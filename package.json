@@ -4,13 +4,16 @@
   "main": "index.js",
   "scripts": {
     "test": "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**.spec.ts"
-
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
-  "dependencies": {},
+  "dependencies": {
+    "@bnb-attestation-service/bas-sdk": "^0.0.8-alpha",
+    "@ethereum-attestation-service/eas-sdk": "^2.6.0",
+    "ethers": "^6.13.2"
+  },
   "devDependencies": {
     "@types/chai": "^4.3.0",
     "@types/mocha": "^9.0.0",
