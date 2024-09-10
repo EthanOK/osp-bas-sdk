@@ -28,7 +28,7 @@ export const createAttestOffChain = async (
   const schemaEncoder = new SchemaEncoder(schema.schema);
 
   const encodedData = schemaEncoder.encodeData([
-    { name: "Post", value: "this a post", type: "string" },
+    { name: "Post", value: "this a post 2", type: "string" },
   ]);
 
   const attestation = await offchain.signOffchainAttestation(
@@ -52,28 +52,6 @@ export const createAttestOffChain = async (
   const attestation_ = JSON.stringify(attestation, (key, value) =>
     typeof value === "bigint" ? Number(value).toString() : value
   );
-  console.log(attestation_);
-  const str = JSON.stringify(attestation_);
 
-  return str;
-  const bytes = new TextEncoder().encode(str);
-  const blob = new Blob([bytes], {
-    type: "application/json;charset=utf-8",
-  });
-
-    let res;
-    try {
-      // Use GreenField SDK to store the attestation
-      // const gfClient = bas.greenFieldClient;
-      // gfClient.init("", "");
-      // res = await gfClient.createObject(
-      //   signer,
-      //   new File([blob], `${schemaUID}.${attestation.uid}`),
-      //   isPrivate || true
-      // );
-    } catch (err: any) {
-      console.log(err);
-      alert(err.message);
-    }
-    console.log(res);
+  return attestation_;
 };
