@@ -10,8 +10,8 @@ import {
   initEAS,
   registerSchema,
   RegisterSchemaParams,
+  createAttestOffChain
 } from "../src/index";
-import { createAttestOffChain } from "../src/attestation/createAttest";
 
 async function main() {
   const provider = new ethers.JsonRpcProvider(
