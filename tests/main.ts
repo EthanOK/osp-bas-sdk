@@ -11,6 +11,7 @@ import {
   registerSchema,
   RegisterSchemaParams,
 } from "../src/index";
+import { createAttestOffChain } from "../src/attestation/createAttest";
 
 async function main() {
   const provider = new ethers.JsonRpcProvider(
@@ -31,11 +32,13 @@ async function main() {
 
   // const schemaUID = await registerSchema(signer, BNB_schemaRegistryAddress, params);
 
-  await getSchemaByUID(
-    provider,
-    BNB_schemaRegistryAddress,
-    "0x38e5fea851e6c36703fa5b7371777c1ac47bcec4fd1c35cc9c6d7f5331a130cf"
-  );
+  // await getSchemaByUID(
+  //   provider,
+  //   BNB_schemaRegistryAddress,
+  //   "0x38e5fea851e6c36703fa5b7371777c1ac47bcec4fd1c35cc9c6d7f5331a130cf"
+  // );
+
+  await createAttestOffChain(signer, BNB_basAddress);
 }
 
 main();
