@@ -1,5 +1,5 @@
-// import * as bassdk from "@bnb-attestation-service/bas-sdk";
-import { EAS, SchemaRegistry } from "@ethereum-attestation-service/eas-sdk";
+// import {BAS, SchemaRegistry} from "@bnb-attestation-service/bas-sdk";
+import { EAS, SchemaRegistry,SchemaRecord } from "@ethereum-attestation-service/eas-sdk";
 import { ethers, Signer } from "ethers";
 import { BNB_basAddress, GFTESTCHAINID, GFTESTRPC } from "../../tests/config";
 
@@ -43,11 +43,11 @@ export const getSchemaByUID = async (
   provider: any,
   schemaRegistryAddress: string,
   schemaUID: string
-) => {
+):Promise<SchemaRecord> => {
   const schemaRegistry = new SchemaRegistry(schemaRegistryAddress);
   schemaRegistry.connect(provider);
 
   const schemaRecord = await schemaRegistry.getSchema({ uid: schemaUID });
 
-  console.log(schemaRecord);
+  return schemaRecord;
 };
