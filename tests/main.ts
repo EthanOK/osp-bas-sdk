@@ -10,7 +10,7 @@ import {
   initEAS,
   registerSchema,
   RegisterSchemaParams,
-  createAttestOffChain
+  createAttestOffChain,
 } from "../src/index";
 
 async function main() {
@@ -38,7 +38,8 @@ async function main() {
   //   "0x38e5fea851e6c36703fa5b7371777c1ac47bcec4fd1c35cc9c6d7f5331a130cf"
   // );
 
-  await createAttestOffChain(signer, BNB_basAddress);
+  const attestation = await createAttestOffChain(signer, BNB_basAddress);
+  console.log(attestation);
 }
 
 main();

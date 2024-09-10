@@ -1,6 +1,8 @@
 import { Client, PermissionTypes } from "@bnb-chain/greenfield-js-sdk";
 import { hashMessage, getAddress } from "ethers";
 import { DeliverTxResponse } from "@cosmjs/stargate";
+import { getCheckSums } from "@bnb-chain/greenfiled-file-handle";
+import fs from "fs";
 
 export const encodeAddrToBucketName = (addr: string) => {
   return `bas-${hashMessage(getAddress(addr)).substring(2, 42)}`;
@@ -98,11 +100,102 @@ export class GreenFieldClientTS {
       });
     } catch (error) {
       if (error.code === -1) {
-        console.log(error.message);
+        console.log(error.message, bucketName);
         return null;
       }
     }
     console.log("transactionHash", res.transactionHash);
     return res;
   }
+
+  // https://docs.bnbchain.org/bnb-greenfield/for-developers/apis-and-sdks/sdk-js/#21-construct-create-object-tx
+  async createObject(
+    str: string,
+    ACCOUNT_PRIVATEKEY: string,
+    isPrivate = true
+  ) {
+    console.log("started");
+    console.log(this.address, this.chainId);
+    if (!this.address || !str || !this.chainId) {
+      alert("Please select a file or address");
+      return;
+    }
+    if (!ACCOUNT_PRIVATEKEY.startsWith("0x")) {
+      ACCOUNT_PRIVATEKEY = "0x" + ACCOUNT_PRIVATEKEY;
+    }
+
+    const attest = JSON.parse(str);
+    const fileName = `${attest.message.schema}.${attest.uid}`;
+    fs.writeFileSync(fileName, str);
+
+    const filePath = fileName;
+    const fileBuffer = fs.readFileSync(filePath);
+
+    const hashResult = await getCheckSums(new Uint8Array(fileBuffer));
+    const { contentLength, expectCheckSums } = hashResult;
+    // console.log("hashResult", hashResult);
+    const tx = await this.client.object.createObject(
+      {
+        bucketName: encodeAddrToBucketName(this.address),
+        objectName: fileName,
+        creator: this.address,
+        visibility: isPrivate
+          ? "VISIBILITY_TYPE_PRIVATE"
+          : "VISIBILITY_TYPE_PUBLIC_READ",
+        fileType: "json",
+        redundancyType: "REDUNDANCY_EC_TYPE",
+        contentLength: contentLength,
+        expectCheckSums: JSON.parse(expectCheckSums),
+      },
+      {
+        type: "ECDSA",
+        privateKey: ACCOUNT_PRIVATEKEY,
+      }
+    );
+
+    const simulateInfo = await tx.simulate({
+      denom: "BNB",
+    });
+    console.log(simulateInfo);
+    const { transactionHash } = await tx.broadcast({
+      denom: "BNB",
+      gasLimit: Number(simulateInfo.gasLimit),
+      gasPrice: simulateInfo.gasPrice,
+      payer: this.address,
+      granter: "",
+      privateKey: ACCOUNT_PRIVATEKEY,
+    });
+
+    const file = createFile(fileName, fileName);
+    console.log(file);
+
+    const uploadRes = await this.client.object.uploadObject(
+      {
+        bucketName: encodeAddrToBucketName(this.address),
+        objectName: fileName,
+        body: file,
+        txnHash: transactionHash,
+      },
+      // highlight-start
+      {
+        type: "ECDSA",
+        privateKey: ACCOUNT_PRIVATEKEY,
+      }
+      // highlight-end
+    );
+    console.log("uploadRes", uploadRes);
+
+    return uploadRes;
+  }
+}
+function createFile(path, fileName) {
+  const stats = fs.statSync(path);
+  const fileSize = stats.size;
+
+  return {
+    name: fileName,
+    type: "",
+    size: fileSize,
+    content: fs.readFileSync(path),
+  };
 }

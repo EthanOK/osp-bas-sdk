@@ -10,7 +10,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@bnb-attestation-service/bas-sdk": "^0.0.8-alpha"
+    "@bnb-attestation-service/bas-sdk": "^0.0.8-alpha",
+    "@bnb-chain/greenfiled-file-handle": "^1.0.2",
+    "i": "^0.3.7",
+    "npm": "^10.8.3"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",
