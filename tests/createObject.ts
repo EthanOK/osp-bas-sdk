@@ -17,9 +17,9 @@ async function main() {
   client.init("0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2", "5600");
 
   const attestation = await createAttestOffChain(signer, BNB_basAddress);
-  // console.log(attestation);
+  console.log(attestation);
   
-  await client.createObject(attestation, PrivateKey, false);
+  await client.createObject(attestation, PrivateKey, true);
 }
 
 main();
