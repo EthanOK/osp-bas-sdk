@@ -24,12 +24,14 @@ export const createAttestOffChain = async (
     BNB_schemaRegistryAddress,
     schemaUID
   );
-  console.log(schema);
+  // console.log(schema);
 
   const schemaEncoder = new SchemaEncoder(schema.schema);
 
+  const timestamp = Math.floor(Date.now() / 1000);
+  
   const encodedData = schemaEncoder.encodeData([
-    { name: "Post", value: "this a post 2", type: "string" },
+    { name: "Post", value: `this a post in ${timestamp}`, type: "string" },
   ]);
 
   const attestation = await offchain.signOffchainAttestation(
@@ -38,7 +40,7 @@ export const createAttestOffChain = async (
       // Unix timestamp of when attestation expires. (0 for no expiration)
       expirationTime: BigInt(0),
       // Unix timestamp of current time
-      time: BigInt(1725939809),
+      time: BigInt(timestamp),
       revocable: true,
       version: 1, // Fixed value
       nonce: BigInt(0), // Fixed value

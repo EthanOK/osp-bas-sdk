@@ -6,12 +6,11 @@ import {
   VisibilityType,
 } from "@bnb-chain/greenfield-js-sdk";
 import { DeliverTxResponse } from "@cosmjs/stargate";
-// import { getCheckSums } from "@bnb-chain/greenfiled-file-handle";
-import fs from "fs";
-import { NodeAdapterReedSolomon } from "@bnb-chain/reed-solomon/node.adapter";
-import { encodeAddrToBucketName, selectSp } from "./utils";
 
-const rs = new NodeAdapterReedSolomon();
+import { encodeAddrToBucketName, selectSp } from "./utils";
+import { ReedSolomon } from "@bnb-chain/reed-solomon";
+
+const rs = new ReedSolomon();
 
 export class GreenFieldClientTS {
   client: Client;
@@ -97,11 +96,7 @@ export class GreenFieldClientTS {
 
     const fileBuffer = Buffer.from(str);
 
-    //TODO have problem with this
-    const expectCheckSums = await rs.encodeInWorker(
-      __filename,
-      Uint8Array.from(fileBuffer)
-    );
+    const expectCheckSums = rs.encode(Uint8Array.from(fileBuffer));
 
     // createObject
     const createObjectTx = await this.client.object.createObject({
@@ -151,10 +146,10 @@ export class GreenFieldClientTS {
       console.log("upload object success", uploadRes);
     }
 
-    return uploadRes;
+    return transactionHash;
   }
 }
-function createFile(fileName, fileBuffer) {
+function createFile(fileName: string, fileBuffer: Buffer) {
   return {
     name: fileName,
     type: "",

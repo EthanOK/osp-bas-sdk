@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**.spec.ts"
+    "test": "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**.spec.ts",
+    "createObject":"ts-node tests/createObject.ts"
   },
   "keywords": [],
   "author": "",
