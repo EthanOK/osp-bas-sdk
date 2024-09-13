@@ -24,6 +24,7 @@ export const createAttestOffChain = async (
     BNB_schemaRegistryAddress,
     schemaUID
   );
+  console.log(schema);
 
   const schemaEncoder = new SchemaEncoder(schema.schema);
 

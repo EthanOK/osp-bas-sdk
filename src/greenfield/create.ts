@@ -1,44 +1,18 @@
-import { Client, PermissionTypes } from "@bnb-chain/greenfield-js-sdk";
-import { hashMessage, getAddress } from "ethers";
+import {
+  bytesFromBase64,
+  Client,
+  Long,
+  RedundancyType,
+  VisibilityType,
+} from "@bnb-chain/greenfield-js-sdk";
 import { DeliverTxResponse } from "@cosmjs/stargate";
-import { getCheckSums } from "@bnb-chain/greenfiled-file-handle";
+// import { getCheckSums } from "@bnb-chain/greenfiled-file-handle";
 import fs from "fs";
+import { NodeAdapterReedSolomon } from "@bnb-chain/reed-solomon/node.adapter";
+import { encodeAddrToBucketName, selectSp } from "./utils";
 
-export const encodeAddrToBucketName = (addr: string) => {
-  return `bas-${hashMessage(getAddress(addr)).substring(2, 42)}`;
-};
-export const getSps = async (client) => {
-  const sps = await client.sp.getStorageProviders();
-  const finalSps = (sps ?? []).filter((v) => v.endpoint.includes("nodereal"));
-  return finalSps;
-};
-export const getAllSps = async (client) => {
-  const sps = await getSps(client);
-  return sps.map((sp) => {
-    return {
-      address: sp.operatorAddress,
-      endpoint: sp.endpoint,
-      name: sp.description?.moniker,
-    };
-  });
-};
-export const selectSp = async (client) => {
-  const finalSps = await getSps(client);
-  const selectIndex = Math.floor(Math.random() * finalSps.length);
-  const secondarySpAddresses = [
-    ...finalSps.slice(0, selectIndex),
-    ...finalSps.slice(selectIndex + 1),
-  ].map((item) => item.operatorAddress);
-  const selectSpInfo = {
-    //@ts-ignore
-    id: finalSps[selectIndex].id || 0,
-    endpoint: finalSps[selectIndex].endpoint,
-    primarySpAddress: finalSps[selectIndex]?.operatorAddress,
-    sealAddress: finalSps[selectIndex].sealAddress,
-    secondarySpAddresses,
-  };
-  return selectSpInfo;
-};
+const rs = new NodeAdapterReedSolomon();
+
 export class GreenFieldClientTS {
   client: Client;
   chainId = null;
@@ -62,34 +36,32 @@ export class GreenFieldClientTS {
     if (!ACCOUNT_PRIVATEKEY.startsWith("0x")) {
       ACCOUNT_PRIVATEKEY = "0x" + ACCOUNT_PRIVATEKEY;
     }
+
+    // Bucket 是否存在？
+    let isBucketExist = false;
+    try {
+      const bucketMeta = await this.client.bucket.getBucketMeta({ bucketName });
+      console.log("bucketMeta", bucketMeta);
+
+      isBucketExist = true;
+    } catch (error) {}
+
     let res: DeliverTxResponse;
     try {
-      const createBucketTx = await this.client.bucket.createBucket(
-        {
-          bucketName: bucketName,
-          creator: this.address,
-          visibility: "VISIBILITY_TYPE_PUBLIC_READ",
-          chargedReadQuota: "0",
-          spInfo: {
-            primarySpAddress: spInfo.primarySpAddress,
-          },
-          paymentAddress: this.address,
-        },
-        {
-          type: "ECDSA",
-          privateKey: ACCOUNT_PRIVATEKEY,
-          // type: "EDDSA",
-          // domain: window.location.origin,
-          // seed: offChainData.seedString,
-          // address: this.address,
-        }
-      );
+      const createBucketTx = await this.client.bucket.createBucket({
+        bucketName: bucketName,
+        creator: this.address,
+        visibility: VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
+        chargedReadQuota: Long.fromString("0"),
+        paymentAddress: this.address,
+        primarySpAddress: spInfo.primarySpAddress,
+      });
       // console.log({ createBucketTx });
 
       const simulateInfo = await createBucketTx.simulate({
         denom: "BNB",
       });
-      console.log("simulateInfo", simulateInfo);
+      // console.log("simulateInfo", simulateInfo);
       res = await createBucketTx.broadcast({
         denom: "BNB",
         gasLimit: Number(simulateInfo?.gasLimit),
@@ -98,66 +70,58 @@ export class GreenFieldClientTS {
         granter: "",
         privateKey: ACCOUNT_PRIVATEKEY,
       });
+
+      console.log("transactionHash", res.transactionHash);
     } catch (error) {
-      if (error.code === -1) {
-        console.log(error.message, bucketName);
-        return null;
+      if (!isBucketExist) {
+        console.log(error);
       }
     }
-    console.log("transactionHash", res.transactionHash);
-    return res;
+
+    return isBucketExist;
   }
 
-  // https://docs.bnbchain.org/bnb-greenfield/for-developers/apis-and-sdks/sdk-js/#21-construct-create-object-tx
   async createObject(
     str: string,
     ACCOUNT_PRIVATEKEY: string,
-    isPrivate = true
+    isPrivate = false
   ) {
     console.log("started");
     console.log(this.address, this.chainId);
-    if (!this.address || !str || !this.chainId) {
-      alert("Please select a file or address");
-      return;
-    }
     if (!ACCOUNT_PRIVATEKEY.startsWith("0x")) {
       ACCOUNT_PRIVATEKEY = "0x" + ACCOUNT_PRIVATEKEY;
     }
 
     const attest = JSON.parse(str);
     const fileName = `${attest.message.schema}.${attest.uid}`;
-    fs.writeFileSync(fileName, str);
 
-    const filePath = fileName;
-    const fileBuffer = fs.readFileSync(filePath);
+    const fileBuffer = Buffer.from(str);
 
-    const hashResult = await getCheckSums(new Uint8Array(fileBuffer));
-    const { contentLength, expectCheckSums } = hashResult;
-    // console.log("hashResult", hashResult);
-    const tx = await this.client.object.createObject(
-      {
-        bucketName: encodeAddrToBucketName(this.address),
-        objectName: fileName,
-        creator: this.address,
-        visibility: isPrivate
-          ? "VISIBILITY_TYPE_PRIVATE"
-          : "VISIBILITY_TYPE_PUBLIC_READ",
-        fileType: "json",
-        redundancyType: "REDUNDANCY_EC_TYPE",
-        contentLength: contentLength,
-        expectCheckSums: JSON.parse(expectCheckSums),
-      },
-      {
-        type: "ECDSA",
-        privateKey: ACCOUNT_PRIVATEKEY,
-      }
+    //TODO have problem with this
+    const expectCheckSums = await rs.encodeInWorker(
+      __filename,
+      Uint8Array.from(fileBuffer)
     );
 
-    const simulateInfo = await tx.simulate({
+    // createObject
+    const createObjectTx = await this.client.object.createObject({
+      bucketName: encodeAddrToBucketName(this.address),
+      objectName: fileName,
+      creator: this.address,
+      visibility: isPrivate
+        ? VisibilityType.VISIBILITY_TYPE_PRIVATE
+        : VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
+      contentType: "json",
+      redundancyType: RedundancyType.REDUNDANCY_EC_TYPE,
+      payloadSize: Long.fromInt(fileBuffer.byteLength),
+      expectChecksums: expectCheckSums.map((x) => bytesFromBase64(x)),
+    });
+
+    const simulateInfo = await createObjectTx.simulate({
       denom: "BNB",
     });
-    console.log(simulateInfo);
-    const { transactionHash } = await tx.broadcast({
+    // console.log(simulateInfo);
+    const { transactionHash } = await createObjectTx.broadcast({
       denom: "BNB",
       gasLimit: Number(simulateInfo.gasLimit),
       gasPrice: simulateInfo.gasPrice,
@@ -166,14 +130,14 @@ export class GreenFieldClientTS {
       privateKey: ACCOUNT_PRIVATEKEY,
     });
 
-    const file = createFile(fileName, fileName);
-    console.log(file);
+    console.log("create object success", transactionHash);
 
+    // uploadObject
     const uploadRes = await this.client.object.uploadObject(
       {
         bucketName: encodeAddrToBucketName(this.address),
         objectName: fileName,
-        body: file,
+        body: createFile(fileName, fileBuffer),
         txnHash: transactionHash,
       },
       // highlight-start
@@ -183,19 +147,18 @@ export class GreenFieldClientTS {
       }
       // highlight-end
     );
-    console.log("uploadRes", uploadRes);
+    if (uploadRes.code === 0) {
+      console.log("upload object success", uploadRes);
+    }
 
     return uploadRes;
   }
 }
-function createFile(path, fileName) {
-  const stats = fs.statSync(path);
-  const fileSize = stats.size;
-
+function createFile(fileName, fileBuffer) {
   return {
     name: fileName,
     type: "",
-    size: fileSize,
-    content: fs.readFileSync(path),
+    size: fileBuffer.byteLength,
+    content: fileBuffer,
   };
 }
