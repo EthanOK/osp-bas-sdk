@@ -6,37 +6,34 @@ import { getSchemaByUID } from "../schema/register";
 
 // Initialize SchemaEncoder with the schema string
 
+export type AttestParams = {
+  schemaUID: string;
+  encodedData: string;
+  refUID: string;
+  recipient: string;
+};
+
 export const createAttestOffChain = async (
   signer: Signer,
-  BASContractAddress: string
+  bas: EAS,
+  params: AttestParams
 ) => {
-  //   const bas = new BAS(BASContractAddress, "", "");
-  const bas = new EAS(BASContractAddress);
   bas.connect(signer);
 
   const offchain = await bas.getOffchain();
-  const schemaUID =
-    "0x599b1dc37382faa679ffc8af28adaa01357950c8947f090c54a608ba6f63ba6d";
-  const isPrivate = false;
 
-  const schema = await getSchemaByUID(
-    signer.provider,
-    BNB_schemaRegistryAddress,
-    schemaUID
-  );
+  // const schema = await getSchemaByUID(
+  //   signer.provider,
+  //   BNB_schemaRegistryAddress,
+  //   params.schemaUID
+  // );
   // console.log(schema);
 
-  const schemaEncoder = new SchemaEncoder(schema.schema);
-
   const timestamp = Math.floor(Date.now() / 1000);
-  
-  const encodedData = schemaEncoder.encodeData([
-    { name: "Post", value: `this a post in ${timestamp}`, type: "string" },
-  ]);
 
   const attestation = await offchain.signOffchainAttestation(
     {
-      recipient: "0x0000000000000000000000000000000000000000",
+      recipient: params.recipient,
       // Unix timestamp of when attestation expires. (0 for no expiration)
       expirationTime: BigInt(0),
       // Unix timestamp of current time
@@ -44,10 +41,9 @@ export const createAttestOffChain = async (
       revocable: true,
       version: 1, // Fixed value
       nonce: BigInt(0), // Fixed value
-      schema: schemaUID,
-      refUID:
-        "0x0000000000000000000000000000000000000000000000000000000000000000",
-      data: encodedData,
+      schema: params.schemaUID,
+      refUID: params.refUID,
+      data: params.encodedData,
     },
     signer
   );
