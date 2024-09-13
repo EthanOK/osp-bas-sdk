@@ -10,7 +10,8 @@ async function main() {
 
 
   await client.createBucket(
-    encodeAddrToBucketName("0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2"),
+    // encodeAddrToBucketName("0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2"),
+    "bas-test-3",
     PrivateKey
   );
 }
