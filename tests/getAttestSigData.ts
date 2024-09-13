@@ -11,7 +11,9 @@ import {
   registerSchema,
   RegisterSchemaParams,
   createAttestOffChain,
+  AttestParams,
 } from "../src/index";
+import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 
 async function main() {
   const provider = new ethers.JsonRpcProvider(
@@ -19,26 +21,21 @@ async function main() {
   );
   const signer = new ethers.Wallet(PrivateKey, provider);
 
-  // SyntaxError: Cannot use import statement outside a module
-  // initBAS(provider, BNB_basAddress);
-
-  initEAS(provider, BNB_basAddress);
-
-  const params: RegisterSchemaParams = {
-    schema: "uint256 id, string name",
-    resolverAddress: "0x0000000000000000000000000000000000000000",
-    revocable: false,
+  const recipient = ethers.Wallet.createRandom().address;
+  const schemaEncoder = new SchemaEncoder("string Post");
+  const encodedData = schemaEncoder.encodeData([
+    { name: "Post", value: `${recipient} post`, type: "string" },
+  ]);
+  const bas = new EAS(BNB_basAddress);
+  const params_a: AttestParams = {
+    schemaUID:
+      "0x599b1dc37382faa679ffc8af28adaa01357950c8947f090c54a608ba6f63ba6d",
+    encodedData: encodedData,
+    recipient: recipient,
+    refUID:
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
   };
-
-  // const schemaUID = await registerSchema(signer, BNB_schemaRegistryAddress, params);
-
-  // await getSchemaByUID(
-  //   provider,
-  //   BNB_schemaRegistryAddress,
-  //   "0x38e5fea851e6c36703fa5b7371777c1ac47bcec4fd1c35cc9c6d7f5331a130cf"
-  // );
-
-  const attestation = await createAttestOffChain(signer, BNB_basAddress);
+  const attestation = await createAttestOffChain(signer, bas, params_a);
   console.log(attestation);
 }
 

@@ -6,23 +6,20 @@ import {
   VisibilityType,
 } from "@bnb-chain/greenfield-js-sdk";
 import { DeliverTxResponse } from "@cosmjs/stargate";
-
 import { encodeAddrToBucketName, selectSp } from "./utils";
 import { ReedSolomon } from "@bnb-chain/reed-solomon";
+// import { NodeAdapterReedSolomon } from "@bnb-chain/reed-solomon/node.adapter";
 
 const rs = new ReedSolomon();
+// const rs = new NodeAdapterReedSolomon();
 
 export class GreenFieldClientTS {
   client: Client;
-  chainId = null;
+  // chainId = null;
   address = null;
-  constructor(url, chainId) {
+  constructor(url: string, chainId: string, creator: string) {
     this.client = Client.create(url, chainId);
-  }
-
-  init(address, chainId) {
-    this.address = address;
-    this.chainId = chainId;
+    this.address = creator;
   }
 
   /**
@@ -81,26 +78,31 @@ export class GreenFieldClientTS {
   }
 
   async createObject(
-    str: string,
+    bucketName: string,
+    attestation: string,
     ACCOUNT_PRIVATEKEY: string,
     isPrivate = false
   ) {
     console.log("started");
-    console.log(this.address, this.chainId);
+    // console.log(this.address, this.chainId);
     if (!ACCOUNT_PRIVATEKEY.startsWith("0x")) {
       ACCOUNT_PRIVATEKEY = "0x" + ACCOUNT_PRIVATEKEY;
     }
 
-    const attest = JSON.parse(str);
+    const attest = JSON.parse(attestation);
     const fileName = `${attest.message.schema}.${attest.uid}`;
 
-    const fileBuffer = Buffer.from(str);
+    const fileBuffer = Buffer.from(attestation);
 
     const expectCheckSums = rs.encode(Uint8Array.from(fileBuffer));
+    // const expectCheckSums = await rs.encodeInWorker(
+    //   __filename,
+    //   Uint8Array.from(fileBuffer)
+    // );
 
     // createObject
     const createObjectTx = await this.client.object.createObject({
-      bucketName: encodeAddrToBucketName(this.address),
+      bucketName: bucketName,
       objectName: fileName,
       creator: this.address,
       visibility: isPrivate
@@ -130,7 +132,7 @@ export class GreenFieldClientTS {
     // uploadObject
     const uploadRes = await this.client.object.uploadObject(
       {
-        bucketName: encodeAddrToBucketName(this.address),
+        bucketName: bucketName,
         objectName: fileName,
         body: createFile(fileName, fileBuffer),
         txnHash: transactionHash,
