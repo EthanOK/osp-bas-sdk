@@ -1,6 +1,6 @@
 {
   "name": "osp-bas-sdk",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "source": "src/index.ts",
   "main": "dist/index.js",
   "module": "dist/index.module.js",
@@ -13,7 +13,12 @@
     "getAttest": "ts-node tests/getAttestSigData.ts",
     "createObject": "ts-node tests/createObject.ts"
   },
-  "keywords": [],
+  "keywords": [
+    "osp",
+    "bas",
+    "greenfield",
+    "eas"
+  ],
   "files": [
     "src",
     "dist",

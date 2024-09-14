@@ -1,10 +1,6 @@
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import {
-  AttestParams,
-  createAttestOffChain,
-  encodeAddrToBucketName,
-  GreenFieldClientTS,
-} from "../src/index";
+// npm link osp-bas-sdk
+import { AttestParams, createAttestOffChain, encodeAddrToBucketName, GreenFieldClientTS } from "osp-bas-sdk";
 import { BNB_basAddress, PrivateKey } from "./config";
 import * as ethers from "ethers";
 async function main() {
@@ -46,7 +42,7 @@ async function main() {
   };
   const attestation = await createAttestOffChain(signer, bas, params_a);
   console.log(attestation);
-  const bucketName = "bas-test-1";
+  const bucketName = encodeAddrToBucketName("0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2");
   const txhash = await client.createObject(bucketName, attestation, PrivateKey, false);
 }
 
