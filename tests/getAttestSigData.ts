@@ -4,15 +4,9 @@ import {
   PrivateKey,
 } from "./config";
 import * as ethers from "ethers";
-import {
-  getSchemaByUID,
-  initEAS,
-  registerSchema,
-  RegisterSchemaParams,
-  createAttestOffChain,
-  AttestParams,
-} from "../src/index";
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
+// npm link osp-bas-sdk
+import { AttestParams, createAttestOffChain, GreenFieldClientTS } from "osp-bas-sdk";
 
 async function main() {
   const provider = new ethers.JsonRpcProvider(
