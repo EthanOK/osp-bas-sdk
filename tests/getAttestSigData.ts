@@ -5,7 +5,6 @@ import {
 } from "./config";
 import * as ethers from "ethers";
 import {
-  A,
   getSchemaByUID,
   initEAS,
   registerSchema,

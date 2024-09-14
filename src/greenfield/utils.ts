@@ -1,5 +1,10 @@
 import { hashMessage, getAddress } from "ethers";
 
+/**
+ * @description encode address to bucket name
+ * @param addr
+ * @returns bucket name
+ */
 export const encodeAddrToBucketName = (addr: string) => {
   return `bas-${hashMessage(getAddress(addr)).substring(2, 42)}`;
 };

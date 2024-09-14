@@ -1,15 +1,27 @@
 {
-  "name": "eas-bas-sdk",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "osp-bas-sdk",
+  "version": "0.0.2",
+  "source": "src/index.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.module.js",
+  "types": "dist/src/index.d.ts",
+  "unpkg": "dist/index.umd.js",
   "scripts": {
+    "build": "microbundle",
+    "dev": "microbundle watch",
     "test": "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**.spec.ts",
-    "createObject":"ts-node tests/createObject.ts"
+    "getAttest": "ts-node tests/getAttestSigData.ts",
+    "createObject": "ts-node tests/createObject.ts"
   },
   "keywords": [],
-  "author": "",
+  "files": [
+    "src",
+    "dist",
+    "index.d.ts"
+  ],
+  "author": "OSP",
   "license": "ISC",
-  "description": "",
+  "description": "This is the BAS SDK for OSP",
   "dependencies": {
     "@bnb-chain/greenfield-js-sdk": "^2.1.1",
     "@bnb-chain/greenfiled-file-handle": "^1.0.2",
@@ -23,6 +35,7 @@
     "@types/node": "^22.5.1",
     "chai": "^4.3.4",
     "dotenv": "^16.4.5",
+    "microbundle": "^0.15.1",
     "mocha": "^9.0.3",
     "ts-mocha": "^10.0.0",
     "typescript": "^4.3.5"
