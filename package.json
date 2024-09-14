@@ -10,7 +10,6 @@
     "build": "microbundle",
     "dev": "microbundle watch",
     "typedoc": "typedoc src/index.ts",
-    "format": "npx prettier --write .",
     "test": "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**.spec.ts",
     "getAttest": "ts-node tests/getAttestSigData.ts",
     "createObject": "ts-node tests/createObject.ts"
