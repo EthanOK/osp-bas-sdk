@@ -1,5 +1,5 @@
 /**
- * @description encode address to bucket name
+ * encode address to bucket name
  * @param addr
  * @returns bucket name
  */
