@@ -47,7 +47,7 @@ async function main() {
   const attestation = await createAttestOffChain(signer, bas, params_a);
   console.log(attestation);
   const bucketName = "bas-test-1";
-  await client.createObject(bucketName, attestation, PrivateKey, false);
+  const txhash = await client.createObject(bucketName, attestation, PrivateKey, false);
 }
 
 main();

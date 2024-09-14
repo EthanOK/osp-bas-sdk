@@ -13,10 +13,18 @@ import { ReedSolomon } from "@bnb-chain/reed-solomon";
 const rs = new ReedSolomon();
 // const rs = new NodeAdapterReedSolomon();
 
+/**
+ * GreenField Client
+ */
 export class GreenFieldClientTS {
   client: Client;
   // chainId = null;
   address = null;
+  /**
+   * @param url greenfield rpc url
+   * @param chainId greenfield chainId
+   * @param creator creator address
+   */
   constructor(url: string, chainId: string, creator: string) {
     this.client = Client.create(url, chainId);
     this.address = creator;
@@ -24,16 +32,18 @@ export class GreenFieldClientTS {
 
   /**
    * create bucket
+   * @param bucketName bucket name
+   * @param privateKey creator private key
    */
-  async createBucket(bucketName: string, ACCOUNT_PRIVATEKEY: string) {
+  async createBucket(bucketName: string, privateKey: string) {
     const spInfo = await selectSp(this.client);
     // console.log("spInfo", spInfo);
 
-    if (!ACCOUNT_PRIVATEKEY.startsWith("0x")) {
-      ACCOUNT_PRIVATEKEY = "0x" + ACCOUNT_PRIVATEKEY;
+    if (!privateKey.startsWith("0x")) {
+      privateKey = "0x" + privateKey;
     }
 
-    // Bucket 是否存在？
+    // Bucket is existed
     let isBucketExist = false;
     try {
       const bucketMeta = await this.client.bucket.getBucketMeta({ bucketName });
@@ -64,7 +74,7 @@ export class GreenFieldClientTS {
         gasPrice: simulateInfo?.gasPrice || "5000000000",
         payer: this.address,
         granter: "",
-        privateKey: ACCOUNT_PRIVATEKEY,
+        privateKey: privateKey,
       });
 
       console.log("transactionHash", res.transactionHash);
@@ -77,16 +87,23 @@ export class GreenFieldClientTS {
     return isBucketExist;
   }
 
+  /**
+   * create object
+   * @param bucketName bucket name
+   * @param attestation attestation
+   * @param privateKey creator private key
+   * @param isPrivate is private object
+   */
   async createObject(
     bucketName: string,
     attestation: string,
-    ACCOUNT_PRIVATEKEY: string,
+    privateKey: string,
     isPrivate = false
   ) {
     console.log("started");
     // console.log(this.address, this.chainId);
-    if (!ACCOUNT_PRIVATEKEY.startsWith("0x")) {
-      ACCOUNT_PRIVATEKEY = "0x" + ACCOUNT_PRIVATEKEY;
+    if (!privateKey.startsWith("0x")) {
+      privateKey = "0x" + privateKey;
     }
 
     const attest = JSON.parse(attestation);
@@ -124,7 +141,7 @@ export class GreenFieldClientTS {
       gasPrice: simulateInfo.gasPrice,
       payer: this.address,
       granter: "",
-      privateKey: ACCOUNT_PRIVATEKEY,
+      privateKey: privateKey,
     });
 
     console.log("create object success", transactionHash);
@@ -140,7 +157,7 @@ export class GreenFieldClientTS {
       // highlight-start
       {
         type: "ECDSA",
-        privateKey: ACCOUNT_PRIVATEKEY,
+        privateKey: privateKey,
       }
       // highlight-end
     );

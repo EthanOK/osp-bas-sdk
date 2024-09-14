@@ -6,6 +6,13 @@ import { getSchemaByUID } from "../schema/register";
 
 // Initialize SchemaEncoder with the schema string
 
+/**
+ * Attestation params
+ * @param schemaUID schema uid
+ * @param encodedData encoded data
+ * @param refUID reference uid
+ * @param recipient recipient address
+ */
 export type AttestParams = {
   schemaUID: string;
   encodedData: string;
@@ -13,6 +20,13 @@ export type AttestParams = {
   recipient: string;
 };
 
+/**
+ * Create attestation
+ * @param signer signer
+ * @param bas bas
+ * @param params attestation params
+ * @returns attestation string
+ */
 export const createAttestOffChain = async (
   signer: Signer,
   bas: EAS,
