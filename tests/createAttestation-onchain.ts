@@ -1,18 +1,19 @@
+// npm link osp-bas-sdk
 import {
-  EAS,
-  SchemaEncoder,
-  MultiAttestationRequest,
   AttestationRequestData,
-} from "@ethereum-attestation-service/eas-sdk";
+  BAS,
+  MultiAttestationRequest,
+  SchemaEncoder,
+} from "osp-bas-sdk";
 import { ethers } from "ethers";
 import { PrivateKey } from "./config";
 
-async function main() {
+async function createAttestation() {
   const provider = new ethers.JsonRpcProvider(
     "https://opbnb-testnet-rpc.bnbchain.org"
   );
   const signer = new ethers.Wallet(PrivateKey, provider);
-  const bas = new EAS("0x5e905F77f59491F03eBB78c204986aaDEB0C6bDa");
+  const bas = new BAS("0x5e905F77f59491F03eBB78c204986aaDEB0C6bDa");
   bas.connect(signer);
 
   const schemaUID =
@@ -62,4 +63,4 @@ function getAttestationRequestData() {
   return attestationRequestData;
 }
 
-main();
+createAttestation();

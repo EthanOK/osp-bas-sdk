@@ -1,4 +1,5 @@
-import { encodeAddrToBucketName, GreenFieldClientTS } from "../src/index";
+// npm link osp-bas-sdk
+import { encodeAddrToBucketName, GreenFieldClientTS } from "osp-bas-sdk";
 import { PrivateKey } from "./config";
 
 async function main() {

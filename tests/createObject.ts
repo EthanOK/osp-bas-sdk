@@ -1,8 +1,14 @@
-import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 // npm link osp-bas-sdk
-import { AttestParams, createAttestOffChain, encodeAddrToBucketName, GreenFieldClientTS } from "osp-bas-sdk";
+import {
+  AttestParams,
+  BAS,
+  createAttestOffChain,
+  encodeAddrToBucketName,
+  GreenFieldClientTS,
+  SchemaEncoder,
+} from "osp-bas-sdk";
 import { BNB_basAddress, PrivateKey } from "./config";
-import * as ethers from "ethers";
+import { ethers } from "ethers";
 async function main() {
   const provider = new ethers.JsonRpcProvider(
     "https://rpc.ankr.com/bsc_testnet_chapel"
@@ -13,7 +19,7 @@ async function main() {
     "5600",
     "0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2"
   );
-  const bas = new EAS(BNB_basAddress);
+  const bas = new BAS(BNB_basAddress);
 
   const recipient = ethers.Wallet.createRandom().address;
   const schemaEncoder = new SchemaEncoder(
@@ -42,8 +48,15 @@ async function main() {
   };
   const attestation = await createAttestOffChain(signer, bas, params_a);
   console.log(attestation);
-  const bucketName = encodeAddrToBucketName("0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2");
-  const txhash = await client.createObject(bucketName, attestation, PrivateKey, false);
+  const bucketName = encodeAddrToBucketName(
+    "0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2"
+  );
+  const txhash = await client.createObject(
+    bucketName,
+    attestation,
+    PrivateKey,
+    false
+  );
 }
 
 main();
