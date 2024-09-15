@@ -9,7 +9,7 @@
   "source": "src/index.ts",
   "main": "dist/index.js",
   "module": "dist/index.module.js",
-  "types": "dist/src/index.d.ts",
+  "types": "dist/index.d.ts",
   "unpkg": "dist/index.umd.js",
   "scripts": {
     "build": "microbundle",
@@ -25,7 +25,12 @@ main: 默认的模块入口
 # build
 
 `npm run build`
+
 生成 dist 目录及文件
+
+`index.d.ts move to dist`
+
+dist/src/index.d.ts => dist/index.d.ts
 
 # 本地使用
 
