@@ -1,13 +1,14 @@
-import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 // npm link osp-bas-sdk
 import {
   AttestParams,
+  BAS,
   createAttestOffChain,
   encodeAddrToBucketName,
   GreenFieldClientTS,
+  SchemaEncoder,
 } from "osp-bas-sdk";
-import { PrivateKey } from "./config";
 import { ethers } from "ethers";
+import { PrivateKey } from "./config";
 async function main() {
   const provider = new ethers.JsonRpcProvider(
     "https://rpc.ankr.com/bsc_testnet_chapel"
@@ -18,7 +19,7 @@ async function main() {
     "5600",
     "0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2"
   );
-  const bas = new EAS("0x6c2270298b1e6046898a322acB3Cbad6F99f7CBD");
+  const bas = new BAS("0x6c2270298b1e6046898a322acB3Cbad6F99f7CBD");
 
   const recipient = ethers.Wallet.createRandom().address;
   const schemaEncoder = new SchemaEncoder(

@@ -1,6 +1,10 @@
+import {
+  getSchemaByUID,
+  registerSchema,
+  RegisterSchemaParams,
+} from "osp-bas-sdk";
 import { ethers } from "ethers";
 import { BNB_schemaRegistryAddress, PrivateKey } from "./config";
-import { getSchemaByUID, registerSchema, RegisterSchemaParams } from "../src";
 
 async function main() {
   const provider = new ethers.JsonRpcProvider(

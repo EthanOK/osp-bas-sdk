@@ -1,12 +1,18 @@
+// npm link osp-bas-sdk
+import {
+  AttestParams,
+  BAS,
+  createAttestOffChain,
+  GreenFieldClientTS,
+  SchemaEncoder,
+} from "osp-bas-sdk";
+import { ethers } from "ethers";
 import {
   BNB_basAddress,
   BNB_schemaRegistryAddress,
   PrivateKey,
 } from "./config";
-import * as ethers from "ethers";
-import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-// npm link osp-bas-sdk
-import { AttestParams, createAttestOffChain, GreenFieldClientTS } from "osp-bas-sdk";
+
 
 async function main() {
   const provider = new ethers.JsonRpcProvider(
@@ -19,7 +25,7 @@ async function main() {
   const encodedData = schemaEncoder.encodeData([
     { name: "Post", value: `${recipient} post`, type: "string" },
   ]);
-  const bas = new EAS(BNB_basAddress);
+  const bas = new BAS(BNB_basAddress);
   const params_a: AttestParams = {
     schemaUID:
       "0x599b1dc37382faa679ffc8af28adaa01357950c8947f090c54a608ba6f63ba6d",

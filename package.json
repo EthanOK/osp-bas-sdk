@@ -17,20 +17,16 @@
   "keywords": [
     "osp",
     "bas",
-    "greenfield",
-    "eas"
+    "greenfield"
   ],
   "files": [
-    "src",
-    "dist",
-    "index.d.ts"
+    "dist"
   ],
   "author": "OSP",
   "license": "ISC",
   "description": "This is the BAS SDK for OSP",
   "dependencies": {
     "@bnb-chain/greenfield-js-sdk": "^2.1.1",
-    "@bnb-chain/greenfiled-file-handle": "^1.0.2",
     "@bnb-chain/reed-solomon": "^1.1.3",
     "@ethereum-attestation-service/eas-sdk": "1.2.0-beta.0",
     "ethers": "^6.13.2"
