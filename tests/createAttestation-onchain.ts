@@ -4,7 +4,7 @@ import {
   MultiAttestationRequest,
   AttestationRequestData,
 } from "@ethereum-attestation-service/eas-sdk";
-import * as ethers from "ethers";
+import { ethers } from "ethers";
 import { PrivateKey } from "./config";
 
 async function main() {
@@ -20,7 +20,7 @@ async function main() {
 
   let params: MultiAttestationRequest[] = [];
   let attestationRequestDatas: AttestationRequestData[] = [];
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 50; i++) {
     let attestationRequestData = getAttestationRequestData();
     attestationRequestDatas.push(attestationRequestData);
   }
