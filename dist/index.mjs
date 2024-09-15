@@ -1,20 +1,3 @@
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
-};
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var __async = (__this, __arguments, generator) => {
   return new Promise((resolve, reject) => {
     var fulfilled = (value) => {
@@ -36,31 +19,17 @@ var __async = (__this, __arguments, generator) => {
   });
 };
 
-// src/index.ts
-var src_exports = {};
-__export(src_exports, {
-  BAS: () => BAS,
-  GreenFieldClientTS: () => GreenFieldClientTS,
-  SchemaEncoder: () => SchemaEncoder,
-  createAttestOffChain: () => createAttestOffChain,
-  encodeAddrToBucketName: () => encodeAddrToBucketName,
-  getAllSps: () => getAllSps,
-  getSchemaByUID: () => getSchemaByUID,
-  getSps: () => getSps,
-  initEAS: () => initEAS,
-  registerSchema: () => registerSchema,
-  selectSp: () => selectSp
-});
-module.exports = __toCommonJS(src_exports);
-
 // src/schema/register.ts
-var import_eas_sdk = require("@ethereum-attestation-service/eas-sdk");
+import {
+  EAS,
+  SchemaRegistry
+} from "@ethereum-attestation-service/eas-sdk";
 var initEAS = (provider, BASContractAddress) => {
-  const bas = new import_eas_sdk.EAS(BASContractAddress);
+  const bas = new EAS(BASContractAddress);
   bas.connect(provider);
 };
 var registerSchema = (signer, schemaRegistryAddress, params) => __async(void 0, null, function* () {
-  const schemaRegistry = new import_eas_sdk.SchemaRegistry(schemaRegistryAddress);
+  const schemaRegistry = new SchemaRegistry(schemaRegistryAddress);
   schemaRegistry.connect(signer);
   const transaction = yield schemaRegistry.register({
     schema: params.schema,
@@ -71,7 +40,7 @@ var registerSchema = (signer, schemaRegistryAddress, params) => __async(void 0, 
   return schemaUID;
 });
 var getSchemaByUID = (provider, schemaRegistryAddress, schemaUID) => __async(void 0, null, function* () {
-  const schemaRegistry = new import_eas_sdk.SchemaRegistry(schemaRegistryAddress);
+  const schemaRegistry = new SchemaRegistry(schemaRegistryAddress);
   schemaRegistry.connect(provider);
   const schemaRecord = yield schemaRegistry.getSchema({ uid: schemaUID });
   return schemaRecord;
@@ -108,12 +77,18 @@ var createAttestOffChain = (signer, bas, params) => __async(void 0, null, functi
 });
 
 // src/greenfield/create.ts
-var import_greenfield_js_sdk = require("@bnb-chain/greenfield-js-sdk");
+import {
+  bytesFromBase64,
+  Client,
+  Long,
+  RedundancyType,
+  VisibilityType
+} from "@bnb-chain/greenfield-js-sdk";
 
 // src/greenfield/utils.ts
-var import_ethers = require("ethers");
+import { hashMessage, getAddress } from "ethers";
 var encodeAddrToBucketName = (addr) => {
-  return `bas-${(0, import_ethers.hashMessage)((0, import_ethers.getAddress)(addr)).substring(2, 42)}`;
+  return `bas-${hashMessage(getAddress(addr)).substring(2, 42)}`;
 };
 var getSps = (client) => __async(void 0, null, function* () {
   const sps = yield client.sp.getStorageProviders();
@@ -151,8 +126,8 @@ var selectSp = (client) => __async(void 0, null, function* () {
 });
 
 // src/greenfield/create.ts
-var import_reed_solomon = require("@bnb-chain/reed-solomon");
-var rs = new import_reed_solomon.ReedSolomon();
+import { ReedSolomon } from "@bnb-chain/reed-solomon";
+var rs = new ReedSolomon();
 var GreenFieldClientTS = class {
   /**
    * @param url greenfield rpc url
@@ -162,7 +137,7 @@ var GreenFieldClientTS = class {
   constructor(url, chainId, creator) {
     // chainId = null;
     this.address = null;
-    this.client = import_greenfield_js_sdk.Client.create(url, chainId);
+    this.client = Client.create(url, chainId);
     this.address = creator;
   }
   /**
@@ -188,8 +163,8 @@ var GreenFieldClientTS = class {
         const createBucketTx = yield this.client.bucket.createBucket({
           bucketName,
           creator: this.address,
-          visibility: import_greenfield_js_sdk.VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
-          chargedReadQuota: import_greenfield_js_sdk.Long.fromString("0"),
+          visibility: VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
+          chargedReadQuota: Long.fromString("0"),
           paymentAddress: this.address,
           primarySpAddress: spInfo.primarySpAddress
         });
@@ -234,11 +209,11 @@ var GreenFieldClientTS = class {
         bucketName,
         objectName: fileName,
         creator: this.address,
-        visibility: isPrivate ? import_greenfield_js_sdk.VisibilityType.VISIBILITY_TYPE_PRIVATE : import_greenfield_js_sdk.VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
+        visibility: isPrivate ? VisibilityType.VISIBILITY_TYPE_PRIVATE : VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
         contentType: "json",
-        redundancyType: import_greenfield_js_sdk.RedundancyType.REDUNDANCY_EC_TYPE,
-        payloadSize: import_greenfield_js_sdk.Long.fromInt(fileBuffer.byteLength),
-        expectChecksums: expectCheckSums.map((x) => (0, import_greenfield_js_sdk.bytesFromBase64)(x))
+        redundancyType: RedundancyType.REDUNDANCY_EC_TYPE,
+        payloadSize: Long.fromInt(fileBuffer.byteLength),
+        expectChecksums: expectCheckSums.map((x) => bytesFromBase64(x))
       });
       const simulateInfo = yield createObjectTx.simulate({
         denom: "BNB"
@@ -283,11 +258,13 @@ function createFile(fileName, fileBuffer) {
 }
 
 // src/bas/index.ts
-var import_eas_sdk2 = require("@ethereum-attestation-service/eas-sdk");
-var BAS = import_eas_sdk2.EAS;
-var SchemaEncoder = import_eas_sdk2.SchemaEncoder;
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
+import {
+  EAS as BaseEAS,
+  SchemaEncoder as BaseSchemaEncoder
+} from "@ethereum-attestation-service/eas-sdk";
+var BAS = BaseEAS;
+var SchemaEncoder = BaseSchemaEncoder;
+export {
   BAS,
   GreenFieldClientTS,
   SchemaEncoder,
@@ -299,4 +276,4 @@ var SchemaEncoder = import_eas_sdk2.SchemaEncoder;
   initEAS,
   registerSchema,
   selectSp
-});
+};

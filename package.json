@@ -1,12 +1,10 @@
 {
   "name": "osp-bas-sdk",
-  "version": "0.0.3-2",
+  "version": "0.0.4",
   "description": "This is the BAS SDK for OSP",
-  "source": "src/index.ts",
   "main": "dist/index.js",
-  "module": "dist/index.module.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "unpkg": "dist/index.umd.js",
   "author": "OSP",
   "license": "MIT",
   "repository": {
@@ -14,14 +12,6 @@
     "url": "https://gitlab.com/dengjizhang/osp-bas-sdk.git"
   },
   "homepage": "https://gitlab.com/dengjizhang",
-  "scripts": {
-    "build": "microbundle",
-    "dev": "microbundle watch",
-    "typedoc": "typedoc src/index.ts",
-    "test": "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**.spec.ts",
-    "getAttest": "ts-node tests/getAttestSigData.ts",
-    "createObject": "ts-node tests/createObject.ts"
-  },
   "keywords": [
     "osp",
     "bas",
@@ -42,10 +32,16 @@
     "@types/node": "^22.5.1",
     "chai": "^4.3.4",
     "dotenv": "^16.4.5",
-    "microbundle": "^0.15.1",
     "mocha": "^9.0.3",
     "ts-mocha": "^10.0.0",
+    "tsup": "^8.2.4",
     "typedoc": "^0.26.7",
     "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "build": "tsup ./src/index.ts --format esm,cjs --dts",
+    "link": "npm link && npm link osp-bas-sdk",
+    "typedoc": "typedoc src/index.ts",
+    "test": "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**.spec.ts"
   }
 }
