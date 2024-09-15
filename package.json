@@ -1,11 +1,19 @@
 {
   "name": "osp-bas-sdk",
-  "version": "0.0.3-1",
+  "version": "0.0.3-2",
+  "description": "This is the BAS SDK for OSP",
   "source": "src/index.ts",
   "main": "dist/index.js",
   "module": "dist/index.module.js",
-  "types": "dist/index.d.ts", 
+  "types": "dist/index.d.ts",
   "unpkg": "dist/index.umd.js",
+  "author": "OSP",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/dengjizhang/osp-bas-sdk.git"
+  },
+  "homepage": "https://gitlab.com/dengjizhang",
   "scripts": {
     "build": "microbundle",
     "dev": "microbundle watch",
@@ -22,9 +30,6 @@
   "files": [
     "dist"
   ],
-  "author": "OSP",
-  "license": "ISC",
-  "description": "This is the BAS SDK for OSP",
   "dependencies": {
     "@bnb-chain/greenfield-js-sdk": "^2.1.1",
     "@bnb-chain/reed-solomon": "^1.1.3",
