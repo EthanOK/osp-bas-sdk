@@ -46,6 +46,7 @@ __export(src_exports, {
   encodeAddrToBucketName: () => encodeAddrToBucketName,
   getAllSps: () => getAllSps,
   getSchemaByUID: () => getSchemaByUID,
+  getSigatureByDelegation: () => getSigatureByDelegation,
   getSps: () => getSps,
   initEAS: () => initEAS,
   registerSchema: () => registerSchema,
@@ -105,6 +106,26 @@ var createAttestOffChain = (signer, bas, params) => __async(void 0, null, functi
     (key, value) => typeof value === "bigint" ? Number(value).toString() : value
   );
   return attestation_;
+});
+var getSigatureByDelegation = (bas, params, signer) => __async(void 0, null, function* () {
+  if (signer.provider == null) {
+    throw new Error("Signer provider is not defined");
+  }
+  bas.connect(signer);
+  const delegated = yield bas.getDelegated();
+  const params_ = {
+    schema: params.schemaUID,
+    recipient: params.recipient,
+    expirationTime: BigInt(0),
+    revocable: true,
+    refUID: params.refUID,
+    data: params.encodedData,
+    value: BigInt(0),
+    deadline: params.deadline,
+    nonce: params.nonce
+  };
+  const attestation = yield delegated.signDelegatedAttestation(params_, signer);
+  return attestation.signature;
 });
 
 // src/greenfield/create.ts
@@ -295,6 +316,7 @@ var SchemaEncoder = import_eas_sdk2.SchemaEncoder;
   encodeAddrToBucketName,
   getAllSps,
   getSchemaByUID,
+  getSigatureByDelegation,
   getSps,
   initEAS,
   registerSchema,

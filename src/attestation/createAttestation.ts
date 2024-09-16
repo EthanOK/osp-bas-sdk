@@ -1,8 +1,14 @@
 // import { SchemaEncoder, BAS } from "@bnb-attestation-service/bas-sdk";
-import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
+import {
+  EAS,
+  EIP712AttestationParams,
+  OffchainAttestationParams,
+  SchemaEncoder,
+} from "@ethereum-attestation-service/eas-sdk";
 import { ethers, Signer } from "ethers";
 import { BNB_schemaRegistryAddress } from "../../tests/config";
 import { getSchemaByUID } from "../schema/register";
+import { throws } from "assert";
 
 // Initialize SchemaEncoder with the schema string
 
@@ -19,6 +25,11 @@ export type AttestParams = {
   refUID: string;
   recipient: string;
 };
+
+export interface DelegatedAttestParams extends AttestParams {
+  deadline: bigint;
+  nonce?: bigint;
+}
 
 /**
  * Create attestation
@@ -67,4 +78,35 @@ export const createAttestOffChain = async (
   );
 
   return attestation_;
+};
+
+export const getSigatureByDelegation = async (
+  bas: EAS,
+  params: DelegatedAttestParams,
+  signer: Signer
+) => {
+  if (signer.provider == null) {
+    throw new Error("Signer provider is not defined");
+  }
+  bas.connect(signer);
+  const delegated = await bas.getDelegated();
+
+  const params_: EIP712AttestationParams = {
+    schema: params.schemaUID,
+    recipient: params.recipient,
+    expirationTime: BigInt(0),
+    revocable: true,
+    refUID: params.refUID,
+    data: params.encodedData,
+    value: BigInt(0),
+    deadline: params.deadline,
+    nonce: params.nonce,
+  };
+  // console.log(params_);
+
+  const attestation = await delegated.signDelegatedAttestation(params_, signer);
+  // console.log(attestation.types);
+  // console.log(attestation);
+
+  return attestation.signature;
 };

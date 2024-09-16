@@ -75,6 +75,26 @@ var createAttestOffChain = (signer, bas, params) => __async(void 0, null, functi
   );
   return attestation_;
 });
+var getSigatureByDelegation = (bas, params, signer) => __async(void 0, null, function* () {
+  if (signer.provider == null) {
+    throw new Error("Signer provider is not defined");
+  }
+  bas.connect(signer);
+  const delegated = yield bas.getDelegated();
+  const params_ = {
+    schema: params.schemaUID,
+    recipient: params.recipient,
+    expirationTime: BigInt(0),
+    revocable: true,
+    refUID: params.refUID,
+    data: params.encodedData,
+    value: BigInt(0),
+    deadline: params.deadline,
+    nonce: params.nonce
+  };
+  const attestation = yield delegated.signDelegatedAttestation(params_, signer);
+  return attestation.signature;
+});
 
 // src/greenfield/create.ts
 import {
@@ -272,6 +292,7 @@ export {
   encodeAddrToBucketName,
   getAllSps,
   getSchemaByUID,
+  getSigatureByDelegation,
   getSps,
   initEAS,
   registerSchema,
