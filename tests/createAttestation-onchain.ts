@@ -21,7 +21,7 @@ async function createAttestation() {
 
   let params: MultiAttestationRequest[] = [];
   let attestationRequestDatas: AttestationRequestData[] = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 2; i++) {
     let attestationRequestData = getAttestationRequestData();
     attestationRequestDatas.push(attestationRequestData);
   }

@@ -1,5 +1,6 @@
-import { SchemaRecord, EAS, SchemaEncoder as SchemaEncoder$1, MultiAttestationRequest as MultiAttestationRequest$1, AttestationRequestData as AttestationRequestData$1 } from '@ethereum-attestation-service/eas-sdk';
+import { SchemaRecord, EAS, SchemaEncoder as SchemaEncoder$1, MultiAttestationRequest as MultiAttestationRequest$1, AttestationRequestData as AttestationRequestData$1, MultiDelegatedAttestationRequest as MultiDelegatedAttestationRequest$1 } from '@ethereum-attestation-service/eas-sdk';
 import { Signer, Provider } from 'ethers';
+import * as _ethereum_attestation_service_eas_sdk_dist_offchain_typed_data_handler from '@ethereum-attestation-service/eas-sdk/dist/offchain/typed-data-handler';
 import { Client } from '@bnb-chain/greenfield-js-sdk';
 
 declare const initEAS: (provider: any, BASContractAddress: string) => void;
@@ -44,6 +45,10 @@ type AttestParams = {
     refUID: string;
     recipient: string;
 };
+interface DelegatedAttestParams extends AttestParams {
+    deadline: bigint;
+    nonce?: bigint;
+}
 /**
  * Create attestation
  * @param signer signer
@@ -52,6 +57,7 @@ type AttestParams = {
  * @returns attestation string
  */
 declare const createAttestOffChain: (signer: Signer, bas: EAS, params: AttestParams) => Promise<string>;
+declare const getSigatureByDelegation: (bas: EAS, params: DelegatedAttestParams, signer: Signer) => Promise<_ethereum_attestation_service_eas_sdk_dist_offchain_typed_data_handler.Signature>;
 
 /**
  * GreenField Client
@@ -101,5 +107,11 @@ declare const BAS: typeof EAS;
 declare const SchemaEncoder: typeof SchemaEncoder$1;
 type MultiAttestationRequest = MultiAttestationRequest$1;
 type AttestationRequestData = AttestationRequestData$1;
+type MultiDelegatedAttestationRequest = MultiDelegatedAttestationRequest$1;
+interface Signature {
+    r: string;
+    s: string;
+    v: number;
+}
 
-export { type AttestParams, type AttestationRequestData, BAS, GreenFieldClientTS, type MultiAttestationRequest, type RegisterSchemaParams, SchemaEncoder, createAttestOffChain, encodeAddrToBucketName, getAllSps, getSchemaByUID, getSps, initEAS, registerSchema, selectSp };
+export { type AttestParams, type AttestationRequestData, BAS, type DelegatedAttestParams, GreenFieldClientTS, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, type RegisterSchemaParams, SchemaEncoder, type Signature, createAttestOffChain, encodeAddrToBucketName, getAllSps, getSchemaByUID, getSigatureByDelegation, getSps, initEAS, registerSchema, selectSp };
