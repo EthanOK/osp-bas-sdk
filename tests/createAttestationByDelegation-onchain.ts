@@ -3,17 +3,13 @@ import {
   AttestationRequestData,
   BAS,
   DelegatedAttestParams,
-  // getSigatureByDelegation,
+  getSigatureByDelegation,
   MultiDelegatedAttestationRequest,
   SchemaEncoder,
   Signature,
 } from "osp-bas-sdk";
 import { ethers, Signer } from "ethers";
-import { PrivateKey } from "./config";
-import { getSigatureByDelegation } from "../src";
-// 0xCf1718067e3A48A54e78d90236c8BDEAcA5eD4fa
-const Attester_PrivateKey =
-  "0xa13c0065698c7c77447030b5431f3fe96e7bb2c6f6ace0fb9d42c1d9fec5e260";
+import { Attester_PrivateKey, PrivateKey } from "./config";
 
 const deadline = Math.floor(Date.now() / 1000) + 60;
 
@@ -24,7 +20,6 @@ const payer = new ethers.Wallet(PrivateKey, provider);
 const attester = new ethers.Wallet(Attester_PrivateKey, provider);
 
 const bas = new BAS("0x5e905F77f59491F03eBB78c204986aaDEB0C6bDa");
-bas.connect(provider);
 
 async function createAttestationByDelegation() {
   const schemaUID =
@@ -33,6 +28,8 @@ async function createAttestationByDelegation() {
   let params: MultiDelegatedAttestationRequest[] = [];
   let attestationRequestDatas: AttestationRequestData[] = [];
   let signatures: Signature[] = [];
+
+  bas.connect(provider);
   const nonce = await bas.getNonce(attester.address);
   for (let i = 0; i < 2; i++) {
     let attestationRequestData = await getAttestationRequestData();
