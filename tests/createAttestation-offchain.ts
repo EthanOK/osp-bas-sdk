@@ -11,6 +11,7 @@ import {
   HandleOspReturnDataOffChain,
   createObjectMulAttestOSP,
   createObjectAttestOSP,
+  getKmsSigner,
 } from "osp-bas-sdk";
 import { ethers, hexlify, randomBytes } from "ethers";
 
@@ -21,7 +22,7 @@ async function main() {
     "https://rpc.ankr.com/bsc_testnet_chapel"
   );
   // const signer = new ethers.Wallet(PrivateKey, provider);
-  const signer = (await getDeployer()).connect(provider);
+  const signer = getKmsSigner(provider);
 
   const Global_UnHandle_Data: HandleOspReturnDataOffChain[] = [];
 
