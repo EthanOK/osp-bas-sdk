@@ -1,5 +1,5 @@
 import * as _ethereum_attestation_service_eas_sdk from '@ethereum-attestation-service/eas-sdk';
-import { SchemaRecord, EAS, SchemaEncoder as SchemaEncoder$1, MultiAttestationRequest as MultiAttestationRequest$1, AttestationRequestData as AttestationRequestData$1, MultiDelegatedAttestationRequest as MultiDelegatedAttestationRequest$1 } from '@ethereum-attestation-service/eas-sdk';
+import { SchemaRecord, EAS, SchemaEncoder as SchemaEncoder$1, MultiAttestationRequest as MultiAttestationRequest$1, AttestationRequestData as AttestationRequestData$1, MultiDelegatedAttestationRequest as MultiDelegatedAttestationRequest$1, Offchain } from '@ethereum-attestation-service/eas-sdk';
 import { Signer, Provider, ethers } from 'ethers';
 import * as _ethereum_attestation_service_eas_sdk_dist_offchain_typed_data_handler from '@ethereum-attestation-service/eas-sdk/dist/offchain/typed-data-handler';
 import { Client } from '@bnb-chain/greenfield-js-sdk';
@@ -125,7 +125,7 @@ interface DelegatedAttestParams extends AttestParams {
  * @param params attestation params
  * @returns attestation Json Object
  */
-declare const getAttestationOffChain: (signer: Signer, params: AttestParams) => Promise<object>;
+declare const getAttestationOffChain: (offchain: Offchain, signer: Signer, params: AttestParams) => Promise<object>;
 declare const getSigatureByDelegation: (bas: EAS, params: DelegatedAttestParams, signer: Signer) => Promise<_ethereum_attestation_service_eas_sdk_dist_offchain_typed_data_handler.Signature>;
 declare const getAttestationRequestData: (recipient: string, encodedData: string) => _ethereum_attestation_service_eas_sdk.AttestationRequestData;
 declare const getAttestParams: (dataType: OspDataType, recipient: string, encodedData: string) => AttestParams;
