@@ -216,6 +216,6 @@ declare const selectSp: (client: any) => Promise<{
 }>;
 
 declare const getDeployer: () => Promise<AwsKmsSigner<ethers.JsonRpcProvider>>;
-declare const getKmsSigner: (provider: Provider) => AwsKmsSigner<ethers.Provider>;
+declare const getKmsSigner: (provider?: Provider) => AwsKmsSigner<ethers.Provider>;
 
 export { type AttestParams, type AttestationRequestData, BAS, CommunitySchema, CommunitySchemaUID, type DelegatedAttestParams, FollowSchema, FollowSchemaUID, GreenFieldClientTS, type HandleOspReturnData, type HandleOspReturnDataOffChain, JoinSchema, JoinSchemaUID, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, OspDataType, OspDataTypeMap, OspSchemaMap, ProfileSchema, ProfileSchemaUID, type RegisterSchemaParams, SchemaEncoder, type Signature, createObjectAttestOSP, createObjectMulAttestOSP, encodeAddrToBucketName, encodeCommunityData, type encodeCommunityDataParams, encodeFollowData, type encodeFollowDataParams, encodeJoinData, type encodeJoinDataParams, encodeProfileData, type encodeProfileDataParams, getAllSps, getAttestParams, getAttestationOffChain, getAttestationRequestData, getDeployer, getKmsSigner, getMulAttestParams, getSchemaByUID, getSigatureByDelegation, getSps, handleOspRequestData, handleOspRequestPrepareOffChain, initEAS, multiAttestBASOffChain, multiAttestBASOnChain, registerSchema, selectSp };
