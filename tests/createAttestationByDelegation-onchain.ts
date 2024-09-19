@@ -3,6 +3,8 @@ import {
   AttestationRequestData,
   BAS,
   DelegatedAttestParams,
+  getDeployer,
+  getKmsSigner,
   getSigatureByDelegation,
   MultiDelegatedAttestationRequest,
   SchemaEncoder,
@@ -17,7 +19,8 @@ const provider = new ethers.JsonRpcProvider(
   "https://opbnb-testnet-rpc.bnbchain.org"
 );
 const payer = new ethers.Wallet(PrivateKey, provider);
-const attester = new ethers.Wallet(Attester_PrivateKey, provider);
+// const attester = new ethers.Wallet(Attester_PrivateKey, provider);
+const attester =  getKmsSigner(provider);
 
 const bas = new BAS("0x5e905F77f59491F03eBB78c204986aaDEB0C6bDa");
 
@@ -28,9 +31,10 @@ async function createAttestationByDelegation() {
   let params: MultiDelegatedAttestationRequest[] = [];
   let attestationRequestDatas: AttestationRequestData[] = [];
   let signatures: Signature[] = [];
-
+  const attesterAddress = await attester.getAddress();
+  
   bas.connect(provider);
-  const nonce = await bas.getNonce(attester.address);
+  const nonce = await bas.getNonce(attesterAddress);
   for (let i = 0; i < 2; i++) {
     let attestationRequestData = await getAttestationRequestData();
     attestationRequestDatas.push(attestationRequestData);
@@ -52,7 +56,7 @@ async function createAttestationByDelegation() {
     schema: schemaUID,
     data: attestationRequestDatas,
     signatures: signatures,
-    attester: attester.address,
+    attester: attesterAddress,
     deadline: BigInt(deadline),
   });
 

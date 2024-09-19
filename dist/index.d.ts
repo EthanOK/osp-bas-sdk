@@ -1,3 +1,4 @@
+import * as _ethereum_attestation_service_eas_sdk from '@ethereum-attestation-service/eas-sdk';
 import { SchemaRecord, EAS, SchemaEncoder as SchemaEncoder$1, MultiAttestationRequest as MultiAttestationRequest$1, AttestationRequestData as AttestationRequestData$1, MultiDelegatedAttestationRequest as MultiDelegatedAttestationRequest$1 } from '@ethereum-attestation-service/eas-sdk';
 import { Signer, Provider, ethers } from 'ethers';
 import * as _ethereum_attestation_service_eas_sdk_dist_offchain_typed_data_handler from '@ethereum-attestation-service/eas-sdk/dist/offchain/typed-data-handler';
@@ -33,6 +34,23 @@ declare const registerSchema: (signer: Signer, schemaRegistryAddress: string, pa
  */
 declare const getSchemaByUID: (provider: Provider, schemaRegistryAddress: string, schemaUID: string) => Promise<SchemaRecord>;
 
+declare const BAS: typeof EAS;
+declare const SchemaEncoder: typeof SchemaEncoder$1;
+type MultiAttestationRequest = MultiAttestationRequest$1;
+type AttestationRequestData = AttestationRequestData$1;
+type MultiDelegatedAttestationRequest = MultiDelegatedAttestationRequest$1;
+interface Signature {
+    r: string;
+    s: string;
+    v: number;
+}
+
+type HandleOspReturnData = {
+    dataType: number;
+    requestData: AttestationRequestData$1;
+};
+declare const handleOspRequestData: (chainId: number, jsonData: string) => HandleOspReturnData;
+
 /**
  * Attestation params
  * @param schemaUID schema uid
@@ -59,6 +77,59 @@ interface DelegatedAttestParams extends AttestParams {
  */
 declare const createAttestOffChain: (signer: Signer, bas: EAS, params: AttestParams) => Promise<object>;
 declare const getSigatureByDelegation: (bas: EAS, params: DelegatedAttestParams, signer: Signer) => Promise<_ethereum_attestation_service_eas_sdk_dist_offchain_typed_data_handler.Signature>;
+declare const getAttestationRequestData: (recipient: string, encodedData: string) => _ethereum_attestation_service_eas_sdk.AttestationRequestData;
+declare const getMulAttestParams: (params: HandleOspReturnData[]) => MultiAttestationRequest[];
+/**
+ * Create multi attestation
+ * @param signer signer
+ * @param params multi attestation params
+ * @returns attestation uids
+ */
+declare const multiAttestBASOnChain: (signer: Signer, params: MultiAttestationRequest[]) => Promise<string[]>;
+
+declare enum OspDataType {
+    None = 0,
+    Follow = 1,
+    Profile = 2,
+    Community = 3,
+    Join = 4
+}
+declare const FollowSchemaUID = "0x1c9575bc318527d66fad7fc50aae6e2153185fcc624e14cf0af562d87d869be2";
+declare const ProfileSchemaUID = "0x7c90370dcf194ce4c2851abec14da05abd98d8860ae7147ac714755430d42f6e";
+declare const CommunitySchemaUID = "0x18c1dbf9c1a1c6a64b661c23110116f80b7d6897839334b724ea2a46056bee94";
+declare const JoinSchemaUID = "0x3a017e34de4075a58f3a6a2826823a95bf38924b87646b68621c5fb4c2201069";
+declare const OspDataTypeMap: Map<OspDataType, string>;
+declare const FollowSchema = "bytes32 followTx, address follower, uint256 followedProfileId";
+declare const ProfileSchema = "bytes32 createProfileTx, address profileOwner, uint256 profileId, string handle";
+declare const CommunitySchema = "bytes32 createCommunityTx, address communityOwner, uint256 communityId, string handle, address joinNFT";
+declare const JoinSchema = "bytes32 joinTx, address joiner, uint256 communityId";
+type encodeFollowDataParams = {
+    followTx: string;
+    follower: string;
+    followedProfileId: string;
+};
+declare const encodeFollowData: (param: encodeFollowDataParams) => string;
+type encodeProfileDataParams = {
+    createProfileTx: string;
+    profileOwner: string;
+    profileId: string;
+    handle: string;
+};
+declare const encodeProfileData: (param: encodeProfileDataParams) => string;
+type encodeCommunityDataParams = {
+    createCommunityTx: string;
+    communityOwner: string;
+    communityId: string;
+    handle: string;
+    joinNFT: string;
+};
+declare const encodeCommunityData: (param: encodeCommunityDataParams) => string;
+type encodeJoinDataParams = {
+    joinTx: string;
+    joiner: string;
+    communityId: string;
+};
+declare const encodeJoinData: (param: encodeJoinDataParams) => string;
 
 /**
  * GreenField Client
@@ -112,17 +183,7 @@ declare const selectSp: (client: any) => Promise<{
     secondarySpAddresses: any[];
 }>;
 
-declare const BAS: typeof EAS;
-declare const SchemaEncoder: typeof SchemaEncoder$1;
-type MultiAttestationRequest = MultiAttestationRequest$1;
-type AttestationRequestData = AttestationRequestData$1;
-type MultiDelegatedAttestationRequest = MultiDelegatedAttestationRequest$1;
-interface Signature {
-    r: string;
-    s: string;
-    v: number;
-}
-
 declare const getDeployer: () => Promise<AwsKmsSigner<ethers.JsonRpcProvider>>;
+declare const getKmsSigner: (provider: Provider) => AwsKmsSigner<ethers.Provider>;
 
-export { type AttestParams, type AttestationRequestData, BAS, type DelegatedAttestParams, GreenFieldClientTS, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, type RegisterSchemaParams, SchemaEncoder, type Signature, createAttestOffChain, encodeAddrToBucketName, getAllSps, getDeployer, getSchemaByUID, getSigatureByDelegation, getSps, initEAS, registerSchema, selectSp };
+export { type AttestParams, type AttestationRequestData, BAS, CommunitySchema, CommunitySchemaUID, type DelegatedAttestParams, FollowSchema, FollowSchemaUID, GreenFieldClientTS, type HandleOspReturnData, JoinSchema, JoinSchemaUID, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, OspDataType, OspDataTypeMap, ProfileSchema, ProfileSchemaUID, type RegisterSchemaParams, SchemaEncoder, type Signature, createAttestOffChain, encodeAddrToBucketName, encodeCommunityData, type encodeCommunityDataParams, encodeFollowData, type encodeFollowDataParams, encodeJoinData, type encodeJoinDataParams, encodeProfileData, type encodeProfileDataParams, getAllSps, getAttestationRequestData, getDeployer, getKmsSigner, getMulAttestParams, getSchemaByUID, getSigatureByDelegation, getSps, handleOspRequestData, initEAS, multiAttestBASOnChain, registerSchema, selectSp };
