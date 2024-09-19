@@ -3,6 +3,7 @@ import {
   AttestParams,
   BAS,
   getAttestationOffChain,
+  getKmsSigner,
   GreenFieldClientTS,
   SchemaEncoder,
 } from "osp-bas-sdk";
@@ -17,14 +18,18 @@ async function main() {
   const provider = new ethers.JsonRpcProvider(
     "https://rpc.ankr.com/bsc_testnet_chapel"
   );
-  const signer = new ethers.Wallet(PrivateKey, provider);
+  // const signer = new ethers.Wallet(PrivateKey, provider);
+
+  const signer =  getKmsSigner(provider);
 
   const recipient = ethers.Wallet.createRandom().address;
   const schemaEncoder = new SchemaEncoder("string Post");
   const encodedData = schemaEncoder.encodeData([
     { name: "Post", value: `${recipient} post`, type: "string" },
   ]);
-  const bas = new BAS(BNB_basAddress);
+  const offchain = await new BAS(BNB_basAddress)
+    .connect(provider)
+    .getOffchain();
   const params_a: AttestParams = {
     schemaUID:
       "0x599b1dc37382faa679ffc8af28adaa01357950c8947f090c54a608ba6f63ba6d",
@@ -33,7 +38,7 @@ async function main() {
     refUID:
       "0x0000000000000000000000000000000000000000000000000000000000000000",
   };
-  const attestation = await getAttestationOffChain(signer, params_a);
+  const attestation = await getAttestationOffChain(offchain, signer, params_a);
   console.log(attestation);
 }
 

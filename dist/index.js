@@ -566,14 +566,7 @@ var encodeJoinData = (param) => {
 };
 
 // src/attestation/createAttestation.ts
-var getAttestationOffChain = (signer, params) => __async(void 0, null, function* () {
-  const basAddress = process.env.BAS_ADDRESS_BNB;
-  if (basAddress == null || basAddress == "") {
-    throw new Error("BAS address is not config in env file");
-  }
-  const bas = new import_eas_sdk3.EAS(basAddress);
-  bas.connect(signer);
-  const offchain = yield bas.getOffchain();
+var getAttestationOffChain = (offchain, signer, params) => __async(void 0, null, function* () {
   const timestamp = Math.floor(Date.now() / 1e3);
   const attestation = yield offchain.signOffchainAttestation(
     {
@@ -674,6 +667,12 @@ var multiAttestBASOnChain = (signer, params) => __async(void 0, null, function* 
   }
 });
 var multiAttestBASOffChain = (signer, unHandleDatas) => __async(void 0, null, function* () {
+  const basAddress = process.env.BAS_ADDRESS_BNB;
+  if (basAddress == null || basAddress == "") {
+    throw new Error("BAS address is not config in env file");
+  }
+  const bas = new import_eas_sdk3.EAS(basAddress);
+  const offchain = yield new import_eas_sdk3.EAS(basAddress).connect(signer).getOffchain();
   const attestations = [];
   try {
     for (let i = 0; i < unHandleDatas.length; i++) {
@@ -682,6 +681,7 @@ var multiAttestBASOffChain = (signer, unHandleDatas) => __async(void 0, null, fu
         continue;
       }
       const attestation = yield getAttestationOffChain(
+        offchain,
         signer,
         data.requestData
       );
