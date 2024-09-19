@@ -77,7 +77,7 @@ export const createAttestOffChain = async (
     typeof value === "bigint" ? Number(value).toString() : value
   );
 
-  return attestation_;
+  return JSON.parse(attestation_) as object;
 };
 
 export const getSigatureByDelegation = async (
