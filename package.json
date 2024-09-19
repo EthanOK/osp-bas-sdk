@@ -21,6 +21,7 @@
     "dist"
   ],
   "dependencies": {
+    "@aliyunmq/mq-http-sdk": "^1.0.4",
     "@bnb-chain/greenfield-js-sdk": "^2.1.1",
     "@bnb-chain/reed-solomon": "^1.1.3",
     "@cuonghx.gu-tech/ethers-aws-kms-signer": "^0.9.1",

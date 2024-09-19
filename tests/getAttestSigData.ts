@@ -2,7 +2,7 @@
 import {
   AttestParams,
   BAS,
-  createAttestOffChain,
+  getAttestationOffChain,
   GreenFieldClientTS,
   SchemaEncoder,
 } from "osp-bas-sdk";
@@ -12,7 +12,6 @@ import {
   BNB_schemaRegistryAddress,
   PrivateKey,
 } from "./config";
-
 
 async function main() {
   const provider = new ethers.JsonRpcProvider(
@@ -34,7 +33,7 @@ async function main() {
     refUID:
       "0x0000000000000000000000000000000000000000000000000000000000000000",
   };
-  const attestation = await createAttestOffChain(signer, bas, params_a);
+  const attestation = await getAttestationOffChain(signer, params_a);
   console.log(attestation);
 }
 

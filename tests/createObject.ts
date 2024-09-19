@@ -2,7 +2,7 @@
 import {
   AttestParams,
   BAS,
-  createAttestOffChain,
+  getAttestationOffChain,
   encodeAddrToBucketName,
   GreenFieldClientTS,
   SchemaEncoder,
@@ -46,7 +46,7 @@ async function main() {
     refUID:
       "0x0000000000000000000000000000000000000000000000000000000000000000",
   };
-  const attestation = await createAttestOffChain(signer, bas, params_a);
+  const attestation = await getAttestationOffChain(signer, params_a);
   console.log(attestation);
   const bucketName = encodeAddrToBucketName(
     "0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2"
