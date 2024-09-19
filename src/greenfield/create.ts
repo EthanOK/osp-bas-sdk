@@ -178,6 +178,7 @@ export class GreenFieldClientTS {
   async createObjectMulAttest(
     bucketName: string,
     attestations: string,
+    fileName: string,
     privateKey: string,
     isPrivate = false
   ) {
@@ -188,7 +189,7 @@ export class GreenFieldClientTS {
     }
     const attest = JSON.parse(attestations);
 
-    const fileName = `${attest[0].message.schema}.${attest[0].uid}`;
+    // const fileName = `${attest[0].message.schema}.${attest[0].uid}`;
 
     const fileBuffer = Buffer.from(attestations);
 

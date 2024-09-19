@@ -462,6 +462,12 @@ var FollowSchema = "bytes32 followTx, address follower, uint256 followedProfileI
 var ProfileSchema = "bytes32 createProfileTx, address profileOwner, uint256 profileId, string handle";
 var CommunitySchema = "bytes32 createCommunityTx, address communityOwner, uint256 communityId, string handle, address joinNFT";
 var JoinSchema = "bytes32 joinTx, address joiner, uint256 communityId";
+var OspSchemaMap = /* @__PURE__ */ new Map([
+  [1 /* Follow */, FollowSchema],
+  [2 /* Profile */, ProfileSchema],
+  [3 /* Community */, CommunitySchema],
+  [4 /* Join */, JoinSchema]
+]);
 var encodeFollowData = (param) => {
   const schemaEncoder = new SchemaEncoder(FollowSchema);
   const encodedData = schemaEncoder.encodeData([
@@ -511,7 +517,12 @@ var encodeJoinData = (param) => {
 };
 
 // src/attestation/createAttestation.ts
-var createAttestOffChain = (signer, bas, params) => __async(void 0, null, function* () {
+var getAttestationOffChain = (signer, params) => __async(void 0, null, function* () {
+  const basAddress = process.env.BAS_ADDRESS_BNB;
+  if (basAddress == null || basAddress == "") {
+    throw new Error("BAS address is not config in env file");
+  }
+  const bas = new EAS2(basAddress);
   bas.connect(signer);
   const offchain = yield bas.getOffchain();
   const timestamp = Math.floor(Date.now() / 1e3);
@@ -570,6 +581,15 @@ var getAttestationRequestData = (recipient, encodedData) => {
   };
   return attestationRequestData;
 };
+var getAttestParams = (dataType, recipient, encodedData) => {
+  const params = {
+    schemaUID: OspDataTypeMap.get(dataType),
+    encodedData,
+    recipient,
+    refUID: "0x0000000000000000000000000000000000000000000000000000000000000000"
+  };
+  return params;
+};
 var getMulAttestParams = (params) => {
   const groupedParams = {};
   params.forEach((param) => {
@@ -590,9 +610,9 @@ var getMulAttestParams = (params) => {
 };
 var multiAttestBASOnChain = (signer, params) => __async(void 0, null, function* () {
   try {
-    const basAddress = process.env.BAS_ADDRESS;
+    const basAddress = process.env.BAS_ADDRESS_OPBNB;
     if (basAddress == null || basAddress == "") {
-      throw new Error("BAS address is not config in env file");
+      throw new Error("BAS_ADDRESS_OPBNB is not config in env file");
     }
     const bas = new EAS2(basAddress);
     bas.connect(signer);
@@ -602,6 +622,26 @@ var multiAttestBASOnChain = (signer, params) => __async(void 0, null, function* 
   } catch (error) {
     console.log(error);
     return null;
+  }
+});
+var multiAttestBASOffChain = (signer, unHandleDatas) => __async(void 0, null, function* () {
+  const attestations = [];
+  try {
+    for (let i = 0; i < unHandleDatas.length; i++) {
+      const data = unHandleDatas[i];
+      if (data.dataType == 0 /* None */) {
+        continue;
+      }
+      const attestation = yield getAttestationOffChain(
+        signer,
+        data.requestData
+      );
+      attestations.push(attestation);
+    }
+    return attestations;
+  } catch (error) {
+    console.log(error);
+    return attestations;
   }
 });
 
@@ -619,13 +659,13 @@ import { hashMessage, getAddress } from "ethers";
 var encodeAddrToBucketName = (addr) => {
   return `bas-${hashMessage(getAddress(addr)).substring(2, 42)}`;
 };
-var getSps = (client) => __async(void 0, null, function* () {
-  const sps = yield client.sp.getStorageProviders();
+var getSps = (client2) => __async(void 0, null, function* () {
+  const sps = yield client2.sp.getStorageProviders();
   const finalSps = (sps != null ? sps : []).filter((v) => v.endpoint.includes("nodereal"));
   return finalSps;
 });
-var getAllSps = (client) => __async(void 0, null, function* () {
-  const sps = yield getSps(client);
+var getAllSps = (client2) => __async(void 0, null, function* () {
+  const sps = yield getSps(client2);
   return sps.map((sp) => {
     var _a;
     return {
@@ -635,9 +675,9 @@ var getAllSps = (client) => __async(void 0, null, function* () {
     };
   });
 });
-var selectSp = (client) => __async(void 0, null, function* () {
+var selectSp = (client2) => __async(void 0, null, function* () {
   var _a;
-  const finalSps = yield getSps(client);
+  const finalSps = yield getSps(client2);
   const selectIndex = Math.floor(Math.random() * finalSps.length);
   const secondarySpAddresses = [
     ...finalSps.slice(0, selectIndex),
@@ -783,14 +823,13 @@ var GreenFieldClientTS = class {
    * @param privateKey creator private key
    * @param isPrivate is private object
    */
-  createObjectMulAttest(bucketName, attestations, privateKey, isPrivate = false) {
+  createObjectMulAttest(bucketName, attestations, fileName, privateKey, isPrivate = false) {
     return __async(this, null, function* () {
       console.log("started");
       if (!privateKey.startsWith("0x")) {
         privateKey = "0x" + privateKey;
       }
       const attest = JSON.parse(attestations);
-      const fileName = `${attest[0].message.schema}.${attest[0].uid}`;
       const fileBuffer = Buffer.from(attestations);
       const expectCheckSums = rs.encode(Uint8Array.from(fileBuffer));
       const createObjectTx = yield this.client.object.createObject({
@@ -845,18 +884,6 @@ function createFile(fileName, fileBuffer) {
   };
 }
 
-// src/bas/index.ts
-import {
-  EAS as BaseEAS,
-  SchemaEncoder as BaseSchemaEncoder
-} from "@ethereum-attestation-service/eas-sdk";
-var BAS = BaseEAS;
-var SchemaEncoder3 = BaseSchemaEncoder;
-
-// src/kms/kms.ts
-import { AwsKmsSigner } from "@cuonghx.gu-tech/ethers-aws-kms-signer";
-import { ethers } from "ethers";
-
 // node_modules/dotenv/config.js
 (function() {
   require_main().config(
@@ -868,7 +895,41 @@ import { ethers } from "ethers";
   );
 })();
 
+// src/greenfield/createObjectOSP.ts
+var client = new GreenFieldClientTS(
+  process.env.GREEN_RPC_URL,
+  process.env.GREEN_CHAIN_ID,
+  process.env.GREEN_PAYMENT_ADDRESS
+);
+var createObjectAttestOSP = (bucketName, attestation, privateKey, isPrivate = false) => __async(void 0, null, function* () {
+  yield client.createObject(
+    bucketName,
+    JSON.stringify(attestation),
+    privateKey,
+    isPrivate
+  );
+});
+var createObjectMulAttestOSP = (bucketName, attestations, fileName, privateKey, isPrivate = false) => __async(void 0, null, function* () {
+  yield client.createObjectMulAttest(
+    bucketName,
+    JSON.stringify(attestations),
+    fileName,
+    privateKey,
+    isPrivate
+  );
+});
+
+// src/bas/index.ts
+import {
+  EAS as BaseEAS,
+  SchemaEncoder as BaseSchemaEncoder
+} from "@ethereum-attestation-service/eas-sdk";
+var BAS = BaseEAS;
+var SchemaEncoder3 = BaseSchemaEncoder;
+
 // src/kms/kms.ts
+import { AwsKmsSigner } from "@cuonghx.gu-tech/ethers-aws-kms-signer";
+import { ethers } from "ethers";
 var getDeployer = () => __async(void 0, null, function* () {
   const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
   const signer = new AwsKmsSigner(
@@ -954,6 +1015,75 @@ var handleOspRequestData = (chainId, jsonData) => {
     requestData: null
   };
 };
+var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
+  const data = JSON.parse(jsonData);
+  if (Number(data.chainId) === chainId || chainId === 0) {
+    if (data.name === "FollowSBTTransferred") {
+      const encodedData = encodeFollowData({
+        followTx: data.transactionHash,
+        follower: data.userAddress,
+        followedProfileId: BigInt(data.referencedProfileId).toString()
+      });
+      return {
+        dataType: 1 /* Follow */,
+        requestData: getAttestParams(
+          1 /* Follow */,
+          data.userAddress,
+          encodedData
+        )
+      };
+    } else if (data.name === "JoinNFTTransferred") {
+      const encodedData = encodeJoinData({
+        joinTx: data.transactionHash,
+        joiner: data.userAddress,
+        communityId: BigInt(data.communityId).toString()
+      });
+      return {
+        dataType: 4 /* Join */,
+        requestData: getAttestParams(
+          4 /* Join */,
+          data.userAddress,
+          encodedData
+        )
+      };
+    } else if (data.name === "ProfileCreated") {
+      const encodedData = encodeProfileData({
+        createProfileTx: data.transactionHash,
+        profileOwner: data.userAddress,
+        profileId: BigInt(data.profileId).toString(),
+        handle: data.handle
+      });
+      return {
+        dataType: 2 /* Profile */,
+        requestData: getAttestParams(
+          2 /* Profile */,
+          data.userAddress,
+          encodedData
+        )
+      };
+    } else if (data.name === "CommunityCreated") {
+      const encodedData = encodeCommunityData({
+        createCommunityTx: data.transactionHash,
+        communityOwner: data.userAddress,
+        communityId: BigInt(data.communityId).toString(),
+        handle: data.handle,
+        joinNFT: data.joinNFT
+      });
+      return {
+        dataType: 3 /* Community */,
+        requestData: getAttestParams(
+          3 /* Community */,
+          data.userAddress,
+          encodedData
+        )
+      };
+    }
+  }
+  return {
+    dataType: 0 /* None */,
+    requestData: null
+  };
+};
 export {
   BAS,
   CommunitySchema,
@@ -965,16 +1095,20 @@ export {
   JoinSchemaUID,
   OspDataType,
   OspDataTypeMap,
+  OspSchemaMap,
   ProfileSchema,
   ProfileSchemaUID,
   SchemaEncoder3 as SchemaEncoder,
-  createAttestOffChain,
+  createObjectAttestOSP,
+  createObjectMulAttestOSP,
   encodeAddrToBucketName,
   encodeCommunityData,
   encodeFollowData,
   encodeJoinData,
   encodeProfileData,
   getAllSps,
+  getAttestParams,
+  getAttestationOffChain,
   getAttestationRequestData,
   getDeployer,
   getKmsSigner,
@@ -983,7 +1117,9 @@ export {
   getSigatureByDelegation,
   getSps,
   handleOspRequestData,
+  handleOspRequestPrepareOffChain,
   initEAS,
+  multiAttestBASOffChain,
   multiAttestBASOnChain,
   registerSchema,
   selectSp

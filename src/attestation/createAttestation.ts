@@ -10,8 +10,11 @@ import { BNB_schemaRegistryAddress } from "../../tests/config";
 import { getSchemaByUID } from "../schema/register";
 import { throws } from "assert";
 import { AttestationRequestData, MultiAttestationRequest } from "../bas";
-import { OspDataTypeMap } from "./encodedOspData";
-import { HandleOspReturnData } from "../handle/handleOsp";
+import { OspDataType, OspDataTypeMap } from "./encodedOspData";
+import {
+  HandleOspReturnData,
+  HandleOspReturnDataOffChain,
+} from "../handle/handleOsp";
 
 // Initialize SchemaEncoder with the schema string
 
@@ -39,13 +42,17 @@ export interface DelegatedAttestParams extends AttestParams {
  * @param signer signer
  * @param bas bas
  * @param params attestation params
- * @returns attestation string
+ * @returns attestation Json Object
  */
-export const createAttestOffChain = async (
+export const getAttestationOffChain = async (
   signer: Signer,
-  bas: EAS,
   params: AttestParams
 ) => {
+  const basAddress = process.env.BAS_ADDRESS_BNB;
+  if (basAddress == null || basAddress == "") {
+    throw new Error("BAS address is not config in env file");
+  }
+  const bas = new EAS(basAddress);
   bas.connect(signer);
 
   const offchain = await bas.getOffchain();
@@ -130,6 +137,21 @@ export const getAttestationRequestData = (
   return attestationRequestData;
 };
 
+export const getAttestParams = (
+  dataType: OspDataType,
+  recipient: string,
+  encodedData: string
+) => {
+  const params: AttestParams = {
+    schemaUID: OspDataTypeMap.get(dataType),
+    encodedData: encodedData,
+    recipient: recipient,
+    refUID:
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
+  };
+  return params;
+};
+
 export const getMulAttestParams = (
   params: HandleOspReturnData[]
 ): MultiAttestationRequest[] => {
@@ -165,9 +187,9 @@ export const multiAttestBASOnChain = async (
   params: MultiAttestationRequest[]
 ) => {
   try {
-    const basAddress = process.env.BAS_ADDRESS;
+    const basAddress = process.env.BAS_ADDRESS_OPBNB;
     if (basAddress == null || basAddress == "") {
-      throw new Error("BAS address is not config in env file");
+      throw new Error("BAS_ADDRESS_OPBNB is not config in env file");
     }
 
     const bas = new EAS(basAddress);
@@ -178,5 +200,35 @@ export const multiAttestBASOnChain = async (
   } catch (error) {
     console.log(error);
     return null;
+  }
+};
+
+/**
+ * Create multi attestation
+ * @param signer signer
+ * @param params multi attestation params
+ * @returns attestations type is json object[]
+ */
+export const multiAttestBASOffChain = async (
+  signer: Signer,
+  unHandleDatas: HandleOspReturnDataOffChain[]
+) => {
+  const attestations = [];
+  try {
+    for (let i = 0; i < unHandleDatas.length; i++) {
+      const data = unHandleDatas[i];
+      if (data.dataType == OspDataType.None) {
+        continue;
+      }
+      const attestation = await getAttestationOffChain(
+        signer,
+        data.requestData
+      );
+      attestations.push(attestation);
+    }
+    return attestations;
+  } catch (error) {
+    console.log(error);
+    return attestations;
   }
 };

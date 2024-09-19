@@ -32,6 +32,13 @@ export const CommunitySchema =
   "bytes32 createCommunityTx, address communityOwner, uint256 communityId, string handle, address joinNFT";
 export const JoinSchema = "bytes32 joinTx, address joiner, uint256 communityId";
 
+export const OspSchemaMap = new Map([
+  [OspDataType.Follow, FollowSchema],
+  [OspDataType.Profile, ProfileSchema],
+  [OspDataType.Community, CommunitySchema],
+  [OspDataType.Join, JoinSchema],
+]);
+
 export type encodeFollowDataParams = {
   followTx: string;
   follower: string;
