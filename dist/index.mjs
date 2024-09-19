@@ -766,7 +766,6 @@ var GreenFieldClientTS = class {
    */
   createObject(bucketName, attestation, privateKey, isPrivate = false) {
     return __async(this, null, function* () {
-      console.log("started");
       if (!privateKey.startsWith("0x")) {
         privateKey = "0x" + privateKey;
       }

@@ -100,7 +100,7 @@ export class GreenFieldClientTS {
     privateKey: string,
     isPrivate = false
   ) {
-    console.log("started");
+    // console.log("started");
     // console.log(this.address, this.chainId);
     if (!privateKey.startsWith("0x")) {
       privateKey = "0x" + privateKey;

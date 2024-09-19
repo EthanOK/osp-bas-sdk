@@ -1,4 +1,3 @@
-import { log } from "console";
 import { GreenFieldClientTS } from "./create";
 import "dotenv/config";
 
