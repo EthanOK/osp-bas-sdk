@@ -53,7 +53,7 @@ async function main() {
   );
   const txhash = await client.createObject(
     bucketName,
-    attestation,
+    JSON.stringify(attestation),
     PrivateKey,
     false
   );

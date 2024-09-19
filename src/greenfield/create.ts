@@ -90,7 +90,7 @@ export class GreenFieldClientTS {
   /**
    * create object
    * @param bucketName bucket name
-   * @param attestation attestation
+   * @param attestation attestation is Json String
    * @param privateKey creator private key
    * @param isPrivate is private object
    */
@@ -110,6 +110,87 @@ export class GreenFieldClientTS {
     const fileName = `${attest.message.schema}.${attest.uid}`;
 
     const fileBuffer = Buffer.from(attestation);
+
+    const expectCheckSums = rs.encode(Uint8Array.from(fileBuffer));
+    // const expectCheckSums = await rs.encodeInWorker(
+    //   __filename,
+    //   Uint8Array.from(fileBuffer)
+    // );
+
+    // createObject
+    const createObjectTx = await this.client.object.createObject({
+      bucketName: bucketName,
+      objectName: fileName,
+      creator: this.address,
+      visibility: isPrivate
+        ? VisibilityType.VISIBILITY_TYPE_PRIVATE
+        : VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
+      contentType: "json",
+      redundancyType: RedundancyType.REDUNDANCY_EC_TYPE,
+      payloadSize: Long.fromInt(fileBuffer.byteLength),
+      expectChecksums: expectCheckSums.map((x) => bytesFromBase64(x)),
+    });
+
+    const simulateInfo = await createObjectTx.simulate({
+      denom: "BNB",
+    });
+    // console.log(simulateInfo);
+    const { transactionHash } = await createObjectTx.broadcast({
+      denom: "BNB",
+      gasLimit: Number(simulateInfo.gasLimit),
+      gasPrice: simulateInfo.gasPrice,
+      payer: this.address,
+      granter: "",
+      privateKey: privateKey,
+    });
+
+    console.log("create object success", transactionHash);
+
+    // uploadObject
+    const uploadRes = await this.client.object.uploadObject(
+      {
+        bucketName: bucketName,
+        objectName: fileName,
+        body: createFile(fileName, fileBuffer),
+        txnHash: transactionHash,
+      },
+      // highlight-start
+      {
+        type: "ECDSA",
+        privateKey: privateKey,
+      }
+      // highlight-end
+    );
+    if (uploadRes.code === 0) {
+      console.log("upload object success", uploadRes);
+    }
+
+    return transactionHash;
+  }
+
+  /**
+   * create object multiple attestations
+   * @param bucketName bucket name
+   * @param attestations attestations is Json String
+   * @param privateKey creator private key
+   * @param isPrivate is private object
+   */
+  async createObjectMulAttest(
+    bucketName: string,
+    attestations: string,
+    privateKey: string,
+    isPrivate = false
+  ) {
+    console.log("started");
+    // console.log(this.address, this.chainId);
+    if (!privateKey.startsWith("0x")) {
+      privateKey = "0x" + privateKey;
+    }
+    const attest = JSON.parse(attestations);
+
+    const fileName = `${attest[0].message.schema}.${attest[0].uid}`;
+
+    const fileBuffer = Buffer.from(attestations);
 
     const expectCheckSums = rs.encode(Uint8Array.from(fileBuffer));
     // const expectCheckSums = await rs.encodeInWorker(

@@ -2,6 +2,7 @@
 import {
   AttestationRequestData,
   BAS,
+  getDeployer,
   MultiAttestationRequest,
   SchemaEncoder,
 } from "osp-bas-sdk";
@@ -12,7 +13,9 @@ async function createAttestation() {
   const provider = new ethers.JsonRpcProvider(
     "https://opbnb-testnet-rpc.bnbchain.org"
   );
-  const signer = new ethers.Wallet(PrivateKey, provider);
+  // const signer = new ethers.Wallet(PrivateKey, provider);
+  const signer = await getDeployer();
+
   const bas = new BAS("0x5e905F77f59491F03eBB78c204986aaDEB0C6bDa");
   bas.connect(signer);
 
