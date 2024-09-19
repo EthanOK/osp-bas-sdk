@@ -1,8 +1,9 @@
 import { assert } from "chai";
-import { BNB_basAddress } from "./config";
+import { BNB_basAddress, PrivateKey } from "./config";
 import { ethers } from "ethers";
 import {
   getDeployer,
+  getKmsSigner,
   getMulAttestParams,
   handleOspRequestData,
   MultiAttestationRequest,
@@ -86,5 +87,23 @@ describe("BNB Bas Address", () => {
       JSON.stringify(communityJson)
     );
     console.log(handleOspReturnData4);
+  });
+
+  it("should kms sign message", async () => {
+    const deployer =  getKmsSigner();
+
+    for (let i = 0; i < 100; i++) {
+      const signature = await deployer.signMessage("hello world" + i);
+      // console.log(signature);
+    }
+  });
+
+  it("should private_key sign message", async () => {
+    const deployer = new ethers.Wallet(PrivateKey);
+
+    for (let i = 0; i < 10000; i++) {
+      const signature = await deployer.signMessage("hello world" + i);
+      // console.log(signature);
+    }
   });
 });

@@ -19,7 +19,7 @@ export const getDeployer = async () => {
   return signer;
 };
 
-export const getKmsSigner = (provider: Provider) => {
+export const getKmsSigner = (provider?: Provider) => {
   const signer = new AwsKmsSigner(
     {
       keyId: process.env.AWS_KMS_KEY_ID!,
