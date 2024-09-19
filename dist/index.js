@@ -420,16 +420,35 @@ var require_cli_options = __commonJS({
 var src_exports = {};
 __export(src_exports, {
   BAS: () => BAS,
+  CommunitySchema: () => CommunitySchema,
+  CommunitySchemaUID: () => CommunitySchemaUID,
+  FollowSchema: () => FollowSchema,
+  FollowSchemaUID: () => FollowSchemaUID,
   GreenFieldClientTS: () => GreenFieldClientTS,
-  SchemaEncoder: () => SchemaEncoder,
+  JoinSchema: () => JoinSchema,
+  JoinSchemaUID: () => JoinSchemaUID,
+  OspDataType: () => OspDataType,
+  OspDataTypeMap: () => OspDataTypeMap,
+  ProfileSchema: () => ProfileSchema,
+  ProfileSchemaUID: () => ProfileSchemaUID,
+  SchemaEncoder: () => SchemaEncoder3,
   createAttestOffChain: () => createAttestOffChain,
   encodeAddrToBucketName: () => encodeAddrToBucketName,
+  encodeCommunityData: () => encodeCommunityData,
+  encodeFollowData: () => encodeFollowData,
+  encodeJoinData: () => encodeJoinData,
+  encodeProfileData: () => encodeProfileData,
   getAllSps: () => getAllSps,
+  getAttestationRequestData: () => getAttestationRequestData,
   getDeployer: () => getDeployer,
+  getKmsSigner: () => getKmsSigner,
+  getMulAttestParams: () => getMulAttestParams,
   getSchemaByUID: () => getSchemaByUID,
   getSigatureByDelegation: () => getSigatureByDelegation,
   getSps: () => getSps,
+  handleOspRequestData: () => handleOspRequestData,
   initEAS: () => initEAS,
+  multiAttestBASOnChain: () => multiAttestBASOnChain,
   registerSchema: () => registerSchema,
   selectSp: () => selectSp
 });
@@ -458,6 +477,81 @@ var getSchemaByUID = (provider, schemaRegistryAddress, schemaUID) => __async(voi
   const schemaRecord = yield schemaRegistry.getSchema({ uid: schemaUID });
   return schemaRecord;
 });
+
+// src/attestation/createAttestation.ts
+var import_eas_sdk3 = require("@ethereum-attestation-service/eas-sdk");
+
+// src/attestation/encodedOspData.ts
+var import_eas_sdk2 = require("@ethereum-attestation-service/eas-sdk");
+var OspDataType = /* @__PURE__ */ ((OspDataType2) => {
+  OspDataType2[OspDataType2["None"] = 0] = "None";
+  OspDataType2[OspDataType2["Follow"] = 1] = "Follow";
+  OspDataType2[OspDataType2["Profile"] = 2] = "Profile";
+  OspDataType2[OspDataType2["Community"] = 3] = "Community";
+  OspDataType2[OspDataType2["Join"] = 4] = "Join";
+  return OspDataType2;
+})(OspDataType || {});
+var FollowSchemaUID = "0x1c9575bc318527d66fad7fc50aae6e2153185fcc624e14cf0af562d87d869be2";
+var ProfileSchemaUID = "0x7c90370dcf194ce4c2851abec14da05abd98d8860ae7147ac714755430d42f6e";
+var CommunitySchemaUID = "0x18c1dbf9c1a1c6a64b661c23110116f80b7d6897839334b724ea2a46056bee94";
+var JoinSchemaUID = "0x3a017e34de4075a58f3a6a2826823a95bf38924b87646b68621c5fb4c2201069";
+var OspDataTypeMap = /* @__PURE__ */ new Map([
+  [1 /* Follow */, FollowSchemaUID],
+  [2 /* Profile */, ProfileSchemaUID],
+  [3 /* Community */, CommunitySchemaUID],
+  [4 /* Join */, JoinSchemaUID]
+]);
+var FollowSchema = "bytes32 followTx, address follower, uint256 followedProfileId";
+var ProfileSchema = "bytes32 createProfileTx, address profileOwner, uint256 profileId, string handle";
+var CommunitySchema = "bytes32 createCommunityTx, address communityOwner, uint256 communityId, string handle, address joinNFT";
+var JoinSchema = "bytes32 joinTx, address joiner, uint256 communityId";
+var encodeFollowData = (param) => {
+  const schemaEncoder = new import_eas_sdk2.SchemaEncoder(FollowSchema);
+  const encodedData = schemaEncoder.encodeData([
+    { name: "followTx", value: param.followTx, type: "bytes32" },
+    { name: "follower", value: param.follower, type: "address" },
+    {
+      name: "followedProfileId",
+      value: param.followedProfileId,
+      type: "uint256"
+    }
+  ]);
+  return encodedData;
+};
+var encodeProfileData = (param) => {
+  const schemaEncoder = new import_eas_sdk2.SchemaEncoder(ProfileSchema);
+  const encodedData = schemaEncoder.encodeData([
+    { name: "createProfileTx", value: param.createProfileTx, type: "bytes32" },
+    { name: "profileOwner", value: param.profileOwner, type: "address" },
+    { name: "profileId", value: param.profileId, type: "uint256" },
+    { name: "handle", value: param.handle, type: "string" }
+  ]);
+  return encodedData;
+};
+var encodeCommunityData = (param) => {
+  const schemaEncoder = new import_eas_sdk2.SchemaEncoder(CommunitySchema);
+  const encodedData = schemaEncoder.encodeData([
+    {
+      name: "createCommunityTx",
+      value: param.createCommunityTx,
+      type: "bytes32"
+    },
+    { name: "communityOwner", value: param.communityOwner, type: "address" },
+    { name: "communityId", value: param.communityId, type: "uint256" },
+    { name: "handle", value: param.handle, type: "string" },
+    { name: "joinNFT", value: param.joinNFT, type: "address" }
+  ]);
+  return encodedData;
+};
+var encodeJoinData = (param) => {
+  const schemaEncoder = new import_eas_sdk2.SchemaEncoder(JoinSchema);
+  const encodedData = schemaEncoder.encodeData([
+    { name: "joinTx", value: param.joinTx, type: "bytes32" },
+    { name: "joiner", value: param.joiner, type: "address" },
+    { name: "communityId", value: param.communityId, type: "uint256" }
+  ]);
+  return encodedData;
+};
 
 // src/attestation/createAttestation.ts
 var createAttestOffChain = (signer, bas, params) => __async(void 0, null, function* () {
@@ -507,6 +601,51 @@ var getSigatureByDelegation = (bas, params, signer) => __async(void 0, null, fun
   };
   const attestation = yield delegated.signDelegatedAttestation(params_, signer);
   return attestation.signature;
+});
+var getAttestationRequestData = (recipient, encodedData) => {
+  const attestationRequestData = {
+    recipient,
+    expirationTime: BigInt(0),
+    revocable: true,
+    data: encodedData,
+    refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
+    value: BigInt(0)
+  };
+  return attestationRequestData;
+};
+var getMulAttestParams = (params) => {
+  const groupedParams = {};
+  params.forEach((param) => {
+    if (!groupedParams[param.dataType]) {
+      groupedParams[param.dataType] = [];
+    }
+    groupedParams[param.dataType].push(param);
+  });
+  const result = Object.keys(groupedParams).map(
+    (dataTypeStr) => ({
+      schema: OspDataTypeMap.get(parseInt(dataTypeStr)),
+      data: groupedParams[parseInt(dataTypeStr)].map(
+        (param) => param.requestData
+      )
+    })
+  );
+  return result;
+};
+var multiAttestBASOnChain = (signer, params) => __async(void 0, null, function* () {
+  try {
+    const basAddress = process.env.BAS_ADDRESS;
+    if (basAddress == null || basAddress == "") {
+      throw new Error("BAS address is not config in env file");
+    }
+    const bas = new import_eas_sdk3.EAS(basAddress);
+    bas.connect(signer);
+    const txs = yield bas.multiAttest(params);
+    const attestUIDs = yield txs.wait();
+    return attestUIDs;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
 });
 
 // src/greenfield/create.ts
@@ -744,9 +883,9 @@ function createFile(fileName, fileBuffer) {
 }
 
 // src/bas/index.ts
-var import_eas_sdk2 = require("@ethereum-attestation-service/eas-sdk");
-var BAS = import_eas_sdk2.EAS;
-var SchemaEncoder = import_eas_sdk2.SchemaEncoder;
+var import_eas_sdk4 = require("@ethereum-attestation-service/eas-sdk");
+var BAS = import_eas_sdk4.EAS;
+var SchemaEncoder3 = import_eas_sdk4.SchemaEncoder;
 
 // src/kms/kms.ts
 var import_ethers_aws_kms_signer = require("@cuonghx.gu-tech/ethers-aws-kms-signer");
@@ -777,21 +916,110 @@ var getDeployer = () => __async(void 0, null, function* () {
     },
     provider
   );
+  yield signer.getAddress();
   return signer;
 });
+var getKmsSigner = (provider) => {
+  const signer = new import_ethers_aws_kms_signer.AwsKmsSigner(
+    {
+      keyId: process.env.AWS_KMS_KEY_ID,
+      region: process.env.AWS_REGION,
+      credentials: {
+        accessKeyId: process.env.ACCESS_KEY_ID,
+        secretAccessKey: process.env.SECRET_ACCESS_KEY
+      }
+    },
+    provider
+  );
+  return signer;
+};
+
+// src/handle/handleOsp.ts
+var handleOspRequestData = (chainId, jsonData) => {
+  const data = JSON.parse(jsonData);
+  if (Number(data.chainId) === chainId || chainId === 0) {
+    if (data.name === "FollowSBTTransferred") {
+      const encodedData = encodeFollowData({
+        followTx: data.transactionHash,
+        follower: data.userAddress,
+        followedProfileId: BigInt(data.referencedProfileId).toString()
+      });
+      return {
+        dataType: 1 /* Follow */,
+        requestData: getAttestationRequestData(data.userAddress, encodedData)
+      };
+    } else if (data.name === "JoinNFTTransferred") {
+      const encodedData = encodeJoinData({
+        joinTx: data.transactionHash,
+        joiner: data.userAddress,
+        communityId: BigInt(data.communityId).toString()
+      });
+      return {
+        dataType: 4 /* Join */,
+        requestData: getAttestationRequestData(data.userAddress, encodedData)
+      };
+    } else if (data.name === "ProfileCreated") {
+      const encodedData = encodeProfileData({
+        createProfileTx: data.transactionHash,
+        profileOwner: data.userAddress,
+        profileId: BigInt(data.profileId).toString(),
+        handle: data.handle
+      });
+      return {
+        dataType: 2 /* Profile */,
+        requestData: getAttestationRequestData(data.userAddress, encodedData)
+      };
+    } else if (data.name === "CommunityCreated") {
+      const encodedData = encodeCommunityData({
+        createCommunityTx: data.transactionHash,
+        communityOwner: data.userAddress,
+        communityId: BigInt(data.communityId).toString(),
+        handle: data.handle,
+        joinNFT: data.joinNFT
+      });
+      return {
+        dataType: 3 /* Community */,
+        requestData: getAttestationRequestData(data.userAddress, encodedData)
+      };
+    }
+  }
+  return {
+    dataType: 0 /* None */,
+    requestData: null
+  };
+};
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   BAS,
+  CommunitySchema,
+  CommunitySchemaUID,
+  FollowSchema,
+  FollowSchemaUID,
   GreenFieldClientTS,
+  JoinSchema,
+  JoinSchemaUID,
+  OspDataType,
+  OspDataTypeMap,
+  ProfileSchema,
+  ProfileSchemaUID,
   SchemaEncoder,
   createAttestOffChain,
   encodeAddrToBucketName,
+  encodeCommunityData,
+  encodeFollowData,
+  encodeJoinData,
+  encodeProfileData,
   getAllSps,
+  getAttestationRequestData,
   getDeployer,
+  getKmsSigner,
+  getMulAttestParams,
   getSchemaByUID,
   getSigatureByDelegation,
   getSps,
+  handleOspRequestData,
   initEAS,
+  multiAttestBASOnChain,
   registerSchema,
   selectSp
 });

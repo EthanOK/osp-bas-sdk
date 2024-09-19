@@ -9,6 +9,9 @@ import { ethers, Signer } from "ethers";
 import { BNB_schemaRegistryAddress } from "../../tests/config";
 import { getSchemaByUID } from "../schema/register";
 import { throws } from "assert";
+import { AttestationRequestData, MultiAttestationRequest } from "../bas";
+import { OspDataTypeMap } from "./encodedOspData";
+import { HandleOspReturnData } from "../handle/handleOsp";
 
 // Initialize SchemaEncoder with the schema string
 
@@ -109,4 +112,71 @@ export const getSigatureByDelegation = async (
   // console.log(attestation);
 
   return attestation.signature;
+};
+
+export const getAttestationRequestData = (
+  recipient: string,
+  encodedData: string
+) => {
+  const attestationRequestData: AttestationRequestData = {
+    recipient: recipient,
+    expirationTime: BigInt(0),
+    revocable: true,
+    data: encodedData,
+    refUID:
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
+    value: BigInt(0),
+  };
+  return attestationRequestData;
+};
+
+export const getMulAttestParams = (
+  params: HandleOspReturnData[]
+): MultiAttestationRequest[] => {
+  const groupedParams: { [key: number]: HandleOspReturnData[] } = {};
+
+  params.forEach((param) => {
+    if (!groupedParams[param.dataType]) {
+      groupedParams[param.dataType] = [];
+    }
+    groupedParams[param.dataType].push(param);
+  });
+
+  const result: MultiAttestationRequest[] = Object.keys(groupedParams).map(
+    (dataTypeStr) => ({
+      schema: OspDataTypeMap.get(parseInt(dataTypeStr)),
+      data: groupedParams[parseInt(dataTypeStr)].map(
+        (param) => param.requestData
+      ),
+    })
+  );
+
+  return result;
+};
+
+/**
+ * Create multi attestation
+ * @param signer signer
+ * @param params multi attestation params
+ * @returns attestation uids
+ */
+export const multiAttestBASOnChain = async (
+  signer: Signer,
+  params: MultiAttestationRequest[]
+) => {
+  try {
+    const basAddress = process.env.BAS_ADDRESS;
+    if (basAddress == null || basAddress == "") {
+      throw new Error("BAS address is not config in env file");
+    }
+
+    const bas = new EAS(basAddress);
+    bas.connect(signer);
+    const txs = await bas.multiAttest(params);
+    const attestUIDs = await txs.wait();
+    return attestUIDs;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
 };

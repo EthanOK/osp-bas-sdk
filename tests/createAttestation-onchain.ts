@@ -1,69 +1,62 @@
 // npm link osp-bas-sdk
 import {
-  AttestationRequestData,
-  BAS,
-  getDeployer,
+  encodeFollowData,
+  encodeProfileData,
+  getAttestationRequestData,
   MultiAttestationRequest,
-  SchemaEncoder,
+  HandleOspReturnData,
+  OspDataType,
+  getMulAttestParams,
+  getDeployer,
+  multiAttestBASOnChain,
 } from "osp-bas-sdk";
-import { ethers } from "ethers";
-import { PrivateKey } from "./config";
+import { ethers, hexlify, randomBytes } from "ethers";
 
 async function createAttestation() {
-  const provider = new ethers.JsonRpcProvider(
-    "https://opbnb-testnet-rpc.bnbchain.org"
-  );
   // const signer = new ethers.Wallet(PrivateKey, provider);
+
   const signer = await getDeployer();
 
-  const bas = new BAS("0x5e905F77f59491F03eBB78c204986aaDEB0C6bDa");
-  bas.connect(signer);
+  const Global_UnHandle_Data: HandleOspReturnData[] = [];
+  for (let i = 0; i < 4; i++) {
+    const recipient = ethers.Wallet.createRandom().address;
 
-  const schemaUID =
-    "0xb375a6d216ba084094bbaae989bf76a31357cc88e7fe270fd477a96e1fbdadb1";
-
-  let params: MultiAttestationRequest[] = [];
-  let attestationRequestDatas: AttestationRequestData[] = [];
-  for (let i = 0; i < 2; i++) {
-    let attestationRequestData = getAttestationRequestData();
-    attestationRequestDatas.push(attestationRequestData);
+    const followHash = hexlify(randomBytes(32));
+    if (i % 2 === 0) {
+      Global_UnHandle_Data.push({
+        dataType: OspDataType.Follow,
+        requestData: getAttestationRequestData(
+          recipient,
+          encodeFollowData({
+            followTx: followHash,
+            follower: recipient,
+            followedProfileId: i.toString(),
+          })
+        ),
+      });
+    } else {
+      Global_UnHandle_Data.push({
+        dataType: OspDataType.Profile,
+        requestData: getAttestationRequestData(
+          recipient,
+          encodeProfileData({
+            createProfileTx: followHash,
+            profileOwner: recipient,
+            profileId: i.toString(),
+            handle: `demo${i}`,
+          })
+        ),
+      });
+    }
   }
-  params.push({
-    schema: schemaUID,
-    data: attestationRequestDatas,
-  });
 
-  const txs = await bas.multiAttest(params);
-  const newAttestationUIDs = await txs.wait();
-  console.log("New attestation UID:", newAttestationUIDs);
-}
+  const params: MultiAttestationRequest[] =
+    getMulAttestParams(Global_UnHandle_Data);
 
-function getAttestationRequestData() {
-  const recipient = ethers.Wallet.createRandom().address;
-  const schemaEncoder = new SchemaEncoder(
-    "bytes32 followHash,uint256 followerProfileId,uint256 followedProfileId"
-  );
-
-  const followHash = ethers.hexlify(ethers.randomBytes(32));
-  const followedProfileId = Math.floor(Math.random() * 1000) + 1;
-  const encodedData = schemaEncoder.encodeData([
-    { name: "followHash", value: followHash, type: "bytes32" },
-    { name: "followerProfileId", value: 5611, type: "uint256" },
-    {
-      name: "followedProfileId",
-      value: followedProfileId,
-      type: "uint256",
-    },
-  ]);
-  const attestationRequestData: AttestationRequestData = {
-    recipient: recipient,
-    expirationTime: BigInt(0),
-    revocable: true,
-    data: encodedData,
-    refUID:
-      "0x0000000000000000000000000000000000000000000000000000000000000000",
-  };
-  return attestationRequestData;
+  const uids = await multiAttestBASOnChain(signer, params);
+  console.log("uids:", uids);
+  Global_UnHandle_Data.length = 0;
+  console.log(Global_UnHandle_Data);
 }
 
 createAttestation();
