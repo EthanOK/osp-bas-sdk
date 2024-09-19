@@ -14,7 +14,6 @@ import {
   getKmsSigner,
 } from "osp-bas-sdk";
 import { ethers, hexlify, randomBytes } from "ethers";
-import { PrivateKey } from "./config";
 
 const GREEN_PAYMENT_PRIVATE_KEY = process.env.GREEN_PAYMENT_PRIVATE_KEY!;
 
@@ -24,13 +23,13 @@ async function main() {
   );
 
   // TODO: 签名速度 和kms有关
-  const signer = new ethers.Wallet(PrivateKey, provider);
+  const signer = new ethers.Wallet(GREEN_PAYMENT_PRIVATE_KEY, provider);
   // const signer = getKmsSigner(provider);
 
   const Global_UnHandle_Data: HandleOspReturnDataOffChain[] = [];
 
   let timestamp = Math.floor(Date.now() / 1000);
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 100; i++) {
     const recipient = ethers.Wallet.createRandom().address;
 
     const followHash = hexlify(randomBytes(32));
@@ -89,9 +88,10 @@ async function main() {
     //   GREEN_PAYMENT_PRIVATE_KEY,
     //   false
     // );
-    console.log(attestations[999]);
+    // console.log(attestations[999]);
 
     // TODO: GreenField 适配中
+    timestamp = Math.floor(Date.now() / 1000);
     const fileName = `${attestations[0].message.schema}.${attestations[0].uid}`;
     await createObjectMulAttestOSP(
       bucketName,
@@ -100,7 +100,14 @@ async function main() {
       GREEN_PAYMENT_PRIVATE_KEY,
       false
     );
-  } catch {}
+    console.log(
+      "上传时间:",
+      Math.floor(Date.now() / 1000) - timestamp,
+      "S"
+    );
+  } catch (error){
+    console.log(error);
+  }
 }
 
 main();
