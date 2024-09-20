@@ -89,7 +89,7 @@ describe("BNB Bas Address", () => {
     console.log(handleOspReturnData4);
   });
 
-  it("should kms sign message", async () => {
+  it("kms sign message 100", async () => {
     const deployer =  getKmsSigner();
 
     for (let i = 0; i < 100; i++) {
@@ -98,10 +98,10 @@ describe("BNB Bas Address", () => {
     }
   });
 
-  it("should private_key sign message", async () => {
+  it("private_key sign message 1000", async () => {
     const deployer = new ethers.Wallet(PrivateKey);
 
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < 1000; i++) {
       const signature = await deployer.signMessage("hello world" + i);
       // console.log(signature);
     }

@@ -9,6 +9,7 @@ import {
   MultiAttestationRequest,
   multiAttestBASOffChain,
   multiAttestBASOnChain,
+  serializeJsonString,
 } from "osp-bas-sdk";
 
 const chainId = 5611;
@@ -125,7 +126,7 @@ let res = null;
 
               greenFieldClient.createObjectMulAttest(
                 bucketName,
-                JSON.stringify(attestations),
+                serializeJsonString(attestations),
                 PrivateKey,
                 "",
                 false

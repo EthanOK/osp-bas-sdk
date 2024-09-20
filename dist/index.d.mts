@@ -1,5 +1,5 @@
 import * as _ethereum_attestation_service_eas_sdk from '@ethereum-attestation-service/eas-sdk';
-import { SchemaRecord, EAS, SchemaEncoder as SchemaEncoder$1, MultiAttestationRequest as MultiAttestationRequest$1, AttestationRequestData as AttestationRequestData$1, MultiDelegatedAttestationRequest as MultiDelegatedAttestationRequest$1, Offchain } from '@ethereum-attestation-service/eas-sdk';
+import { SchemaRecord, EAS, SchemaEncoder as SchemaEncoder$1, MultiAttestationRequest as MultiAttestationRequest$1, AttestationRequestData as AttestationRequestData$1, MultiDelegatedAttestationRequest as MultiDelegatedAttestationRequest$1, SignedOffchainAttestation as SignedOffchainAttestation$1, Offchain } from '@ethereum-attestation-service/eas-sdk';
 import { Signer, Provider, ethers } from 'ethers';
 import * as _ethereum_attestation_service_eas_sdk_dist_offchain_typed_data_handler from '@ethereum-attestation-service/eas-sdk/dist/offchain/typed-data-handler';
 import { Client } from '@bnb-chain/greenfield-js-sdk';
@@ -39,6 +39,7 @@ declare const SchemaEncoder: typeof SchemaEncoder$1;
 type MultiAttestationRequest = MultiAttestationRequest$1;
 type AttestationRequestData = AttestationRequestData$1;
 type MultiDelegatedAttestationRequest = MultiDelegatedAttestationRequest$1;
+type SignedOffchainAttestation = SignedOffchainAttestation$1;
 interface Signature {
     r: string;
     s: string;
@@ -125,10 +126,10 @@ interface DelegatedAttestParams extends AttestParams {
  * @param params attestation params
  * @returns attestation Json Object
  */
-declare const getAttestationOffChain: (offchain: Offchain, signer: Signer, params: AttestParams) => Promise<object>;
+declare const getAttestationOffChain: (offchain: Offchain, signer: Signer, params: AttestParams) => Promise<SignedOffchainAttestation$1>;
 declare const getSigatureByDelegation: (bas: EAS, params: DelegatedAttestParams, signer: Signer) => Promise<_ethereum_attestation_service_eas_sdk_dist_offchain_typed_data_handler.Signature>;
 declare const getAttestationRequestData: (recipient: string, encodedData: string) => _ethereum_attestation_service_eas_sdk.AttestationRequestData;
-declare const getAttestParams: (dataType: OspDataType, recipient: string, encodedData: string) => AttestParams;
+declare const getAttestParamsOffChain: (dataType: OspDataType, recipient: string, encodedData: string) => AttestParams;
 declare const getMulAttestParams: (params: HandleOspReturnData[]) => MultiAttestationRequest[];
 /**
  * Create multi attestation
@@ -143,7 +144,7 @@ declare const multiAttestBASOnChain: (signer: Signer, params: MultiAttestationRe
  * @param params multi attestation params
  * @returns attestations type is json object[]
  */
-declare const multiAttestBASOffChain: (signer: Signer, unHandleDatas: HandleOspReturnDataOffChain[]) => Promise<any[]>;
+declare const multiAttestBASOffChain: (signer: Signer, unHandleDatas: HandleOspReturnDataOffChain[]) => Promise<SignedOffchainAttestation$1[]>;
 
 /**
  * GreenField Client
@@ -188,16 +189,17 @@ declare class GreenFieldClientTS {
  * @param privateKey creator private key
  * @param isPrivate is private object
  */
-declare const createObjectAttestOSP: (bucketName: string, attestation: any, privateKey: string, isPrivate?: boolean) => Promise<void>;
+declare const createObjectAttestOSP: (bucketName: string, attestation: SignedOffchainAttestation, privateKey: string, isPrivate?: boolean) => Promise<void>;
 /**
  * Create object with multiple attestation
  * @param bucketName bucket name
- * @param attestations attestation type is json object[]
+ * @param attestations attestations
  * @param fileName file name
  * @param privateKey creator private key
  * @param isPrivate is private object
  */
-declare const createObjectMulAttestOSP: (bucketName: string, attestations: object, fileName: string, privateKey: string, isPrivate?: boolean) => Promise<void>;
+declare const createObjectMulAttestOSP: (bucketName: string, attestations: SignedOffchainAttestation[], fileName: string, privateKey: string, isPrivate?: boolean) => Promise<void>;
+declare function serializeJsonString(data: any): string;
 
 /**
  * encode address to bucket name
@@ -218,4 +220,4 @@ declare const selectSp: (client: any) => Promise<{
 declare const getDeployer: () => Promise<AwsKmsSigner<ethers.JsonRpcProvider>>;
 declare const getKmsSigner: (provider?: Provider) => AwsKmsSigner<ethers.Provider>;
 
-export { type AttestParams, type AttestationRequestData, BAS, CommunitySchema, CommunitySchemaUID, type DelegatedAttestParams, FollowSchema, FollowSchemaUID, GreenFieldClientTS, type HandleOspReturnData, type HandleOspReturnDataOffChain, JoinSchema, JoinSchemaUID, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, OspDataType, OspDataTypeMap, OspSchemaMap, ProfileSchema, ProfileSchemaUID, type RegisterSchemaParams, SchemaEncoder, type Signature, createObjectAttestOSP, createObjectMulAttestOSP, encodeAddrToBucketName, encodeCommunityData, type encodeCommunityDataParams, encodeFollowData, type encodeFollowDataParams, encodeJoinData, type encodeJoinDataParams, encodeProfileData, type encodeProfileDataParams, getAllSps, getAttestParams, getAttestationOffChain, getAttestationRequestData, getDeployer, getKmsSigner, getMulAttestParams, getSchemaByUID, getSigatureByDelegation, getSps, handleOspRequestData, handleOspRequestPrepareOffChain, initEAS, multiAttestBASOffChain, multiAttestBASOnChain, registerSchema, selectSp };
+export { type AttestParams, type AttestationRequestData, BAS, CommunitySchema, CommunitySchemaUID, type DelegatedAttestParams, FollowSchema, FollowSchemaUID, GreenFieldClientTS, type HandleOspReturnData, type HandleOspReturnDataOffChain, JoinSchema, JoinSchemaUID, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, OspDataType, OspDataTypeMap, OspSchemaMap, ProfileSchema, ProfileSchemaUID, type RegisterSchemaParams, SchemaEncoder, type Signature, type SignedOffchainAttestation, createObjectAttestOSP, createObjectMulAttestOSP, encodeAddrToBucketName, encodeCommunityData, type encodeCommunityDataParams, encodeFollowData, type encodeFollowDataParams, encodeJoinData, type encodeJoinDataParams, encodeProfileData, type encodeProfileDataParams, getAllSps, getAttestParamsOffChain, getAttestationOffChain, getAttestationRequestData, getDeployer, getKmsSigner, getMulAttestParams, getSchemaByUID, getSigatureByDelegation, getSps, handleOspRequestData, handleOspRequestPrepareOffChain, initEAS, multiAttestBASOffChain, multiAttestBASOnChain, registerSchema, selectSp, serializeJsonString };

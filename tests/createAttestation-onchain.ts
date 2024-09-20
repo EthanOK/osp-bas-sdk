@@ -9,13 +9,16 @@ import {
   getMulAttestParams,
   getDeployer,
   multiAttestBASOnChain,
+  getKmsSigner,
 } from "osp-bas-sdk";
 import { ethers, hexlify, randomBytes } from "ethers";
 
 async function createAttestation() {
+  const provider = new ethers.JsonRpcProvider(
+    "https://opbnb-testnet-rpc.bnbchain.org"
+  );
   // const signer = new ethers.Wallet(PrivateKey, provider);
-
-  const signer = await getDeployer();
+  const signer = getKmsSigner(provider);
 
   const Global_UnHandle_Data: HandleOspReturnData[] = [];
   for (let i = 0; i < 4; i++) {

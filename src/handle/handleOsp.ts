@@ -9,7 +9,7 @@ import {
 import {
   AttestParams,
   getAttestationRequestData,
-  getAttestParams,
+  getAttestParamsOffChain,
 } from "../attestation/createAttestation";
 
 export type HandleOspReturnData = {
@@ -99,7 +99,7 @@ export const handleOspRequestPrepareOffChain = (
       });
       return {
         dataType: OspDataType.Follow,
-        requestData: getAttestParams(
+        requestData: getAttestParamsOffChain(
           OspDataType.Follow,
           data.userAddress,
           encodedData
@@ -113,7 +113,7 @@ export const handleOspRequestPrepareOffChain = (
       });
       return {
         dataType: OspDataType.Join,
-        requestData: getAttestParams(
+        requestData: getAttestParamsOffChain(
           OspDataType.Join,
           data.userAddress,
           encodedData
@@ -128,7 +128,7 @@ export const handleOspRequestPrepareOffChain = (
       });
       return {
         dataType: OspDataType.Profile,
-        requestData: getAttestParams(
+        requestData: getAttestParamsOffChain(
           OspDataType.Profile,
           data.userAddress,
           encodedData
@@ -144,7 +144,7 @@ export const handleOspRequestPrepareOffChain = (
       });
       return {
         dataType: OspDataType.Community,
-        requestData: getAttestParams(
+        requestData: getAttestParamsOffChain(
           OspDataType.Community,
           data.userAddress,
           encodedData

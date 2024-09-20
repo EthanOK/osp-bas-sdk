@@ -441,7 +441,7 @@ __export(src_exports, {
   encodeJoinData: () => encodeJoinData,
   encodeProfileData: () => encodeProfileData,
   getAllSps: () => getAllSps,
-  getAttestParams: () => getAttestParams,
+  getAttestParamsOffChain: () => getAttestParamsOffChain,
   getAttestationOffChain: () => getAttestationOffChain,
   getAttestationRequestData: () => getAttestationRequestData,
   getDeployer: () => getDeployer,
@@ -456,7 +456,8 @@ __export(src_exports, {
   multiAttestBASOffChain: () => multiAttestBASOffChain,
   multiAttestBASOnChain: () => multiAttestBASOnChain,
   registerSchema: () => registerSchema,
-  selectSp: () => selectSp
+  selectSp: () => selectSp,
+  serializeJsonString: () => serializeJsonString
 });
 module.exports = __toCommonJS(src_exports);
 
@@ -586,11 +587,7 @@ var getAttestationOffChain = (offchain, signer, params) => __async(void 0, null,
     },
     signer
   );
-  const attestation_ = JSON.stringify(
-    attestation,
-    (key, value) => typeof value === "bigint" ? Number(value).toString() : value
-  );
-  return JSON.parse(attestation_);
+  return attestation;
 });
 var getSigatureByDelegation = (bas, params, signer) => __async(void 0, null, function* () {
   if (signer.provider == null) {
@@ -623,7 +620,7 @@ var getAttestationRequestData = (recipient, encodedData) => {
   };
   return attestationRequestData;
 };
-var getAttestParams = (dataType, recipient, encodedData) => {
+var getAttestParamsOffChain = (dataType, recipient, encodedData) => {
   const params = {
     schemaUID: OspDataTypeMap.get(dataType),
     encodedData,
@@ -667,12 +664,7 @@ var multiAttestBASOnChain = (signer, params) => __async(void 0, null, function* 
   }
 });
 var multiAttestBASOffChain = (signer, unHandleDatas) => __async(void 0, null, function* () {
-  const basAddress = process.env.BAS_ADDRESS_BNB;
-  if (basAddress == null || basAddress == "") {
-    throw new Error("BAS address is not config in env file");
-  }
-  const bas = new import_eas_sdk3.EAS(basAddress);
-  const offchain = yield new import_eas_sdk3.EAS(basAddress).connect(signer).getOffchain();
+  const offchain = yield new import_eas_sdk3.EAS(process.env.BAS_ADDRESS_BNB).connect(signer).getOffchain();
   const attestations = [];
   try {
     for (let i = 0; i < unHandleDatas.length; i++) {
@@ -946,7 +938,7 @@ var client = new GreenFieldClientTS(
 var createObjectAttestOSP = (bucketName, attestation, privateKey, isPrivate = false) => __async(void 0, null, function* () {
   yield client.createObject(
     bucketName,
-    JSON.stringify(attestation),
+    serializeJsonString(attestation),
     privateKey,
     isPrivate
   );
@@ -954,12 +946,20 @@ var createObjectAttestOSP = (bucketName, attestation, privateKey, isPrivate = fa
 var createObjectMulAttestOSP = (bucketName, attestations, fileName, privateKey, isPrivate = false) => __async(void 0, null, function* () {
   yield client.createObjectMulAttest(
     bucketName,
-    JSON.stringify(attestations),
+    serializeJsonString(attestations),
     fileName,
     privateKey,
     isPrivate
   );
 });
+function serializeJsonString(data) {
+  return JSON.stringify(data, (key, value) => {
+    if (typeof value === "bigint") {
+      return value.toString();
+    }
+    return value;
+  });
+}
 
 // src/bas/index.ts
 var import_eas_sdk4 = require("@ethereum-attestation-service/eas-sdk");
@@ -1065,7 +1065,7 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
       });
       return {
         dataType: 1 /* Follow */,
-        requestData: getAttestParams(
+        requestData: getAttestParamsOffChain(
           1 /* Follow */,
           data.userAddress,
           encodedData
@@ -1079,7 +1079,7 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
       });
       return {
         dataType: 4 /* Join */,
-        requestData: getAttestParams(
+        requestData: getAttestParamsOffChain(
           4 /* Join */,
           data.userAddress,
           encodedData
@@ -1094,7 +1094,7 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
       });
       return {
         dataType: 2 /* Profile */,
-        requestData: getAttestParams(
+        requestData: getAttestParamsOffChain(
           2 /* Profile */,
           data.userAddress,
           encodedData
@@ -1110,7 +1110,7 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
       });
       return {
         dataType: 3 /* Community */,
-        requestData: getAttestParams(
+        requestData: getAttestParamsOffChain(
           3 /* Community */,
           data.userAddress,
           encodedData
@@ -1147,7 +1147,7 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
   encodeJoinData,
   encodeProfileData,
   getAllSps,
-  getAttestParams,
+  getAttestParamsOffChain,
   getAttestationOffChain,
   getAttestationRequestData,
   getDeployer,
@@ -1162,5 +1162,6 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
   multiAttestBASOffChain,
   multiAttestBASOnChain,
   registerSchema,
-  selectSp
+  selectSp,
+  serializeJsonString
 });
