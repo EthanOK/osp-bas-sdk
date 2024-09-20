@@ -3,7 +3,7 @@ import {
   encodeAddrToBucketName,
   encodeFollowData,
   encodeProfileData,
-  getAttestParams,
+  getAttestParamsOffChain,
   getDeployer,
   GreenFieldClientTS,
   multiAttestBASOffChain,
@@ -12,6 +12,8 @@ import {
   createObjectMulAttestOSP,
   createObjectAttestOSP,
   getKmsSigner,
+  getAttestationOffChain,
+  BAS,
 } from "osp-bas-sdk";
 import { ethers, hexlify, randomBytes } from "ethers";
 
@@ -22,21 +24,23 @@ async function main() {
     "https://rpc.ankr.com/bsc_testnet_chapel"
   );
 
-  // TODO: 签名速度 和kms有关
-  const signer = new ethers.Wallet(GREEN_PAYMENT_PRIVATE_KEY, provider);
+  const Attester_Address = "0x043d36c82561c1733e22c07d9af17f21e270174c";
+  const Attester_PRIVATE_KEY =
+    "0x807eb862f8a714bf08a4bab6cd5fcdb33da056444480647f09163909ce0ecbe8";
+  const signer = new ethers.Wallet(Attester_PRIVATE_KEY, provider);
   // const signer = getKmsSigner(provider);
 
   const Global_UnHandle_Data: HandleOspReturnDataOffChain[] = [];
 
   let timestamp = Math.floor(Date.now() / 1000);
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 1000; i++) {
     const recipient = ethers.Wallet.createRandom().address;
 
     const followHash = hexlify(randomBytes(32));
     if (i % 2 === 0) {
       Global_UnHandle_Data.push({
         dataType: OspDataType.Follow,
-        requestData: getAttestParams(
+        requestData: getAttestParamsOffChain(
           OspDataType.Follow,
           recipient,
           encodeFollowData({
@@ -49,7 +53,7 @@ async function main() {
     } else {
       Global_UnHandle_Data.push({
         dataType: OspDataType.Profile,
-        requestData: getAttestParams(
+        requestData: getAttestParamsOffChain(
           OspDataType.Profile,
           recipient,
           encodeProfileData({
@@ -75,22 +79,33 @@ async function main() {
       Math.floor(Date.now() / 1000) - timestamp,
       "S"
     );
-    // console.log(attestations)
+    //
+    const offchain = await new BAS(process.env.BAS_ADDRESS_BNB!)
+      .connect(signer)
+      .getOffchain();
+
+    const result = offchain.verifyOffchainAttestationSignature(
+      Attester_Address,
+      attestations[1]
+    );
+    console.log("验证签名结果:", result);
 
     const bucketName = encodeAddrToBucketName(
       "0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2"
     );
 
-    //  上传 attestations 至 GreenField
-    // await createObjectAttestOSP(
-    //   bucketName,
-    //   attestations[1],
-    //   GREEN_PAYMENT_PRIVATE_KEY,
-    //   false
-    // );
-    // console.log(attestations[999]);
+    //  上传 attestation 至 GreenField
+    await createObjectAttestOSP(
+      bucketName,
+      attestations[1],
+      GREEN_PAYMENT_PRIVATE_KEY,
+      false
+    );
 
-    // TODO: GreenField 适配中
+    // console.log(attestations);
+    return;
+
+    // TODO: 上传 attestations 至 GreenField 适配中
     timestamp = Math.floor(Date.now() / 1000);
     const fileName = `${attestations[0].message.schema}.${attestations[0].uid}`;
     await createObjectMulAttestOSP(
@@ -100,12 +115,8 @@ async function main() {
       GREEN_PAYMENT_PRIVATE_KEY,
       false
     );
-    console.log(
-      "上传时间:",
-      Math.floor(Date.now() / 1000) - timestamp,
-      "S"
-    );
-  } catch (error){
+    console.log("上传时间:", Math.floor(Date.now() / 1000) - timestamp, "S");
+  } catch (error) {
     console.log(error);
   }
 }

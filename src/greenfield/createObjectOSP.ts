@@ -1,3 +1,4 @@
+import { SignedOffchainAttestation } from "../bas";
 import { GreenFieldClientTS } from "./create";
 import "dotenv/config";
 
@@ -16,13 +17,13 @@ const client = new GreenFieldClientTS(
  */
 export const createObjectAttestOSP = async (
   bucketName: string,
-  attestation: any,
+  attestation: SignedOffchainAttestation,
   privateKey: string,
   isPrivate = false
 ) => {
   await client.createObject(
     bucketName,
-    JSON.stringify(attestation),
+    serializeJsonString(attestation),
     privateKey,
     isPrivate
   );
@@ -31,23 +32,32 @@ export const createObjectAttestOSP = async (
 /**
  * Create object with multiple attestation
  * @param bucketName bucket name
- * @param attestations attestation type is json object[]
+ * @param attestations attestations
  * @param fileName file name
  * @param privateKey creator private key
  * @param isPrivate is private object
  */
 export const createObjectMulAttestOSP = async (
   bucketName: string,
-  attestations: object,
+  attestations: SignedOffchainAttestation[],
   fileName: string,
   privateKey: string,
   isPrivate = false
 ) => {
   await client.createObjectMulAttest(
     bucketName,
-    JSON.stringify(attestations),
+    serializeJsonString(attestations),
     fileName,
     privateKey,
     isPrivate
   );
 };
+
+export function serializeJsonString(data: any): string {
+  return JSON.stringify(data, (key, value) => {
+    if (typeof value === "bigint") {
+      return value.toString();
+    }
+    return value;
+  });
+}

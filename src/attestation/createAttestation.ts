@@ -5,6 +5,7 @@ import {
   Offchain,
   OffchainAttestationParams,
   SchemaEncoder,
+  SignedOffchainAttestation,
 } from "@ethereum-attestation-service/eas-sdk";
 import { ethers, Signer } from "ethers";
 import { BNB_schemaRegistryAddress } from "../../tests/config";
@@ -66,14 +67,10 @@ export const getAttestationOffChain = async (
       refUID: params.refUID,
       data: params.encodedData,
     },
-    signer,
-  );
-  
-  const attestation_ = JSON.stringify(attestation, (key, value) =>
-    typeof value === "bigint" ? Number(value).toString() : value
+    signer
   );
 
-  return JSON.parse(attestation_) as object;
+  return attestation;
 };
 
 export const getSigatureByDelegation = async (
@@ -123,7 +120,7 @@ export const getAttestationRequestData = (
   return attestationRequestData;
 };
 
-export const getAttestParams = (
+export const getAttestParamsOffChain = (
   dataType: OspDataType,
   recipient: string,
   encodedData: string
@@ -198,15 +195,12 @@ export const multiAttestBASOnChain = async (
 export const multiAttestBASOffChain = async (
   signer: Signer,
   unHandleDatas: HandleOspReturnDataOffChain[]
-) => {
-  const basAddress = process.env.BAS_ADDRESS_BNB;
-  if (basAddress == null || basAddress == "") {
-    throw new Error("BAS address is not config in env file");
-  }
-  const bas = new EAS(basAddress);
-
-  const offchain = await new EAS(basAddress).connect(signer).getOffchain();
-  const attestations = [];
+): Promise<SignedOffchainAttestation[]> => {
+  const offchain = await new EAS(process.env.BAS_ADDRESS_BNB!)
+    .connect(signer)
+    .getOffchain();
+    
+  const attestations: SignedOffchainAttestation[] = [];
   try {
     for (let i = 0; i < unHandleDatas.length; i++) {
       const data = unHandleDatas[i];
