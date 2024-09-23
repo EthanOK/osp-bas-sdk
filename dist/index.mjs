@@ -933,11 +933,37 @@ var SchemaEncoder3 = BaseSchemaEncoder;
 
 // src/bas/offchainAttestations.ts
 import { ethers } from "ethers";
-var multiAttestBasUploadGreenField = (privateKey, provider_BNB, bucketName, unHandleDatas, fileName, isPrivate) => __async(void 0, null, function* () {
+var multiAttestBasUploadGreenField = (bucketName, unHandleDatas, fileName, isPrivate) => __async(void 0, null, function* () {
   try {
-    const signer = new ethers.Wallet(privateKey, provider_BNB);
+    const privateKey = process.env.GREEN_PAYMENT_PRIVATE_KEY;
+    const signer = new ethers.Wallet(
+      privateKey,
+      new ethers.JsonRpcProvider(process.env.BNB_RPC_URL)
+    );
     const attestations = yield multiAttestBASOffChain(signer, unHandleDatas);
-    fileName = `${attestations[0].message.schema}.${attestations[0].uid}`;
+    const success = yield createObjectMulAttestOSP(
+      bucketName,
+      attestations,
+      fileName,
+      privateKey,
+      isPrivate
+    );
+    return success;
+  } catch (e) {
+  }
+  return false;
+});
+var multiAttestBasUploadGreenField_String = (bucketName, unHandleDatas, fileName, isPrivate) => __async(void 0, null, function* () {
+  try {
+    const privateKey = process.env.GREEN_PAYMENT_PRIVATE_KEY;
+    const signer = new ethers.Wallet(
+      privateKey,
+      new ethers.JsonRpcProvider(process.env.BNB_RPC_URL)
+    );
+    const attestations = yield multiAttestBASOffChain(
+      signer,
+      JSON.parse(unHandleDatas)
+    );
     const success = yield createObjectMulAttestOSP(
       bucketName,
       attestations,
@@ -1146,6 +1172,7 @@ export {
   multiAttestBASOffChain,
   multiAttestBASOnChain,
   multiAttestBasUploadGreenField,
+  multiAttestBasUploadGreenField_String,
   registerSchema,
   selectSp,
   serializeJsonString

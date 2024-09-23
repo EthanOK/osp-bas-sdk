@@ -456,6 +456,7 @@ __export(src_exports, {
   multiAttestBASOffChain: () => multiAttestBASOffChain,
   multiAttestBASOnChain: () => multiAttestBASOnChain,
   multiAttestBasUploadGreenField: () => multiAttestBasUploadGreenField,
+  multiAttestBasUploadGreenField_String: () => multiAttestBasUploadGreenField_String,
   registerSchema: () => registerSchema,
   selectSp: () => selectSp,
   serializeJsonString: () => serializeJsonString
@@ -975,11 +976,37 @@ var SchemaEncoder3 = import_eas_sdk4.SchemaEncoder;
 
 // src/bas/offchainAttestations.ts
 var import_ethers2 = require("ethers");
-var multiAttestBasUploadGreenField = (privateKey, provider_BNB, bucketName, unHandleDatas, fileName, isPrivate) => __async(void 0, null, function* () {
+var multiAttestBasUploadGreenField = (bucketName, unHandleDatas, fileName, isPrivate) => __async(void 0, null, function* () {
   try {
-    const signer = new import_ethers2.ethers.Wallet(privateKey, provider_BNB);
+    const privateKey = process.env.GREEN_PAYMENT_PRIVATE_KEY;
+    const signer = new import_ethers2.ethers.Wallet(
+      privateKey,
+      new import_ethers2.ethers.JsonRpcProvider(process.env.BNB_RPC_URL)
+    );
     const attestations = yield multiAttestBASOffChain(signer, unHandleDatas);
-    fileName = `${attestations[0].message.schema}.${attestations[0].uid}`;
+    const success = yield createObjectMulAttestOSP(
+      bucketName,
+      attestations,
+      fileName,
+      privateKey,
+      isPrivate
+    );
+    return success;
+  } catch (e) {
+  }
+  return false;
+});
+var multiAttestBasUploadGreenField_String = (bucketName, unHandleDatas, fileName, isPrivate) => __async(void 0, null, function* () {
+  try {
+    const privateKey = process.env.GREEN_PAYMENT_PRIVATE_KEY;
+    const signer = new import_ethers2.ethers.Wallet(
+      privateKey,
+      new import_ethers2.ethers.JsonRpcProvider(process.env.BNB_RPC_URL)
+    );
+    const attestations = yield multiAttestBASOffChain(
+      signer,
+      JSON.parse(unHandleDatas)
+    );
     const success = yield createObjectMulAttestOSP(
       bucketName,
       attestations,
@@ -1189,6 +1216,7 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
   multiAttestBASOffChain,
   multiAttestBASOnChain,
   multiAttestBasUploadGreenField,
+  multiAttestBasUploadGreenField_String,
   registerSchema,
   selectSp,
   serializeJsonString
