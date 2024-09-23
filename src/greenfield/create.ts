@@ -187,17 +187,10 @@ export class GreenFieldClientTS {
     if (!privateKey.startsWith("0x")) {
       privateKey = "0x" + privateKey;
     }
-    const attest = JSON.parse(attestations);
-
-    // const fileName = `${attest[0].message.schema}.${attest[0].uid}`;
 
     const fileBuffer = Buffer.from(attestations);
 
     const expectCheckSums = rs.encode(Uint8Array.from(fileBuffer));
-    // const expectCheckSums = await rs.encodeInWorker(
-    //   __filename,
-    //   Uint8Array.from(fileBuffer)
-    // );
 
     // createObject
     const createObjectTx = await this.client.object.createObject({
@@ -216,38 +209,39 @@ export class GreenFieldClientTS {
     const simulateInfo = await createObjectTx.simulate({
       denom: "BNB",
     });
-    // console.log(simulateInfo);
-    const { transactionHash } = await createObjectTx.broadcast({
-      denom: "BNB",
-      gasLimit: Number(simulateInfo.gasLimit),
-      gasPrice: simulateInfo.gasPrice,
-      payer: this.address,
-      granter: "",
-      privateKey: privateKey,
-    });
 
-    console.log("create object success", transactionHash);
-
-    // uploadObject
-    const uploadRes = await this.client.object.uploadObject(
-      {
-        bucketName: bucketName,
-        objectName: fileName,
-        body: createFile(fileName, fileBuffer),
-        txnHash: transactionHash,
-      },
-      // highlight-start
-      {
-        type: "ECDSA",
+    try {
+      const { transactionHash } = await createObjectTx.broadcast({
+        denom: "BNB",
+        gasLimit: Number(simulateInfo.gasLimit),
+        gasPrice: simulateInfo.gasPrice,
+        payer: this.address,
+        granter: "",
         privateKey: privateKey,
-      }
-      // highlight-end
-    );
-    if (uploadRes.code === 0) {
-      console.log("upload object success", uploadRes);
-    }
+      });
 
-    return transactionHash;
+      // uploadObject
+      const uploadRes = await this.client.object.uploadObject(
+        {
+          bucketName: bucketName,
+          objectName: fileName,
+          body: createFile(fileName, fileBuffer),
+          txnHash: transactionHash,
+        },
+        // highlight-start
+        {
+          type: "ECDSA",
+          privateKey: privateKey,
+        }
+        // highlight-end
+      );
+      if (uploadRes.code === 0) {
+        return transactionHash;
+      }
+    } catch (error) {
+      return null;
+    }
+    return null;
   }
 }
 function createFile(fileName: string, fileBuffer: Buffer) {

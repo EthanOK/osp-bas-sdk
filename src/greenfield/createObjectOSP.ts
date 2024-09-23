@@ -43,14 +43,19 @@ export const createObjectMulAttestOSP = async (
   fileName: string,
   privateKey: string,
   isPrivate = false
-) => {
-  await client.createObjectMulAttest(
+):Promise<boolean> => {
+  const txHash = await client.createObjectMulAttest(
     bucketName,
     serializeJsonString(attestations),
     fileName,
     privateKey,
     isPrivate
   );
+  
+  if (txHash === null) {
+    return false;
+  }
+  return true;
 };
 
 export function serializeJsonString(data: any): string {

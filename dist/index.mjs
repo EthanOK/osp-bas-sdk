@@ -819,7 +819,6 @@ var GreenFieldClientTS = class {
       if (!privateKey.startsWith("0x")) {
         privateKey = "0x" + privateKey;
       }
-      const attest = JSON.parse(attestations);
       const fileBuffer = Buffer.from(attestations);
       const expectCheckSums = rs.encode(Uint8Array.from(fileBuffer));
       const createObjectTx = yield this.client.object.createObject({
@@ -835,33 +834,36 @@ var GreenFieldClientTS = class {
       const simulateInfo = yield createObjectTx.simulate({
         denom: "BNB"
       });
-      const { transactionHash } = yield createObjectTx.broadcast({
-        denom: "BNB",
-        gasLimit: Number(simulateInfo.gasLimit),
-        gasPrice: simulateInfo.gasPrice,
-        payer: this.address,
-        granter: "",
-        privateKey
-      });
-      console.log("create object success", transactionHash);
-      const uploadRes = yield this.client.object.uploadObject(
-        {
-          bucketName,
-          objectName: fileName,
-          body: createFile(fileName, fileBuffer),
-          txnHash: transactionHash
-        },
-        // highlight-start
-        {
-          type: "ECDSA",
+      try {
+        const { transactionHash } = yield createObjectTx.broadcast({
+          denom: "BNB",
+          gasLimit: Number(simulateInfo.gasLimit),
+          gasPrice: simulateInfo.gasPrice,
+          payer: this.address,
+          granter: "",
           privateKey
+        });
+        const uploadRes = yield this.client.object.uploadObject(
+          {
+            bucketName,
+            objectName: fileName,
+            body: createFile(fileName, fileBuffer),
+            txnHash: transactionHash
+          },
+          // highlight-start
+          {
+            type: "ECDSA",
+            privateKey
+          }
+          // highlight-end
+        );
+        if (uploadRes.code === 0) {
+          return transactionHash;
         }
-        // highlight-end
-      );
-      if (uploadRes.code === 0) {
-        console.log("upload object success", uploadRes);
+      } catch (error) {
+        return null;
       }
-      return transactionHash;
+      return null;
     });
   }
 };
@@ -900,13 +902,17 @@ var createObjectAttestOSP = (bucketName, attestation, privateKey, isPrivate = fa
   );
 });
 var createObjectMulAttestOSP = (bucketName, attestations, fileName, privateKey, isPrivate = false) => __async(void 0, null, function* () {
-  yield client.createObjectMulAttest(
+  const txHash = yield client.createObjectMulAttest(
     bucketName,
     serializeJsonString(attestations),
     fileName,
     privateKey,
     isPrivate
   );
+  if (txHash === null) {
+    return false;
+  }
+  return true;
 });
 function serializeJsonString(data) {
   return JSON.stringify(data, (key, value) => {
@@ -925,11 +931,31 @@ import {
 var BAS = BaseEAS;
 var SchemaEncoder3 = BaseSchemaEncoder;
 
+// src/bas/offchainAttestations.ts
+import { ethers } from "ethers";
+var multiAttestBasUploadGreenField = (privateKey, provider_BNB, bucketName, unHandleDatas, fileName, isPrivate) => __async(void 0, null, function* () {
+  try {
+    const signer = new ethers.Wallet(privateKey, provider_BNB);
+    const attestations = yield multiAttestBASOffChain(signer, unHandleDatas);
+    fileName = `${attestations[0].message.schema}.${attestations[0].uid}`;
+    const success = yield createObjectMulAttestOSP(
+      bucketName,
+      attestations,
+      fileName,
+      privateKey,
+      isPrivate
+    );
+    return success;
+  } catch (e) {
+  }
+  return false;
+});
+
 // src/kms/kms.ts
 import { AwsKmsSigner } from "@cuonghx.gu-tech/ethers-aws-kms-signer";
-import { ethers } from "ethers";
+import { ethers as ethers2 } from "ethers";
 var getDeployer = () => __async(void 0, null, function* () {
-  const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+  const provider = new ethers2.JsonRpcProvider(process.env.RPC_URL);
   const signer = new AwsKmsSigner(
     {
       keyId: process.env.AWS_KMS_KEY_ID,
@@ -1119,6 +1145,7 @@ export {
   initEAS,
   multiAttestBASOffChain,
   multiAttestBASOnChain,
+  multiAttestBasUploadGreenField,
   registerSchema,
   selectSp,
   serializeJsonString
