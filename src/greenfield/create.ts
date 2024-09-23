@@ -47,9 +47,10 @@ export class GreenFieldClientTS {
     let isBucketExist = false;
     try {
       const bucketMeta = await this.client.bucket.getBucketMeta({ bucketName });
-      console.log("bucketMeta", bucketMeta);
+      // console.log("bucketMeta", bucketMeta.body.GfSpGetBucketMetaResponse);
 
       isBucketExist = true;
+      return isBucketExist;
     } catch (error) {}
 
     let res: DeliverTxResponse;

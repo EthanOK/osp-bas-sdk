@@ -760,8 +760,8 @@ var GreenFieldClientTS = class {
       let isBucketExist = false;
       try {
         const bucketMeta = yield this.client.bucket.getBucketMeta({ bucketName });
-        console.log("bucketMeta", bucketMeta);
         isBucketExist = true;
+        return isBucketExist;
       } catch (error) {
       }
       let res;
