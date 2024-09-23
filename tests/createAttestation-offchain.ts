@@ -15,8 +15,9 @@ import {
   getAttestationOffChain,
   BAS,
   multiAttestBasUploadGreenField,
+  multiAttestBasUploadGreenField_String,
 } from "osp-bas-sdk";
-import { ethers, hexlify, randomBytes } from "ethers";
+import { ethers, hexlify, keccak256, randomBytes } from "ethers";
 
 const GREEN_PAYMENT_PRIVATE_KEY = process.env.GREEN_PAYMENT_PRIVATE_KEY!;
 
@@ -117,15 +118,29 @@ async function main() {
     // );
     // console.log("上传时间:", Math.floor(Date.now() / 1000) - timestamp, "S");
 
-    const res = await multiAttestBasUploadGreenField(
-      process.env.GREEN_PAYMENT_PRIVATE_KEY,
-      provider,
+    // TODO: need change
+    const fileName = `${
+      Global_UnHandle_Data[0].requestData.schemaUID
+    }.${keccak256(randomBytes(32))}`;
+    
+    const success = await multiAttestBasUploadGreenField(
       encodeAddrToBucketName(process.env.GREEN_PAYMENT_ADDRESS!),
       Global_UnHandle_Data,
-      "",
+      fileName,
       true
     );
-    console.log(res);
+    console.log(success);
+
+    const fileName2 = `${
+      Global_UnHandle_Data[0].requestData.schemaUID
+    }.${keccak256(randomBytes(32))}`;
+    const success2 = await multiAttestBasUploadGreenField_String(
+      encodeAddrToBucketName(process.env.GREEN_PAYMENT_ADDRESS!),
+      JSON.stringify(Global_UnHandle_Data),
+      fileName2,
+      true
+    );
+    console.log(success2);
   } catch (error) {
     console.log(error);
   }
