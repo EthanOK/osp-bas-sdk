@@ -6,6 +6,7 @@ import {
   encodeAddrToBucketName,
   GreenFieldClientTS,
   SchemaEncoder,
+  serializeJsonString,
 } from "osp-bas-sdk";
 import { BNB_basAddress, PrivateKey } from "./config";
 import { ethers } from "ethers";
@@ -46,14 +47,18 @@ async function main() {
     refUID:
       "0x0000000000000000000000000000000000000000000000000000000000000000",
   };
-  const attestation = await getAttestationOffChain(signer, params_a);
+
+  const offchain = await new BAS(process.env.BAS_ADDRESS_BNB!)
+    .connect(signer)
+    .getOffchain();
+  const attestation = await getAttestationOffChain(offchain, signer, params_a);
   console.log(attestation);
   const bucketName = encodeAddrToBucketName(
     "0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2"
   );
   const txhash = await client.createObject(
     bucketName,
-    JSON.stringify(attestation),
+    serializeJsonString(attestation),
     PrivateKey,
     false
   );
