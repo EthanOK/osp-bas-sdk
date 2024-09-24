@@ -1,5 +1,7 @@
 # config .env
 
+`Must be set`
+
 ```js
 # Greenfield
 GREEN_RPC_URL=""
@@ -189,7 +191,6 @@ async function createAttestation() {
 }
 
 createAttestation();
-
 ```
 
 # 3. Create Attestation By Delegation On Chain
