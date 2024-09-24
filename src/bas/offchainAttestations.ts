@@ -1,7 +1,7 @@
 import { ethers, Provider } from "ethers";
 import { multiAttestBASOffChain } from "../attestation/createAttestation";
 import { HandleOspReturnDataOffChain } from "../handle/handleOsp";
-import { createObjectMulAttestOSP } from "../greenfield/createObjectOSP";
+import { createObjectAttestOSP, createObjectMulAttestOSP } from "../greenfield/createObjectOSP";
 
 /**
  *  multiAttestBasUploadGreenField
@@ -9,7 +9,7 @@ import { createObjectMulAttestOSP } from "../greenfield/createObjectOSP";
  * @param unHandleDatas
  * @param fileName
  * @param isPrivate
- * @returns
+ * @returns boolean
  */
 export const multiAttestBasUploadGreenField = async (
   bucketName: string,
@@ -29,6 +29,32 @@ export const multiAttestBasUploadGreenField = async (
       bucketName,
       attestations,
       fileName,
+      privateKey,
+      isPrivate
+    );
+    return success;
+  } catch (e) {
+    // console.log(e);
+  }
+  return false;
+};
+
+export const oneAttestBasUploadGreenField = async (
+  bucketName: string,
+  unHandleData: HandleOspReturnDataOffChain,
+  isPrivate?: boolean
+) => {
+  try {
+    const privateKey = process.env.GREEN_PAYMENT_PRIVATE_KEY!;
+    const signer = new ethers.Wallet(
+      privateKey,
+      new ethers.JsonRpcProvider(process.env.BNB_RPC_URL!)
+    );
+
+    const attestations = await multiAttestBASOffChain(signer, [unHandleData]);
+    const success = await createObjectAttestOSP(
+      bucketName,
+      attestations[0],
       privateKey,
       isPrivate
     );

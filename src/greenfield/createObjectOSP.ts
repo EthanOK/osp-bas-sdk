@@ -14,19 +14,21 @@ const client = new GreenFieldClientTS(
  * @param attestation attestation type is json object
  * @param privateKey creator private key
  * @param isPrivate is private object
+ * @returns boolean
  */
 export const createObjectAttestOSP = async (
   bucketName: string,
   attestation: SignedOffchainAttestation,
   privateKey: string,
   isPrivate = false
-) => {
-  await client.createObject(
+): Promise<boolean> => {
+  const txHash = await client.createObject(
     bucketName,
     serializeJsonString(attestation),
     privateKey,
     isPrivate
   );
+  return txHash !== null;
 };
 
 /**
@@ -36,6 +38,7 @@ export const createObjectAttestOSP = async (
  * @param fileName file name
  * @param privateKey creator private key
  * @param isPrivate is private object
+ * @returns boolean
  */
 export const createObjectMulAttestOSP = async (
   bucketName: string,
@@ -43,7 +46,7 @@ export const createObjectMulAttestOSP = async (
   fileName: string,
   privateKey: string,
   isPrivate = false
-):Promise<boolean> => {
+): Promise<boolean> => {
   const txHash = await client.createObjectMulAttest(
     bucketName,
     serializeJsonString(attestations),
@@ -51,13 +54,18 @@ export const createObjectMulAttestOSP = async (
     privateKey,
     isPrivate
   );
-  
+
   if (txHash === null) {
     return false;
   }
   return true;
 };
 
+/**
+ * Serialize Object To json string
+ * @param data data type is object
+ * @returns Json string
+ */
 export function serializeJsonString(data: any): string {
   return JSON.stringify(data, (key, value) => {
     if (typeof value === "bigint") {

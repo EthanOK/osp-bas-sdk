@@ -704,6 +704,7 @@ var GreenFieldClientTS = class {
    * create bucket
    * @param bucketName bucket name
    * @param privateKey creator private key
+   * @returns boolean
    */
   createBucket(bucketName, privateKey) {
     return __async(this, null, function* () {
@@ -711,11 +712,9 @@ var GreenFieldClientTS = class {
       if (!privateKey.startsWith("0x")) {
         privateKey = "0x" + privateKey;
       }
-      let isBucketExist = false;
       try {
         const bucketMeta = yield this.client.bucket.getBucketMeta({ bucketName });
-        isBucketExist = true;
-        return isBucketExist;
+        return true;
       } catch (error) {
       }
       let res;
@@ -740,12 +739,10 @@ var GreenFieldClientTS = class {
           privateKey
         });
         console.log("transactionHash", res.transactionHash);
+        return true;
       } catch (error) {
-        if (!isBucketExist) {
-          console.log(error);
-        }
       }
-      return isBucketExist;
+      return false;
     });
   }
   /**
@@ -764,46 +761,48 @@ var GreenFieldClientTS = class {
       const fileName = `${attest.message.schema}.${attest.uid}`;
       const fileBuffer = Buffer.from(attestation);
       const expectCheckSums = rs.encode(Uint8Array.from(fileBuffer));
-      const createObjectTx = yield this.client.object.createObject({
-        bucketName,
-        objectName: fileName,
-        creator: this.address,
-        visibility: isPrivate ? VisibilityType.VISIBILITY_TYPE_PRIVATE : VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
-        contentType: "json",
-        redundancyType: RedundancyType.REDUNDANCY_EC_TYPE,
-        payloadSize: Long.fromInt(fileBuffer.byteLength),
-        expectChecksums: expectCheckSums.map((x) => bytesFromBase64(x))
-      });
-      const simulateInfo = yield createObjectTx.simulate({
-        denom: "BNB"
-      });
-      const { transactionHash } = yield createObjectTx.broadcast({
-        denom: "BNB",
-        gasLimit: Number(simulateInfo.gasLimit),
-        gasPrice: simulateInfo.gasPrice,
-        payer: this.address,
-        granter: "",
-        privateKey
-      });
-      console.log("create object success", transactionHash);
-      const uploadRes = yield this.client.object.uploadObject(
-        {
+      try {
+        const createObjectTx = yield this.client.object.createObject({
           bucketName,
           objectName: fileName,
-          body: createFile(fileName, fileBuffer),
-          txnHash: transactionHash
-        },
-        // highlight-start
-        {
-          type: "ECDSA",
+          creator: this.address,
+          visibility: isPrivate ? VisibilityType.VISIBILITY_TYPE_PRIVATE : VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
+          contentType: "json",
+          redundancyType: RedundancyType.REDUNDANCY_EC_TYPE,
+          payloadSize: Long.fromInt(fileBuffer.byteLength),
+          expectChecksums: expectCheckSums.map((x) => bytesFromBase64(x))
+        });
+        const simulateInfo = yield createObjectTx.simulate({
+          denom: "BNB"
+        });
+        const { transactionHash } = yield createObjectTx.broadcast({
+          denom: "BNB",
+          gasLimit: Number(simulateInfo.gasLimit),
+          gasPrice: simulateInfo.gasPrice,
+          payer: this.address,
+          granter: "",
           privateKey
+        });
+        const uploadRes = yield this.client.object.uploadObject(
+          {
+            bucketName,
+            objectName: fileName,
+            body: createFile(fileName, fileBuffer),
+            txnHash: transactionHash
+          },
+          // highlight-start
+          {
+            type: "ECDSA",
+            privateKey
+          }
+          // highlight-end
+        );
+        if (uploadRes.code === 0) {
+          return transactionHash;
         }
-        // highlight-end
-      );
-      if (uploadRes.code === 0) {
-        console.log("upload object success", uploadRes);
+      } catch (error) {
       }
-      return transactionHash;
+      return null;
     });
   }
   /**
@@ -815,7 +814,6 @@ var GreenFieldClientTS = class {
    */
   createObjectMulAttest(bucketName, attestations, fileName, privateKey, isPrivate = false) {
     return __async(this, null, function* () {
-      console.log("started");
       if (!privateKey.startsWith("0x")) {
         privateKey = "0x" + privateKey;
       }
@@ -894,12 +892,13 @@ var client = new GreenFieldClientTS(
   process.env.GREEN_PAYMENT_ADDRESS
 );
 var createObjectAttestOSP = (bucketName, attestation, privateKey, isPrivate = false) => __async(void 0, null, function* () {
-  yield client.createObject(
+  const txHash = yield client.createObject(
     bucketName,
     serializeJsonString(attestation),
     privateKey,
     isPrivate
   );
+  return txHash !== null;
 });
 var createObjectMulAttestOSP = (bucketName, attestations, fileName, privateKey, isPrivate = false) => __async(void 0, null, function* () {
   const txHash = yield client.createObjectMulAttest(
@@ -945,6 +944,25 @@ var multiAttestBasUploadGreenField = (bucketName, unHandleDatas, fileName, isPri
       bucketName,
       attestations,
       fileName,
+      privateKey,
+      isPrivate
+    );
+    return success;
+  } catch (e) {
+  }
+  return false;
+});
+var oneAttestBasUploadGreenField = (bucketName, unHandleData, isPrivate) => __async(void 0, null, function* () {
+  try {
+    const privateKey = process.env.GREEN_PAYMENT_PRIVATE_KEY;
+    const signer = new ethers.Wallet(
+      privateKey,
+      new ethers.JsonRpcProvider(process.env.BNB_RPC_URL)
+    );
+    const attestations = yield multiAttestBASOffChain(signer, [unHandleData]);
+    const success = yield createObjectAttestOSP(
+      bucketName,
+      attestations[0],
       privateKey,
       isPrivate
     );
@@ -1173,6 +1191,7 @@ export {
   multiAttestBASOnChain,
   multiAttestBasUploadGreenField,
   multiAttestBasUploadGreenField_String,
+  oneAttestBasUploadGreenField,
   registerSchema,
   selectSp,
   serializeJsonString
