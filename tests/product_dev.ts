@@ -22,7 +22,7 @@ async function prepareSchemaAndBucket() {
     try {
       const schemaUID = await registerSchema(
         signer,
-        process.env.Schema_Registry_BNB!,
+        process.env.SCHEMA_REGISTRY_BNB!,
         {
           schema: schemaNames[i],
           resolverAddress: "0x0000000000000000000000000000000000000000",
@@ -43,7 +43,7 @@ async function prepareSchemaAndBucket() {
       process.env.GREEN_CHAIN_ID!,
       process.env.GREEN_PAYMENT_ADDRESS!
     );
-    const isBucketExist = await client.createBucket(
+    const success = await client.createBucket(
       encodeAddrToBucketName(process.env.GREEN_PAYMENT_ADDRESS!),
       process.env.GREEN_PAYMENT_PRIVATE_KEY!
     );
