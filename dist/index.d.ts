@@ -162,6 +162,7 @@ declare class GreenFieldClientTS {
      * create bucket
      * @param bucketName bucket name
      * @param privateKey creator private key
+     * @returns boolean
      */
     createBucket(bucketName: string, privateKey: string): Promise<boolean>;
     /**
@@ -188,8 +189,9 @@ declare class GreenFieldClientTS {
  * @param attestation attestation type is json object
  * @param privateKey creator private key
  * @param isPrivate is private object
+ * @returns boolean
  */
-declare const createObjectAttestOSP: (bucketName: string, attestation: SignedOffchainAttestation, privateKey: string, isPrivate?: boolean) => Promise<void>;
+declare const createObjectAttestOSP: (bucketName: string, attestation: SignedOffchainAttestation, privateKey: string, isPrivate?: boolean) => Promise<boolean>;
 /**
  * Create object with multiple attestation
  * @param bucketName bucket name
@@ -197,8 +199,14 @@ declare const createObjectAttestOSP: (bucketName: string, attestation: SignedOff
  * @param fileName file name
  * @param privateKey creator private key
  * @param isPrivate is private object
+ * @returns boolean
  */
 declare const createObjectMulAttestOSP: (bucketName: string, attestations: SignedOffchainAttestation[], fileName: string, privateKey: string, isPrivate?: boolean) => Promise<boolean>;
+/**
+ * Serialize Object To json string
+ * @param data data type is object
+ * @returns Json string
+ */
 declare function serializeJsonString(data: any): string;
 
 /**
@@ -223,12 +231,13 @@ declare const selectSp: (client: any) => Promise<{
  * @param unHandleDatas
  * @param fileName
  * @param isPrivate
- * @returns
+ * @returns boolean
  */
 declare const multiAttestBasUploadGreenField: (bucketName: string, unHandleDatas: HandleOspReturnDataOffChain[], fileName: string, isPrivate?: boolean) => Promise<boolean>;
+declare const oneAttestBasUploadGreenField: (bucketName: string, unHandleData: HandleOspReturnDataOffChain, isPrivate?: boolean) => Promise<boolean>;
 declare const multiAttestBasUploadGreenField_String: (bucketName: string, unHandleDatas: string, fileName: string, isPrivate?: boolean) => Promise<boolean>;
 
 declare const getDeployer: () => Promise<AwsKmsSigner<ethers.JsonRpcProvider>>;
 declare const getKmsSigner: (provider?: Provider) => AwsKmsSigner<ethers.Provider>;
 
-export { type AttestParams, type AttestationRequestData, BAS, CommunitySchema, CommunitySchemaUID, type DelegatedAttestParams, FollowSchema, FollowSchemaUID, GreenFieldClientTS, type HandleOspReturnData, type HandleOspReturnDataOffChain, JoinSchema, JoinSchemaUID, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, OspDataType, OspDataTypeMap, OspSchemaMap, ProfileSchema, ProfileSchemaUID, type RegisterSchemaParams, SchemaEncoder, type Signature, type SignedOffchainAttestation, createObjectAttestOSP, createObjectMulAttestOSP, encodeAddrToBucketName, encodeCommunityData, type encodeCommunityDataParams, encodeFollowData, type encodeFollowDataParams, encodeJoinData, type encodeJoinDataParams, encodeProfileData, type encodeProfileDataParams, getAllSps, getAttestParamsOffChain, getAttestationOffChain, getAttestationRequestData, getDeployer, getKmsSigner, getMulAttestParams, getSchemaByUID, getSigatureByDelegation, getSps, handleOspRequestData, handleOspRequestPrepareOffChain, initEAS, multiAttestBASOffChain, multiAttestBASOnChain, multiAttestBasUploadGreenField, multiAttestBasUploadGreenField_String, registerSchema, selectSp, serializeJsonString };
+export { type AttestParams, type AttestationRequestData, BAS, CommunitySchema, CommunitySchemaUID, type DelegatedAttestParams, FollowSchema, FollowSchemaUID, GreenFieldClientTS, type HandleOspReturnData, type HandleOspReturnDataOffChain, JoinSchema, JoinSchemaUID, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, OspDataType, OspDataTypeMap, OspSchemaMap, ProfileSchema, ProfileSchemaUID, type RegisterSchemaParams, SchemaEncoder, type Signature, type SignedOffchainAttestation, createObjectAttestOSP, createObjectMulAttestOSP, encodeAddrToBucketName, encodeCommunityData, type encodeCommunityDataParams, encodeFollowData, type encodeFollowDataParams, encodeJoinData, type encodeJoinDataParams, encodeProfileData, type encodeProfileDataParams, getAllSps, getAttestParamsOffChain, getAttestationOffChain, getAttestationRequestData, getDeployer, getKmsSigner, getMulAttestParams, getSchemaByUID, getSigatureByDelegation, getSps, handleOspRequestData, handleOspRequestPrepareOffChain, initEAS, multiAttestBASOffChain, multiAttestBASOnChain, multiAttestBasUploadGreenField, multiAttestBasUploadGreenField_String, oneAttestBasUploadGreenField, registerSchema, selectSp, serializeJsonString };
