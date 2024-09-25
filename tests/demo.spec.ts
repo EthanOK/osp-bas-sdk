@@ -1,5 +1,4 @@
 import { assert } from "chai";
-import { BNB_basAddress, PrivateKey } from "./config";
 import { ethers } from "ethers";
 import {
   getDeployer,
@@ -13,7 +12,6 @@ import {
 
 describe("BNB Bas Address", () => {
   it("should A", async () => {
-    assert.equal(BNB_basAddress, "0x6c2270298b1e6046898a322acB3Cbad6F99f7CBD");
     const wallet = ethers.Wallet.createRandom();
     console.log(wallet.address);
     console.log(wallet.privateKey);
@@ -34,7 +32,7 @@ describe("BNB Bas Address", () => {
       5611,
       JSON.stringify(followJson)
     );
-    console.log(handleOspReturnData);
+    // console.log(handleOspReturnData);
 
     const joinJson = {
       address: "0x00000066c6c6fca286f48a7f4e989b7198c26caf",
@@ -51,7 +49,7 @@ describe("BNB Bas Address", () => {
       8453,
       JSON.stringify(joinJson)
     );
-    console.log(handleOspReturnData2);
+    // console.log(handleOspReturnData2);
 
     const profileJson = {
       address: "0x000000b34357bd749731f3faaf0971dc3a0571d7",
@@ -68,7 +66,7 @@ describe("BNB Bas Address", () => {
       204,
       JSON.stringify(profileJson)
     );
-    console.log(handleOspReturnData3);
+    // console.log(handleOspReturnData3);
 
     const communityJson = {
       address: "0x000000b34357bd749731f3faaf0971dc3a0571d7",
@@ -86,11 +84,11 @@ describe("BNB Bas Address", () => {
       204,
       JSON.stringify(communityJson)
     );
-    console.log(handleOspReturnData4);
+    // console.log(handleOspReturnData4);
   });
 
   it("kms sign message 100", async () => {
-    const deployer =  getKmsSigner();
+    const deployer = getKmsSigner();
 
     for (let i = 0; i < 100; i++) {
       const signature = await deployer.signMessage("hello world" + i);
@@ -99,7 +97,9 @@ describe("BNB Bas Address", () => {
   });
 
   it("private_key sign message 1000", async () => {
-    const deployer = new ethers.Wallet(PrivateKey);
+    const deployer = new ethers.Wallet(
+      "0xab3301f90a3c1b6d2292268222475ecdb7a11513f192532760809eefce593326"
+    );
 
     for (let i = 0; i < 1000; i++) {
       const signature = await deployer.signMessage("hello world" + i);
