@@ -7,7 +7,8 @@ import {
   GreenFieldClientTS,
   SchemaEncoder,
   serializeJsonString,
-} from "osp-bas-sdk";
+// } from "osp-bas-sdk";
+} from "../src";
 import { BNB_basAddress, PrivateKey } from "./config";
 import { ethers } from "ethers";
 async function main() {
@@ -28,7 +29,7 @@ async function main() {
   );
 
   const followHash = ethers.hexlify(ethers.randomBytes(32));
-  const followedProfileId = Math.floor(Math.random() * 1000) + 1;
+  const followedProfileId = Math.floor(Math.random() * 1000) + 2;
   const encodedData = schemaEncoder.encodeData([
     { name: "followHash", value: followHash, type: "bytes32" },
     { name: "followerProfileId", value: 1, type: "uint256" },
@@ -57,11 +58,12 @@ async function main() {
     "0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2"
   );
   const txhash = await client.createObject(
-    bucketName,
+    'bas-bcae673795001ba4c728b15d504fb4dd62cc4839',
     serializeJsonString(attestation),
     PrivateKey,
     false
   );
+  console.log("txhash", txhash);
 }
 
 main();
