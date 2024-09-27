@@ -2,6 +2,7 @@ import { SignedOffchainAttestation } from "../bas";
 import { GreenFieldClientTS } from "./create";
 import "dotenv/config";
 import { serializeJsonString } from "./utils";
+import { getBundleBuffer } from "../bundle/utils";
 
 const client = new GreenFieldClientTS(
   process.env.GREEN_RPC_URL!,
@@ -43,15 +44,17 @@ export const createObjectAttestOSP = async (
  */
 export const createObjectMulAttestOSP = async (
   bucketName: string,
+  schemaUID: string,
   attestations: SignedOffchainAttestation[],
-  fileName: string,
   privateKey: string,
   isPrivate = false
 ): Promise<boolean> => {
-  const txHash = await client.createObjectMulAttest(
+  const { objectName, buffer } = await getBundleBuffer(schemaUID, attestations);
+
+  const txHash = await client.createObjectByBundle(
     bucketName,
-    serializeJsonString(attestations),
-    fileName,
+    objectName,
+    buffer,
     privateKey,
     isPrivate
   );
