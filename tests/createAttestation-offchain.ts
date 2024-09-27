@@ -8,6 +8,7 @@ import {
   HandleOspReturnDataOffChain,
   multiAttestBasUploadGreenField,
   oneAttestBasUploadGreenField,
+// } from "osp-bas-sdk";
 } from "../src";
 import { ethers, hexlify, keccak256, randomBytes } from "ethers";
 
@@ -16,9 +17,9 @@ async function main() {
 
   let timestamp = Math.floor(Date.now() / 1000);
 
-  let dataType = 2;
+  let dataType = 1;
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 5; i++) {
     const recipient = ethers.Wallet.createRandom().address;
     const followHash = hexlify(randomBytes(32));
     if (dataType === 1) {
@@ -52,7 +53,7 @@ async function main() {
   }
   console.log("组装数据:", Math.floor(Date.now() / 1000) - timestamp, "S");
   try {
-     // 上传 1个 attestation 至 GreenField
+    // 上传 1个 attestation 至 GreenField
     //  const success_ = await oneAttestBasUploadGreenField(
     //   encodeAddrToBucketName(process.env.GREEN_PAYMENT_ADDRESS!),
     //   Global_UnHandle_Data[0],
@@ -60,7 +61,7 @@ async function main() {
     // );
     // console.log("createObjects success:", success_);
     // return
-    
+
     // TODO: 上传 attestations 至 GreenField
     timestamp = Math.floor(Date.now() / 1000);
     const schemaUID = Global_UnHandle_Data[0].requestData.schemaUID;
