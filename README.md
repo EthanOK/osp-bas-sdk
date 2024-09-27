@@ -38,18 +38,21 @@ import {
   HandleOspReturnDataOffChain,
   multiAttestBasUploadGreenField,
   oneAttestBasUploadGreenField,
-} from "osp-bas-sdk";
+  } from "osp-bas-sdk";
+// } from "../src";
 import { ethers, hexlify, keccak256, randomBytes } from "ethers";
 
 async function main() {
   const Global_UnHandle_Data: HandleOspReturnDataOffChain[] = [];
 
   let timestamp = Math.floor(Date.now() / 1000);
-  for (let i = 0; i < 100; i++) {
-    const recipient = ethers.Wallet.createRandom().address;
 
+  let dataType = 1;
+
+  for (let i = 0; i < 5; i++) {
+    const recipient = ethers.Wallet.createRandom().address;
     const followHash = hexlify(randomBytes(32));
-    if (i % 2 === 0) {
+    if (dataType === 1) {
       Global_UnHandle_Data.push({
         dataType: OspDataType.Follow,
         requestData: getAttestParamsOffChain(
@@ -62,7 +65,7 @@ async function main() {
           })
         ),
       });
-    } else {
+    } else if (dataType == 2) {
       Global_UnHandle_Data.push({
         dataType: OspDataType.Profile,
         requestData: getAttestParamsOffChain(
@@ -81,25 +84,22 @@ async function main() {
   console.log("组装数据:", Math.floor(Date.now() / 1000) - timestamp, "S");
   try {
     // 上传 1个 attestation 至 GreenField
-    const success_ = await oneAttestBasUploadGreenField(
-      encodeAddrToBucketName(process.env.GREEN_PAYMENT_ADDRESS!),
-      Global_UnHandle_Data[0],
-      true
-    );
-    console.log("createObjects success:", success_);
+    //  const success_ = await oneAttestBasUploadGreenField(
+    //   encodeAddrToBucketName(process.env.GREEN_PAYMENT_ADDRESS!),
+    //   Global_UnHandle_Data[0],
+    //   false
+    // );
+    // console.log("createObjects success:", success_);
+    // return
 
-    // TODO: 上传 attestations 至 GreenField 【适配中】
+    // TODO: 上传 attestations 至 GreenField
     timestamp = Math.floor(Date.now() / 1000);
-    // TODO: need change
-    const fileName = `${
-      Global_UnHandle_Data[0].requestData.schemaUID
-    }.${keccak256(randomBytes(32))}`;
-
+    const schemaUID = Global_UnHandle_Data[0].requestData.schemaUID;
     const success = await multiAttestBasUploadGreenField(
       encodeAddrToBucketName(process.env.GREEN_PAYMENT_ADDRESS!),
+      schemaUID,
       Global_UnHandle_Data,
-      fileName,
-      true
+      false
     );
     console.log("createObjects success:", success);
 
