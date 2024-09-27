@@ -1,4 +1,5 @@
 import { hashMessage, getAddress } from "ethers";
+import crypto from "crypto";
 
 /**
  * encode address to bucket name
@@ -40,3 +41,18 @@ export const selectSp = async (client) => {
   };
   return selectSpInfo;
 };
+
+
+export function getbBundleUID(attestationUIDs: string[]): string {
+  attestationUIDs.sort();
+  const rr = attestationUIDs.join("");
+  return sha256(rr);
+}
+
+
+function sha256(input: string): string {
+  const hash = crypto.createHash("sha256");
+  hash.update(input);
+  return "0x" + hash.digest("hex");
+}
+
