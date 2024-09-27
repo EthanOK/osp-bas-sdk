@@ -1,7 +1,10 @@
 import { ethers, Provider } from "ethers";
 import { multiAttestBASOffChain } from "../attestation/createAttestation";
 import { HandleOspReturnDataOffChain } from "../handle/handleOsp";
-import { createObjectAttestOSP, createObjectMulAttestOSP } from "../greenfield/createObjectOSP";
+import {
+  createObjectAttestOSP,
+  createObjectMulAttestOSP,
+} from "../greenfield/createObjectOSP";
 
 /**
  *  multiAttestBasUploadGreenField
@@ -13,8 +16,8 @@ import { createObjectAttestOSP, createObjectMulAttestOSP } from "../greenfield/c
  */
 export const multiAttestBasUploadGreenField = async (
   bucketName: string,
+  schemaUID: string,
   unHandleDatas: HandleOspReturnDataOffChain[],
-  fileName: string,
   isPrivate?: boolean
 ) => {
   try {
@@ -25,10 +28,11 @@ export const multiAttestBasUploadGreenField = async (
     );
 
     const attestations = await multiAttestBASOffChain(signer, unHandleDatas);
+
     const success = await createObjectMulAttestOSP(
       bucketName,
+      schemaUID,
       attestations,
-      fileName,
       privateKey,
       isPrivate
     );
@@ -67,8 +71,8 @@ export const oneAttestBasUploadGreenField = async (
 
 export const multiAttestBasUploadGreenField_String = async (
   bucketName: string,
+  schemaUID: string,
   unHandleDatas: string,
-  fileName: string,
   isPrivate?: boolean
 ) => {
   try {
@@ -84,8 +88,9 @@ export const multiAttestBasUploadGreenField_String = async (
     );
     const success = await createObjectMulAttestOSP(
       bucketName,
+      schemaUID,
       attestations,
-      fileName,
+
       privateKey,
       isPrivate
     );

@@ -18,6 +18,7 @@ import {
   HandleOspReturnDataOffChain,
 } from "../handle/handleOsp";
 import { off } from "process";
+import { getAttestationBAS } from "../greenfield/utils";
 
 // Initialize SchemaEncoder with the schema string
 
@@ -200,23 +201,7 @@ export const multiAttestBASOffChain = async (
   const offchain = await new EAS(process.env.BAS_ADDRESS_BNB!)
     .connect(signer)
     .getOffchain();
-      // set object 
-  Object.defineProperty(offchain, 'type', {
-    domain: 'BAS Attestation',
-    primaryType: 'Attest',
-    types: {
-        Attest: [
-            { name: 'version', type: 'uint16' },
-            { name: 'schema', type: 'bytes32' },
-            { name: 'recipient', type: 'address' },
-            { name: 'time', type: 'uint64' },
-            { name: 'expirationTime', type: 'uint64' },
-            { name: 'revocable', type: 'bool' },
-            { name: 'refUID', type: 'bytes32' },
-            { name: 'data', type: 'bytes' }
-        ]
-    }
-  } as any);
+ 
   const attestations: SignedOffchainAttestation[] = [];
   try {
     for (let i = 0; i < unHandleDatas.length; i++) {
@@ -224,16 +209,18 @@ export const multiAttestBASOffChain = async (
       if (data.dataType == OspDataType.None) {
         continue;
       }
+      // TODO: 优化签名
       const attestation = await getAttestationOffChain(
         offchain,
         signer,
         data.requestData
-      );
-      attestations.push(attestation);
+      ); 
+      const attestation_new = await getAttestationBAS(signer, attestation);
+      attestations.push(attestation_new);
     }
     return attestations;
   } catch (error) {
     console.log(error);
-    return attestations;
+    return null;
   }
 };

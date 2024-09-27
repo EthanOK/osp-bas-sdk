@@ -64,21 +64,21 @@ export class Bundle {
     this.finalized = false;
   }
 
-  static async newBundle(): Promise<Bundle> {
+  static async newBundle(): Promise<{
+    bundle: Bundle;
+    fd: fs.promises.FileHandle;
+  }> {
     const tempDir = path.join(process.env.TEMP || os.tmpdir(), "tempBundleDir");
     await fs.promises.mkdir(tempDir, { recursive: true });
 
-    const dir = await fs.promises.mkdtemp(
-      path.join(tempDir, "tempBundle")
-    );
+    const dir = await fs.promises.mkdtemp(path.join(tempDir, "tempBundle"));
     const bundleFile = path.join(tempDir, `tempFile-${Date.now()}.tmp`);
 
-    const fd = await fs.promises.open(bundleFile, 'w');
-    fd.close()
-    
-    const readFile = fs.createReadStream(bundleFile);
+    const fd = await fs.promises.open(bundleFile, "w");
+    // await fd.close()
 
-    return new Bundle({
+    const readFile = fs.createReadStream(bundleFile);
+    const bundle = new Bundle({
       version: BundleVersion.V1,
       metaSize: 0,
       meta: { meta: [] },
@@ -88,6 +88,7 @@ export class Bundle {
       dataSize: 0,
       finalized: false,
     });
+    return { bundle, fd };
   }
 
   static async newBundleFromFile(path: string): Promise<Bundle> {
@@ -147,28 +148,27 @@ export class Bundle {
 
       const readStream = async () => {
         let result = await readerDefault.read();
-          while (!result.done) {
-            try {
-                console.log(result.value.length);
-                this.writeFile!.write(result.value);
-                totalWritten += result.value.length;
-                console.log(`totalWritten = ${totalWritten}`);
-                result = await readerDefault.read();
-            } catch (e) {
-              console.error('!!!!!!!!!!');
-            }
-          }
-          if(result.value){
+        while (!result.done) {
+          try {
+            // console.log(result.value.length);
             this.writeFile!.write(result.value);
             totalWritten += result.value.length;
+            // console.log(`totalWritten = ${totalWritten}`);
+            result = await readerDefault.read();
+          } catch (e) {
+            console.error("!!!!!!!!!!");
           }
-          console.log(totalWritten);
-          resolve(totalWritten);
-        
+        }
+        if (result.value) {
+          this.writeFile!.write(result.value);
+          totalWritten += result.value.length;
+        }
+        // console.log(totalWritten);
+        resolve(totalWritten);
       };
       readStream().catch(reject);
     });
-    console.log(`appendObject written = ${written}`);
+    // console.log(`appendObject written = ${written}`);
     //this.dataSize+= written;
 
     const objMetaNew = {

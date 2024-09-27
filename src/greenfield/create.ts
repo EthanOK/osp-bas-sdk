@@ -8,9 +8,6 @@ import {
 import { DeliverTxResponse } from "@cosmjs/stargate";
 import { encodeAddrToBucketName, selectSp } from "./utils";
 import { ReedSolomon } from "@bnb-chain/reed-solomon";
-import { ethers, getUint } from "ethers";
-import * as appendBuffer from "append-buffer";
-
 // import { NodeAdapterReedSolomon } from "@bnb-chain/reed-solomon/node.adapter";
 
 const rs = new ReedSolomon();
@@ -103,45 +100,11 @@ export class GreenFieldClientTS {
     }
 
     const attest = JSON.parse(attestation);
-    const fileName = `bundle.0xb375a6d216ba084094bbaae989bf76a31357cc88e7fe270fd477a96e1fbdadb1.${[
-      ethers.solidityPackedKeccak256(["bytes32"], [attest.uid]),
-    ]}`;
+    const fileName = `${attest.message.schema}.${attest.uid}`;
 
     const fileBuffer = Buffer.from(attestation);
 
-    const meta = [
-      {
-        object_name: attest.uid,
-        offset: 0,
-        size: fileBuffer.byteLength,
-        hash_algo: "",
-        hash: "",
-        content_type: "",
-        tags: "",
-      },
-    ];
-
-    const metaBuffer = Buffer.from(JSON.stringify(meta));
-    // console.log("metaBuffer", metaBuffer.byteLength);
-
-    const metaSizeBuffer = Buffer.from([0, 0, 0, 0, 0, 0, 0, 162]);
-    const versionBuffer = Buffer.from([0, 0, 0, 0, 0, 0, 0, 0]);
-    // const stringVersionBuffer = versionBuffer.toString()
-    const buffers = Buffer.concat([
-      fileBuffer,
-      metaBuffer,
-      metaSizeBuffer,
-      versionBuffer,
-    ]);
-    console.log("buffers:", buffers);
-    // fileBuffer.write(metaBuffer.toString());
-    // fileBuffer.write(metaSizeBuffer.toString())
-    // fileBuffer.write(versionBuffer.toString())
-    // versionBuffer.write(metaSizeBuffer.toString());
-    // versionBuffer.write(metaBuffer.toString());
-    // versionBuffer.write(fileBuffer.toString());
-
-    const expectCheckSums = rs.encode(Uint8Array.from(buffers));
+    const expectCheckSums = rs.encode(Uint8Array.from(fileBuffer));
 
     try {
       console.log("trying...");
@@ -155,7 +118,7 @@ export class GreenFieldClientTS {
           : VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
         contentType: "Document",
         redundancyType: RedundancyType.REDUNDANCY_EC_TYPE,
-        payloadSize: Long.fromInt(buffers.byteLength),
+        payloadSize: Long.fromInt(fileBuffer.byteLength),
         expectChecksums: expectCheckSums.map((x) => bytesFromBase64(x)),
       });
 
@@ -177,7 +140,7 @@ export class GreenFieldClientTS {
         {
           bucketName: bucketName,
           objectName: fileName,
-          body: createFile(fileName, buffers),
+          body: createFile(fileName, fileBuffer),
           txnHash: transactionHash,
         },
         // highlight-start
@@ -259,7 +222,9 @@ export class GreenFieldClientTS {
         return transactionHash;
       }
     } catch (error) {
+      
       console.log(error);
+      return null;
     }
     return null;
   }
