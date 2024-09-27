@@ -6,7 +6,7 @@ import {BundleMeta, HashAlgo, BundleVersion} from './proto/meta'
 type BundleMetaType = {meta?: ReturnType<() => {name?: string, offset?: number, size?: number, hash_algo?: HashAlgo, hash?: Uint8Array, content_type?: string, tags?: {[p: string]: string}}>[]};
 type ObjectMetaType = {name?: string, offset?: number, size?: number, hash_algo?: HashAlgo, hash?: Uint8Array, content_type?: string, tags?: {[p: string]: string}}
 
-class Bundle {
+export class Bundle {
     version: BundleVersion;
     metaSize: number;
     meta: BundleMetaType;

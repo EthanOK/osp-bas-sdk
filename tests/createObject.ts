@@ -7,8 +7,11 @@ import {
   GreenFieldClientTS,
   SchemaEncoder,
   serializeJsonString,
-// } from "osp-bas-sdk";
+  SignedOffchainAttestation,
+  getbBundleUID,
+  // } from "osp-bas-sdk";
 } from "../src";
+import { Bundle } from "../src/greenfield/bundle";
 import { BNB_basAddress, PrivateKey } from "./config";
 import { ethers } from "ethers";
 async function main() {
@@ -54,16 +57,63 @@ async function main() {
     .getOffchain();
   const attestation = await getAttestationOffChain(offchain, signer, params_a);
   console.log(attestation);
-  const bucketName = encodeAddrToBucketName(
-    "0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2"
-  );
-  const txhash = await client.createObject(
-    'bas-bcae673795001ba4c728b15d504fb4dd62cc4839',
-    serializeJsonString(attestation),
+
+  const bundleBuffer = Buffer.from(JSON.stringify(attestation));
+  const objectName =
+    `bundle.${attestation.message.schema}` + getbBundleUID([attestation.uid]);
+
+  const txhash = await client.createObjectByBundle(
+    "bas-bcae673795001ba4c728b15d504fb4dd62cc4839",
+    objectName,
+    bundleBuffer,
     PrivateKey,
     false
   );
   console.log("txhash", txhash);
+}
+
+export type SingleBundleObject = {
+  Name: string;
+  Data: Buffer;
+};
+export function getBundle(
+  attestations: SignedOffchainAttestation[],
+  schemaUid: string
+) {
+  let objs: SingleBundleObject[] = [];
+  let attestationUids: string[] = [];
+  for (let attestation of attestations) {
+    attestationUids.push(attestation.uid);
+    objs.push({
+      Name: attestation.uid,
+      Data: Buffer.from(serializeJsonString(attestation)),
+    });
+  }
+  const bundleUid = getbBundleUID(attestationUids);
+  const objectName = `bundle.${schemaUid}` + bundleUid;
+
+  return objectName;
+}
+
+async function _getBundle(objs: SingleBundleObject[]) {
+  const bundle = await Bundle.newBundle();
+  try {
+    for (let object of objs) {
+      const data = object.Data;
+
+      // Buffer to ReadableStream
+      bundle.appendObject(object.Name);
+    }
+
+    await bundle.finalizeBundle();
+  } catch (err) {
+    bundle.close(); 
+    return null;
+  } finally {
+    bundle.close(); 
+  }
+
+  return bundle;
 }
 
 main();
