@@ -1,6 +1,7 @@
 import { SignedOffchainAttestation } from "../bas";
 import { GreenFieldClientTS } from "./create";
 import "dotenv/config";
+import { serializeJsonString } from "./utils";
 
 const client = new GreenFieldClientTS(
   process.env.GREEN_RPC_URL!,
@@ -60,17 +61,3 @@ export const createObjectMulAttestOSP = async (
   }
   return true;
 };
-
-/**
- * Serialize Object To json string
- * @param data data type is object
- * @returns Json string
- */
-export function serializeJsonString(data: any): string {
-  return JSON.stringify(data, (key, value) => {
-    if (typeof value === "bigint") {
-      return value.toString();
-    }
-    return value;
-  });
-}
