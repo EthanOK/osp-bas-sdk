@@ -58,9 +58,10 @@ async function main() {
   const attestation = await getAttestationOffChain(offchain, signer, params_a);
   console.log(attestation);
 
-  const bundleBuffer = Buffer.from(JSON.stringify(attestation));
-  const objectName =
-    `bundle.${attestation.message.schema}` + getbBundleUID([attestation.uid]);
+  const { objectName, bundleBuffer } = await getBundleBuffer(
+    [attestation],
+    params_a.schemaUID
+  );
 
   const txhash = await client.createObjectByBundle(
     "bas-bcae673795001ba4c728b15d504fb4dd62cc4839",
@@ -76,7 +77,7 @@ export type SingleBundleObject = {
   Name: string;
   Data: Buffer;
 };
-export function getBundle(
+export async function getBundleBuffer(
   attestations: SignedOffchainAttestation[],
   schemaUid: string
 ) {
@@ -89,10 +90,10 @@ export function getBundle(
       Data: Buffer.from(serializeJsonString(attestation)),
     });
   }
+  const bundle = await _getBundle(objs);
   const bundleUid = getbBundleUID(attestationUids);
   const objectName = `bundle.${schemaUid}` + bundleUid;
-
-  return objectName;
+  return { objectName: objectName, bundleBuffer: bundle.getBundledObject() };
 }
 
 async function _getBundle(objs: SingleBundleObject[]) {
@@ -107,10 +108,10 @@ async function _getBundle(objs: SingleBundleObject[]) {
 
     await bundle.finalizeBundle();
   } catch (err) {
-    bundle.close(); 
+    bundle.close();
     return null;
   } finally {
-    bundle.close(); 
+    bundle.close();
   }
 
   return bundle;
