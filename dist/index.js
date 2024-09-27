@@ -1,7 +1,13 @@
+var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __knownSymbol = (name, symbol) => (symbol = Symbol[name]) ? symbol : Symbol.for("Symbol." + name);
+var __typeError = (msg) => {
+  throw TypeError(msg);
+};
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
@@ -17,7 +23,18 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot " + msg);
+var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
+var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __async = (__this, __arguments, generator) => {
   return new Promise((resolve, reject) => {
     var fulfilled = (value) => {
@@ -38,6 +55,7 @@ var __async = (__this, __arguments, generator) => {
     step((generator = generator.apply(__this, __arguments)).next());
   });
 };
+var __forAwait = (obj, it, method) => (it = obj[__knownSymbol("asyncIterator")]) ? it.call(obj) : (obj = obj[__knownSymbol("iterator")](), it = {}, method = (key, fn) => (fn = obj[key]) && (it[key] = (arg) => new Promise((yes, no, done) => (arg = fn.call(obj, arg), done = arg.done, Promise.resolve(arg.value).then((value) => yes({ value, done }), no)))), method("next"), method("return"), it);
 
 // node_modules/dotenv/package.json
 var require_package = __commonJS({
@@ -113,10 +131,10 @@ var require_package = __commonJS({
 // node_modules/dotenv/lib/main.js
 var require_main = __commonJS({
   "node_modules/dotenv/lib/main.js"(exports2, module2) {
-    var fs = require("fs");
-    var path = require("path");
-    var os = require("os");
-    var crypto = require("crypto");
+    var fs2 = require("fs");
+    var path2 = require("path");
+    var os2 = require("os");
+    var crypto2 = require("crypto");
     var packageJson = require_package();
     var version = packageJson.version;
     var LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
@@ -220,7 +238,7 @@ var require_main = __commonJS({
       if (options && options.path && options.path.length > 0) {
         if (Array.isArray(options.path)) {
           for (const filepath of options.path) {
-            if (fs.existsSync(filepath)) {
+            if (fs2.existsSync(filepath)) {
               possibleVaultPath = filepath.endsWith(".vault") ? filepath : `${filepath}.vault`;
             }
           }
@@ -228,15 +246,15 @@ var require_main = __commonJS({
           possibleVaultPath = options.path.endsWith(".vault") ? options.path : `${options.path}.vault`;
         }
       } else {
-        possibleVaultPath = path.resolve(process.cwd(), ".env.vault");
+        possibleVaultPath = path2.resolve(process.cwd(), ".env.vault");
       }
-      if (fs.existsSync(possibleVaultPath)) {
+      if (fs2.existsSync(possibleVaultPath)) {
         return possibleVaultPath;
       }
       return null;
     }
     function _resolveHome(envPath) {
-      return envPath[0] === "~" ? path.join(os.homedir(), envPath.slice(1)) : envPath;
+      return envPath[0] === "~" ? path2.join(os2.homedir(), envPath.slice(1)) : envPath;
     }
     function _configVault(options) {
       _log("Loading env from encrypted .env.vault");
@@ -249,7 +267,7 @@ var require_main = __commonJS({
       return { parsed };
     }
     function configDotenv(options) {
-      const dotenvPath = path.resolve(process.cwd(), ".env");
+      const dotenvPath = path2.resolve(process.cwd(), ".env");
       let encoding = "utf8";
       const debug = Boolean(options && options.debug);
       if (options && options.encoding) {
@@ -272,13 +290,13 @@ var require_main = __commonJS({
       }
       let lastError;
       const parsedAll = {};
-      for (const path2 of optionPaths) {
+      for (const path3 of optionPaths) {
         try {
-          const parsed = DotenvModule.parse(fs.readFileSync(path2, { encoding }));
+          const parsed = DotenvModule.parse(fs2.readFileSync(path3, { encoding }));
           DotenvModule.populate(parsedAll, parsed, options);
         } catch (e) {
           if (debug) {
-            _debug(`Failed to load ${path2} ${e.message}`);
+            _debug(`Failed to load ${path3} ${e.message}`);
           }
           lastError = e;
         }
@@ -312,7 +330,7 @@ var require_main = __commonJS({
       const authTag = ciphertext.subarray(-16);
       ciphertext = ciphertext.subarray(12, -16);
       try {
-        const aesgcm = crypto.createDecipheriv("aes-256-gcm", key, nonce);
+        const aesgcm = crypto2.createDecipheriv("aes-256-gcm", key, nonce);
         aesgcm.setAuthTag(authTag);
         return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
       } catch (error) {
@@ -442,14 +460,17 @@ __export(src_exports, {
   encodeProfileData: () => encodeProfileData,
   getAllSps: () => getAllSps,
   getAttestParamsOffChain: () => getAttestParamsOffChain,
+  getAttestationBAS: () => getAttestationBAS,
   getAttestationOffChain: () => getAttestationOffChain,
   getAttestationRequestData: () => getAttestationRequestData,
   getDeployer: () => getDeployer,
   getKmsSigner: () => getKmsSigner,
   getMulAttestParams: () => getMulAttestParams,
+  getOffchainUIDBAS: () => getOffchainUIDBAS,
   getSchemaByUID: () => getSchemaByUID,
   getSigatureByDelegation: () => getSigatureByDelegation,
   getSps: () => getSps,
+  getbBundleUID: () => getbBundleUID,
   handleOspRequestData: () => handleOspRequestData,
   handleOspRequestPrepareOffChain: () => handleOspRequestPrepareOffChain,
   initEAS: () => initEAS,
@@ -569,6 +590,135 @@ var encodeJoinData = (param) => {
   return encodedData;
 };
 
+// src/greenfield/utils.ts
+var import_ethers = require("ethers");
+var import_crypto = __toESM(require("crypto"));
+var encodeAddrToBucketName = (addr) => {
+  return `bas-${(0, import_ethers.hashMessage)((0, import_ethers.getAddress)(addr)).substring(2, 42)}`;
+};
+var getSps = (client2) => __async(void 0, null, function* () {
+  const sps = yield client2.sp.getStorageProviders();
+  const finalSps = (sps != null ? sps : []).filter((v) => v.endpoint.includes("nodereal"));
+  return finalSps;
+});
+var getAllSps = (client2) => __async(void 0, null, function* () {
+  const sps = yield getSps(client2);
+  return sps.map((sp) => {
+    var _a;
+    return {
+      address: sp.operatorAddress,
+      endpoint: sp.endpoint,
+      name: (_a = sp.description) == null ? void 0 : _a.moniker
+    };
+  });
+});
+var selectSp = (client2) => __async(void 0, null, function* () {
+  var _a;
+  const finalSps = yield getSps(client2);
+  const selectIndex = Math.floor(Math.random() * finalSps.length);
+  const secondarySpAddresses = [
+    ...finalSps.slice(0, selectIndex),
+    ...finalSps.slice(selectIndex + 1)
+  ].map((item) => item.operatorAddress);
+  const selectSpInfo = {
+    //@ts-ignore
+    id: finalSps[selectIndex].id || 0,
+    endpoint: finalSps[selectIndex].endpoint,
+    primarySpAddress: (_a = finalSps[selectIndex]) == null ? void 0 : _a.operatorAddress,
+    sealAddress: finalSps[selectIndex].sealAddress,
+    secondarySpAddresses
+  };
+  return selectSpInfo;
+});
+function serializeJsonString(data) {
+  return JSON.stringify(data, (key, value) => {
+    if (typeof value === "bigint") {
+      return value.toString();
+    }
+    return value;
+  });
+}
+function getOffchainUIDBAS(version, schema, recipient, time, expirationTime, revocable, refUID, data) {
+  const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+  return import_ethers.ethers.solidityPackedKeccak256(
+    [
+      "uint16",
+      "bytes",
+      "address",
+      "address",
+      "uint64",
+      "uint64",
+      "bool",
+      "bytes32",
+      "bytes",
+      "uint32"
+    ],
+    [
+      version,
+      schema,
+      recipient,
+      ZERO_ADDRESS,
+      time,
+      expirationTime,
+      revocable,
+      refUID,
+      data,
+      0
+    ]
+  );
+}
+function getAttestationBAS(signer, attestation) {
+  return __async(this, null, function* () {
+    attestation.types = {
+      Attest: [
+        { name: "version", type: "uint16" },
+        { name: "schema", type: "bytes32" },
+        { name: "recipient", type: "address" },
+        { name: "time", type: "uint64" },
+        { name: "expirationTime", type: "uint64" },
+        { name: "revocable", type: "bool" },
+        { name: "refUID", type: "bytes32" },
+        { name: "data", type: "bytes" },
+        { name: "nonce", type: "uint64" }
+      ]
+    };
+    attestation.domain.name = "BAS Attestation";
+    const signature = yield signer.signTypedData(
+      attestation.domain,
+      attestation.types,
+      attestation.message
+    );
+    const new_signature = {
+      v: import_ethers.Signature.from(signature).v,
+      r: import_ethers.Signature.from(signature).r,
+      s: import_ethers.Signature.from(signature).s
+    };
+    attestation.signature = new_signature;
+    const uid = getOffchainUIDBAS(
+      attestation.message.version,
+      attestation.message.schema,
+      attestation.message.recipient,
+      attestation.message.time,
+      attestation.message.expirationTime,
+      attestation.message.revocable,
+      attestation.message.refUID,
+      attestation.message.data
+    );
+    attestation.uid = uid;
+    return attestation;
+  });
+}
+function getbBundleUID(attestationUIDs) {
+  attestationUIDs.sort();
+  const rr = attestationUIDs.join("");
+  return sha256(rr);
+}
+function sha256(input) {
+  const hash = import_crypto.default.createHash("sha256");
+  hash.update(input);
+  return "0x" + hash.digest("hex");
+}
+
 // src/attestation/createAttestation.ts
 var getAttestationOffChain = (offchain, signer, params) => __async(void 0, null, function* () {
   const timestamp = Math.floor(Date.now() / 1e3);
@@ -680,59 +830,18 @@ var multiAttestBASOffChain = (signer, unHandleDatas) => __async(void 0, null, fu
         signer,
         data.requestData
       );
-      attestations.push(attestation);
+      const attestation_new = yield getAttestationBAS(signer, attestation);
+      attestations.push(attestation_new);
     }
     return attestations;
   } catch (error) {
     console.log(error);
-    return attestations;
+    return null;
   }
 });
 
 // src/greenfield/create.ts
 var import_greenfield_js_sdk = require("@bnb-chain/greenfield-js-sdk");
-
-// src/greenfield/utils.ts
-var import_ethers = require("ethers");
-var encodeAddrToBucketName = (addr) => {
-  return `bas-${(0, import_ethers.hashMessage)((0, import_ethers.getAddress)(addr)).substring(2, 42)}`;
-};
-var getSps = (client2) => __async(void 0, null, function* () {
-  const sps = yield client2.sp.getStorageProviders();
-  const finalSps = (sps != null ? sps : []).filter((v) => v.endpoint.includes("nodereal"));
-  return finalSps;
-});
-var getAllSps = (client2) => __async(void 0, null, function* () {
-  const sps = yield getSps(client2);
-  return sps.map((sp) => {
-    var _a;
-    return {
-      address: sp.operatorAddress,
-      endpoint: sp.endpoint,
-      name: (_a = sp.description) == null ? void 0 : _a.moniker
-    };
-  });
-});
-var selectSp = (client2) => __async(void 0, null, function* () {
-  var _a;
-  const finalSps = yield getSps(client2);
-  const selectIndex = Math.floor(Math.random() * finalSps.length);
-  const secondarySpAddresses = [
-    ...finalSps.slice(0, selectIndex),
-    ...finalSps.slice(selectIndex + 1)
-  ].map((item) => item.operatorAddress);
-  const selectSpInfo = {
-    //@ts-ignore
-    id: finalSps[selectIndex].id || 0,
-    endpoint: finalSps[selectIndex].endpoint,
-    primarySpAddress: (_a = finalSps[selectIndex]) == null ? void 0 : _a.operatorAddress,
-    sealAddress: finalSps[selectIndex].sealAddress,
-    secondarySpAddresses
-  };
-  return selectSpInfo;
-});
-
-// src/greenfield/create.ts
 var import_reed_solomon = require("@bnb-chain/reed-solomon");
 var rs = new import_reed_solomon.ReedSolomon();
 var GreenFieldClientTS = class {
@@ -809,12 +918,13 @@ var GreenFieldClientTS = class {
       const fileBuffer = Buffer.from(attestation);
       const expectCheckSums = rs.encode(Uint8Array.from(fileBuffer));
       try {
+        console.log("trying...");
         const createObjectTx = yield this.client.object.createObject({
           bucketName,
           objectName: fileName,
           creator: this.address,
           visibility: isPrivate ? import_greenfield_js_sdk.VisibilityType.VISIBILITY_TYPE_PRIVATE : import_greenfield_js_sdk.VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
-          contentType: "json",
+          contentType: "Document",
           redundancyType: import_greenfield_js_sdk.RedundancyType.REDUNDANCY_EC_TYPE,
           payloadSize: import_greenfield_js_sdk.Long.fromInt(fileBuffer.byteLength),
           expectChecksums: expectCheckSums.map((x) => (0, import_greenfield_js_sdk.bytesFromBase64)(x))
@@ -844,10 +954,66 @@ var GreenFieldClientTS = class {
           }
           // highlight-end
         );
+        console.log("uploadRes", uploadRes);
         if (uploadRes.code === 0) {
           return transactionHash;
         }
       } catch (error) {
+        console.log(error);
+      }
+      return null;
+    });
+  }
+  createObjectByBundle(bucketName, fileName, bundleBuffer, privateKey, isPrivate = false) {
+    return __async(this, null, function* () {
+      if (!privateKey.startsWith("0x")) {
+        privateKey = "0x" + privateKey;
+      }
+      const expectCheckSums = rs.encode(Uint8Array.from(bundleBuffer));
+      try {
+        console.log("trying...");
+        const createObjectTx = yield this.client.object.createObject({
+          bucketName,
+          objectName: fileName,
+          creator: this.address,
+          visibility: isPrivate ? import_greenfield_js_sdk.VisibilityType.VISIBILITY_TYPE_PRIVATE : import_greenfield_js_sdk.VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
+          contentType: "Document",
+          redundancyType: import_greenfield_js_sdk.RedundancyType.REDUNDANCY_EC_TYPE,
+          payloadSize: import_greenfield_js_sdk.Long.fromInt(bundleBuffer.byteLength),
+          expectChecksums: expectCheckSums.map((x) => (0, import_greenfield_js_sdk.bytesFromBase64)(x))
+        });
+        const simulateInfo = yield createObjectTx.simulate({
+          denom: "BNB"
+        });
+        const { transactionHash } = yield createObjectTx.broadcast({
+          denom: "BNB",
+          gasLimit: Number(simulateInfo.gasLimit),
+          gasPrice: simulateInfo.gasPrice,
+          payer: this.address,
+          granter: "",
+          privateKey
+        });
+        const uploadRes = yield this.client.object.uploadObject(
+          {
+            bucketName,
+            objectName: fileName,
+            body: createFile(fileName, bundleBuffer),
+            txnHash: transactionHash
+          },
+          // highlight-start
+          {
+            type: "ECDSA",
+            privateKey
+          }
+          // highlight-end
+        );
+        console.log("uploadRes", uploadRes);
+        if (uploadRes.code === 0) {
+          return transactionHash;
+        }
+      } catch (error) {
+        console.log(error);
+        return null;
       }
       return null;
     });
@@ -932,6 +1098,523 @@ function createFile(fileName, fileBuffer) {
   );
 })();
 
+// src/bundle/bundle.ts
+var import_buffer = require("buffer");
+var fs = __toESM(require("fs"));
+var path = __toESM(require("path"));
+var os = __toESM(require("os"));
+
+// src/bundle/proto/meta.ts
+var pb_1 = __toESM(require("google-protobuf"));
+var _one_of_decls;
+var _ObjectMeta = class _ObjectMeta extends pb_1.Message {
+  constructor(data) {
+    super();
+    __privateAdd(this, _one_of_decls, []);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], __privateGet(this, _one_of_decls));
+    if (!Array.isArray(data) && typeof data == "object") {
+      if ("name" in data && data.name != void 0) {
+        this.name = data.name;
+      }
+      if ("offset" in data && data.offset != void 0) {
+        this.offset = data.offset;
+      }
+      if ("size" in data && data.size != void 0) {
+        this.size = data.size;
+      }
+      if ("hash_algo" in data && data.hash_algo != void 0) {
+        this.hash_algo = data.hash_algo;
+      }
+      if ("hash" in data && data.hash != void 0) {
+        this.hash = data.hash;
+      }
+      if ("content_type" in data && data.content_type != void 0) {
+        this.content_type = data.content_type;
+      }
+      if ("tags" in data && data.tags != void 0) {
+        this.tags = data.tags;
+      }
+    }
+    if (!this.tags)
+      this.tags = /* @__PURE__ */ new Map();
+  }
+  get name() {
+    return pb_1.Message.getFieldWithDefault(this, 1, "");
+  }
+  set name(value) {
+    pb_1.Message.setField(this, 1, value);
+  }
+  get offset() {
+    return pb_1.Message.getFieldWithDefault(this, 2, 0);
+  }
+  set offset(value) {
+    pb_1.Message.setField(this, 2, value);
+  }
+  get size() {
+    return pb_1.Message.getFieldWithDefault(this, 3, 0);
+  }
+  set size(value) {
+    pb_1.Message.setField(this, 3, value);
+  }
+  get hash_algo() {
+    return pb_1.Message.getFieldWithDefault(this, 4, 0 /* Unknown */);
+  }
+  set hash_algo(value) {
+    pb_1.Message.setField(this, 4, value);
+  }
+  get hash() {
+    return pb_1.Message.getFieldWithDefault(this, 5, new Uint8Array(0));
+  }
+  set hash(value) {
+    pb_1.Message.setField(this, 5, value);
+  }
+  get content_type() {
+    return pb_1.Message.getFieldWithDefault(this, 6, "");
+  }
+  set content_type(value) {
+    pb_1.Message.setField(this, 6, value);
+  }
+  get tags() {
+    return pb_1.Message.getField(this, 7);
+  }
+  set tags(value) {
+    pb_1.Message.setField(this, 7, value);
+  }
+  static fromObject(data) {
+    const message = new _ObjectMeta({});
+    if (data.name != null) {
+      message.name = data.name;
+    }
+    if (data.offset != null) {
+      message.offset = data.offset;
+    }
+    if (data.size != null) {
+      message.size = data.size;
+    }
+    if (data.hash_algo != null) {
+      message.hash_algo = data.hash_algo;
+    }
+    if (data.hash != null) {
+      message.hash = data.hash;
+    }
+    if (data.content_type != null) {
+      message.content_type = data.content_type;
+    }
+    if (typeof data.tags == "object") {
+      message.tags = new Map(Object.entries(data.tags));
+    }
+    return message;
+  }
+  toObject() {
+    const data = {};
+    if (this.name != null) {
+      data.name = this.name;
+    }
+    if (this.offset != null) {
+      data.offset = this.offset;
+    }
+    if (this.size != null) {
+      data.size = this.size;
+    }
+    if (this.hash_algo != null) {
+      data.hash_algo = this.hash_algo;
+    }
+    if (this.hash != null) {
+      data.hash = this.hash;
+    }
+    if (this.content_type != null) {
+      data.content_type = this.content_type;
+    }
+    if (this.tags != null) {
+      data.tags = Object.fromEntries(this.tags);
+    }
+    return data;
+  }
+  serialize(w) {
+    const writer = w || new pb_1.BinaryWriter();
+    if (this.name.length)
+      writer.writeString(1, this.name);
+    if (this.offset != 0)
+      writer.writeUint64(2, this.offset);
+    if (this.size != 0)
+      writer.writeUint64(3, this.size);
+    if (this.hash_algo != 0 /* Unknown */)
+      writer.writeEnum(4, this.hash_algo);
+    if (this.hash.length)
+      writer.writeBytes(5, this.hash);
+    if (this.content_type.length)
+      writer.writeString(6, this.content_type);
+    for (const [key, value] of this.tags) {
+      writer.writeMessage(7, this.tags, () => {
+        writer.writeString(1, key);
+        writer.writeString(2, value);
+      });
+    }
+    if (!w)
+      return writer.getResultBuffer();
+  }
+  static deserialize(bytes) {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new _ObjectMeta();
+    while (reader.nextField()) {
+      if (reader.isEndGroup())
+        break;
+      switch (reader.getFieldNumber()) {
+        case 1:
+          message.name = reader.readString();
+          break;
+        case 2:
+          message.offset = reader.readUint64();
+          break;
+        case 3:
+          message.size = reader.readUint64();
+          break;
+        case 4:
+          message.hash_algo = reader.readEnum();
+          break;
+        case 5:
+          message.hash = reader.readBytes();
+          break;
+        case 6:
+          message.content_type = reader.readString();
+          break;
+        case 7:
+          reader.readMessage(message, () => pb_1.Map.deserializeBinary(message.tags, reader, reader.readString, reader.readString));
+          break;
+        default:
+          reader.skipField();
+      }
+    }
+    return message;
+  }
+  serializeBinary() {
+    return this.serialize();
+  }
+  static deserializeBinary(bytes) {
+    return _ObjectMeta.deserialize(bytes);
+  }
+};
+_one_of_decls = new WeakMap();
+var ObjectMeta = _ObjectMeta;
+var _one_of_decls2;
+var _BundleMeta = class _BundleMeta extends pb_1.Message {
+  constructor(data) {
+    super();
+    __privateAdd(this, _one_of_decls2, []);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], __privateGet(this, _one_of_decls2));
+    if (!Array.isArray(data) && typeof data == "object") {
+      if ("meta" in data && data.meta != void 0) {
+        this.meta = data.meta;
+      }
+    }
+  }
+  get meta() {
+    return pb_1.Message.getRepeatedWrapperField(this, ObjectMeta, 1);
+  }
+  set meta(value) {
+    pb_1.Message.setRepeatedWrapperField(this, 1, value);
+  }
+  static fromObject(data) {
+    const message = new _BundleMeta({});
+    if (data.meta != null) {
+      message.meta = data.meta.map((item) => ObjectMeta.fromObject(item));
+    }
+    return message;
+  }
+  toObject() {
+    const data = {};
+    if (this.meta != null) {
+      data.meta = this.meta.map((item) => item.toObject());
+    }
+    return data;
+  }
+  serialize(w) {
+    const writer = w || new pb_1.BinaryWriter();
+    if (this.meta.length)
+      writer.writeRepeatedMessage(1, this.meta, (item) => item.serialize(writer));
+    if (!w)
+      return writer.getResultBuffer();
+  }
+  static deserialize(bytes) {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new _BundleMeta();
+    while (reader.nextField()) {
+      if (reader.isEndGroup())
+        break;
+      switch (reader.getFieldNumber()) {
+        case 1:
+          reader.readMessage(message.meta, () => pb_1.Message.addToRepeatedWrapperField(message, 1, ObjectMeta.deserialize(reader), ObjectMeta));
+          break;
+        default:
+          reader.skipField();
+      }
+    }
+    return message;
+  }
+  serializeBinary() {
+    return this.serialize();
+  }
+  static deserializeBinary(bytes) {
+    return _BundleMeta.deserialize(bytes);
+  }
+};
+_one_of_decls2 = new WeakMap();
+var BundleMeta = _BundleMeta;
+
+// src/bundle/bundle.ts
+var Bundle = class _Bundle {
+  constructor(options) {
+    if (options) {
+      this.version = options.version;
+      this.metaSize = options.metaSize;
+      this.meta = options.meta;
+      this.writeFile = options.writeFile;
+      this.readFile = options.readFile;
+      this.bundleFileName = options.bundleFileName;
+    } else {
+      this.version = 0 /* V1 */;
+      this.metaSize = 0;
+      this.meta = { meta: [] };
+      this.writeFile = null;
+      this.readFile = null;
+      this.bundleFileName = "";
+    }
+    this.dataSize = 0;
+    this.finalized = false;
+  }
+  static newBundle() {
+    return __async(this, null, function* () {
+      const tempDir = path.join(process.env.TEMP || os.tmpdir(), "tempBundleDir");
+      yield fs.promises.mkdir(tempDir, { recursive: true });
+      const dir = yield fs.promises.mkdtemp(path.join(tempDir, "tempBundle"));
+      const bundleFile = path.join(tempDir, `tempFile-${Date.now()}.tmp`);
+      const fd = yield fs.promises.open(bundleFile, "w");
+      const readFile = fs.createReadStream(bundleFile);
+      const bundle = new _Bundle({
+        version: 0 /* V1 */,
+        metaSize: 0,
+        meta: { meta: [] },
+        writeFile: fs.createWriteStream(bundleFile),
+        readFile,
+        bundleFileName: bundleFile,
+        dataSize: 0,
+        finalized: false
+      });
+      return { bundle, fd };
+    });
+  }
+  static newBundleFromFile(path2) {
+    return __async(this, null, function* () {
+      const bundleFile = yield fs.promises.open(path2, "r");
+      const stat = yield fs.promises.stat(path2);
+      const dataSize = stat.size;
+      const seekPosition = dataSize - (8 + 8);
+      const buf = import_buffer.Buffer.alloc(16);
+      yield bundleFile.read(buf, seekPosition);
+      const version = buf.readBigUInt64BE(8);
+      if (version !== BigInt(0 /* V1 */)) {
+        throw new Error("Invalid version");
+      }
+      const metaSize = buf.readBigUInt64BE(0);
+      if (metaSize === BigInt(0)) {
+        throw new Error("Empty bundle");
+      }
+      const metaBuf = import_buffer.Buffer.alloc(Number(metaSize));
+      yield bundleFile.read(metaBuf, dataSize - (Number(metaSize) + 8 + 8));
+      const bundle = new _Bundle({
+        version: Number(version),
+        metaSize: Number(metaSize),
+        meta: { meta: [] },
+        writeFile: null,
+        readFile: fs.createReadStream(path2),
+        bundleFileName: path2,
+        dataSize: stat.size,
+        finalized: true
+      });
+      bundle.meta = BundleMeta.deserialize(metaBuf).toObject();
+      return bundle;
+    });
+  }
+  appendObject(name, reader, options) {
+    return __async(this, null, function* () {
+      var _a, _b, _c, _d;
+      if (this.finalized) {
+        throw new Error("Append not allowed");
+      }
+      const objMeta = this.getObjectMeta(name);
+      if (objMeta) {
+        throw new Error("Duplicated name");
+      }
+      const written = yield new Promise((resolve, reject) => {
+        const readerDefault = reader.getReader();
+        let totalWritten = 0;
+        const readStream = () => __async(this, null, function* () {
+          let result = yield readerDefault.read();
+          while (!result.done) {
+            try {
+              this.writeFile.write(result.value);
+              totalWritten += result.value.length;
+              result = yield readerDefault.read();
+            } catch (e) {
+              console.error("!!!!!!!!!!");
+            }
+          }
+          if (result.value) {
+            this.writeFile.write(result.value);
+            totalWritten += result.value.length;
+          }
+          resolve(totalWritten);
+        });
+        readStream().catch(reject);
+      });
+      const objMetaNew = {
+        name,
+        offset: this.dataSize,
+        size: written,
+        hash_algo: 0 /* Unknown */,
+        hash: new Uint8Array(0),
+        content_type: "",
+        tags: {}
+      };
+      if (options) {
+        objMetaNew.hash_algo = (_a = options.hashAlgo) != null ? _a : 0 /* Unknown */;
+        objMetaNew.hash = (_b = options.hash) != null ? _b : new Uint8Array(0);
+        objMetaNew.content_type = (_c = options.contentType) != null ? _c : "";
+        objMetaNew.tags = (_d = options.tags) != null ? _d : {};
+      }
+      this.dataSize += written;
+      this.meta.meta.push(objMetaNew);
+      return objMetaNew;
+    });
+  }
+  getObjectMeta(name) {
+    return this.meta.meta.find((objMeta) => objMeta.name === name) || null;
+  }
+  getBundledObject() {
+    return fs.createReadStream(this.bundleFileName);
+  }
+  finalizeBundle() {
+    return __async(this, null, function* () {
+      if (this.finalized) {
+        throw new Error("Bundle finalized");
+      }
+      if (this.dataSize === 0) {
+        throw new Error("Empty bundle");
+      }
+      let metaData = import_buffer.Buffer.from(BundleMeta.fromObject(this.meta).serialize());
+      this.metaSize = metaData.length;
+      const buf = import_buffer.Buffer.alloc(16);
+      buf.writeBigUInt64BE(BigInt(this.metaSize), 0);
+      buf.writeBigUInt64BE(BigInt(this.version), 8);
+      metaData = import_buffer.Buffer.concat([metaData, buf]);
+      this.writeFile.write(metaData);
+      this.dataSize += this.metaSize + 16;
+      this.finalized = true;
+      return this.getBundledObject();
+    });
+  }
+  close() {
+    if (this.writeFile) {
+      this.writeFile.close();
+    }
+    if (this.readFile) {
+      this.readFile.close();
+    }
+  }
+  getBundleMetaSize() {
+    return this.metaSize;
+  }
+  getBundleObjectsMeta() {
+    return this.meta.meta;
+  }
+  getBundleSize() {
+    return this.dataSize;
+  }
+  getBundleVersion() {
+    return this.version;
+  }
+};
+
+// src/bundle/utils.ts
+function readStreamToBuffer(stream) {
+  return __async(this, null, function* () {
+    const chunks = [];
+    try {
+      for (var iter = __forAwait(stream), more, temp, error; more = !(temp = yield iter.next()).done; more = false) {
+        const chunk = temp.value;
+        chunks.push(Buffer.from(chunk));
+      }
+    } catch (temp) {
+      error = [temp];
+    } finally {
+      try {
+        more && (temp = iter.return) && (yield temp.call(iter));
+      } finally {
+        if (error)
+          throw error[0];
+      }
+    }
+    return Buffer.concat(chunks);
+  });
+}
+function getBundleBuffer(schemaUid, attestations) {
+  return __async(this, null, function* () {
+    let objs = [];
+    let attestationUids = [];
+    for (let attestation of attestations) {
+      attestationUids.push(attestation.uid);
+      objs.push({
+        Name: attestation.uid,
+        Data: Buffer.from(serializeJsonString(attestation))
+      });
+    }
+    const bundle = yield _getBundle(objs);
+    const bundleUid = getbBundleUID(attestationUids);
+    const objectName = `bundle.${schemaUid}.` + bundleUid;
+    const buffer = yield readStreamToBuffer(bundle);
+    console.log(`buffer size is ${buffer.length}`);
+    return { objectName, buffer };
+  });
+}
+function bufferToReadableStream(bufferData) {
+  const readable = new ReadableStream({
+    start(controller) {
+      controller.enqueue(bufferData);
+      controller.close();
+    }
+  });
+  return readable;
+}
+function _getBundle(objs) {
+  return __async(this, null, function* () {
+    const { bundle, fd } = yield Bundle.newBundle();
+    yield new Promise((resolve) => setTimeout(resolve, 1e3));
+    try {
+      try {
+        for (var iter = __forAwait(objs), more, temp, error; more = !(temp = yield iter.next()).done; more = false) {
+          const object = temp.value;
+          const data = object.Data;
+          const readableStream = bufferToReadableStream(data);
+          yield bundle.appendObject(object.Name, readableStream);
+        }
+      } catch (temp) {
+        error = [temp];
+      } finally {
+        try {
+          more && (temp = iter.return) && (yield temp.call(iter));
+        } finally {
+          if (error)
+            throw error[0];
+        }
+      }
+      const result = yield bundle.finalizeBundle();
+      fd.close();
+      return result;
+    } catch (err) {
+      console.log(err);
+    }
+    return null;
+  });
+}
+
 // src/greenfield/createObjectOSP.ts
 var client = new GreenFieldClientTS(
   process.env.GREEN_RPC_URL,
@@ -947,11 +1630,12 @@ var createObjectAttestOSP = (bucketName, attestation, privateKey, isPrivate = fa
   );
   return txHash !== null;
 });
-var createObjectMulAttestOSP = (bucketName, attestations, fileName, privateKey, isPrivate = false) => __async(void 0, null, function* () {
-  const txHash = yield client.createObjectMulAttest(
+var createObjectMulAttestOSP = (bucketName, schemaUID, attestations, privateKey, isPrivate = false) => __async(void 0, null, function* () {
+  const { objectName, buffer } = yield getBundleBuffer(schemaUID, attestations);
+  const txHash = yield client.createObjectByBundle(
     bucketName,
-    serializeJsonString(attestations),
-    fileName,
+    objectName,
+    buffer,
     privateKey,
     isPrivate
   );
@@ -960,14 +1644,6 @@ var createObjectMulAttestOSP = (bucketName, attestations, fileName, privateKey, 
   }
   return true;
 });
-function serializeJsonString(data) {
-  return JSON.stringify(data, (key, value) => {
-    if (typeof value === "bigint") {
-      return value.toString();
-    }
-    return value;
-  });
-}
 
 // src/bas/index.ts
 var import_eas_sdk4 = require("@ethereum-attestation-service/eas-sdk");
@@ -976,7 +1652,7 @@ var SchemaEncoder3 = import_eas_sdk4.SchemaEncoder;
 
 // src/bas/offchainAttestations.ts
 var import_ethers2 = require("ethers");
-var multiAttestBasUploadGreenField = (bucketName, unHandleDatas, fileName, isPrivate) => __async(void 0, null, function* () {
+var multiAttestBasUploadGreenField = (bucketName, schemaUID, unHandleDatas, isPrivate) => __async(void 0, null, function* () {
   try {
     const privateKey = process.env.GREEN_PAYMENT_PRIVATE_KEY;
     const signer = new import_ethers2.ethers.Wallet(
@@ -986,8 +1662,8 @@ var multiAttestBasUploadGreenField = (bucketName, unHandleDatas, fileName, isPri
     const attestations = yield multiAttestBASOffChain(signer, unHandleDatas);
     const success = yield createObjectMulAttestOSP(
       bucketName,
+      schemaUID,
       attestations,
-      fileName,
       privateKey,
       isPrivate
     );
@@ -1015,7 +1691,7 @@ var oneAttestBasUploadGreenField = (bucketName, unHandleData, isPrivate) => __as
   }
   return false;
 });
-var multiAttestBasUploadGreenField_String = (bucketName, unHandleDatas, fileName, isPrivate) => __async(void 0, null, function* () {
+var multiAttestBasUploadGreenField_String = (bucketName, schemaUID, unHandleDatas, isPrivate) => __async(void 0, null, function* () {
   try {
     const privateKey = process.env.GREEN_PAYMENT_PRIVATE_KEY;
     const signer = new import_ethers2.ethers.Wallet(
@@ -1028,8 +1704,8 @@ var multiAttestBasUploadGreenField_String = (bucketName, unHandleDatas, fileName
     );
     const success = yield createObjectMulAttestOSP(
       bucketName,
+      schemaUID,
       attestations,
-      fileName,
       privateKey,
       isPrivate
     );
@@ -1221,14 +1897,17 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
   encodeProfileData,
   getAllSps,
   getAttestParamsOffChain,
+  getAttestationBAS,
   getAttestationOffChain,
   getAttestationRequestData,
   getDeployer,
   getKmsSigner,
   getMulAttestParams,
+  getOffchainUIDBAS,
   getSchemaByUID,
   getSigatureByDelegation,
   getSps,
+  getbBundleUID,
   handleOspRequestData,
   handleOspRequestPrepareOffChain,
   initEAS,
