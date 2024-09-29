@@ -1,16 +1,13 @@
-import { AttestationRequestData } from "@ethereum-attestation-service/eas-sdk";
+import {AttestationRequestData} from "@ethereum-attestation-service/eas-sdk";
 import {
   encodeCommunityData,
   encodeFollowData,
-  encodeJoinData,
+  encodeFollowedData,
+  encodeJoinData, encodeJoinedData,
   encodeProfileData,
   OspDataType,
 } from "../attestation/encodedOspData";
-import {
-  AttestParams,
-  getAttestationRequestData,
-  getAttestParamsOffChain,
-} from "../attestation/createAttestation";
+import {AttestParams, getAttestationRequestData, getAttestParamsOffChain,} from "../attestation/createAttestation";
 
 export type HandleOspReturnData = {
   dataType: number;
@@ -30,6 +27,7 @@ export const handleOspRequestData = (
       const encodedData = encodeFollowData({
         followTx: data.transactionHash,
         follower: data.userAddress,
+        followedAddress: data.referencedUserAddress,
         followedProfileId: BigInt(data.referencedProfileId).toString(),
       });
       return {
@@ -41,6 +39,7 @@ export const handleOspRequestData = (
         joinTx: data.transactionHash,
         joiner: data.userAddress,
         communityId: BigInt(data.communityId).toString(),
+        communityOwner: data.communityOwnerAddress
       });
       return {
         dataType: OspDataType.Join,
@@ -85,40 +84,65 @@ export type HandleOspReturnDataOffChain = {
 export const handleOspRequestPrepareOffChain = (
   chainId: number,
   jsonData: string
-): HandleOspReturnDataOffChain => {
+): HandleOspReturnDataOffChain[] => {
   const data = JSON.parse(jsonData);
+  let handledDatas = new Array<HandleOspReturnDataOffChain>();
 
   if (Number(data.chainId) === chainId || chainId === 0) {
     if (data.name === "FollowSBTTransferred") {
       // console.log("FollowSBTTransferred");
       // console.log(data);
-      const encodedData = encodeFollowData({
+      const followData = {
         followTx: data.transactionHash,
         follower: data.userAddress,
-        followedProfileId: BigInt(data.referencedProfileId).toString(),
-      });
-      return {
+        followedAddress: data.referencedUserAddress,
+        followedProfileId: BigInt(data.referencedProfileId).toString()
+      }
+      const encodedFollowData = encodeFollowData(followData);
+      handledDatas.push({
         dataType: OspDataType.Follow,
         requestData: getAttestParamsOffChain(
-          OspDataType.Follow,
-          data.userAddress,
-          encodedData
+            OspDataType.Follow,
+            data.userAddress,
+            encodedFollowData
         ),
-      };
+      })
+
+      const encodedFollowedData = encodeFollowedData(followData)
+      handledDatas.push({
+        dataType: OspDataType.Followed,
+        requestData: getAttestParamsOffChain(
+            OspDataType.Followed,
+            data.referencedUserAddress,
+            encodedFollowedData
+        )
+      })
     } else if (data.name === "JoinNFTTransferred") {
-      const encodedData = encodeJoinData({
+      const joinData = {
         joinTx: data.transactionHash,
         joiner: data.userAddress,
         communityId: BigInt(data.communityId).toString(),
-      });
-      return {
+        communityOwner: data.communityOwnerAddress
+      }
+      const encodedJoinData = encodeJoinData(joinData);
+      handledDatas.push({
         dataType: OspDataType.Join,
         requestData: getAttestParamsOffChain(
-          OspDataType.Join,
-          data.userAddress,
-          encodedData
+            OspDataType.Join,
+            data.userAddress,
+            encodedJoinData
         ),
-      };
+      })
+
+      const encodedJoinedData = encodeJoinedData(joinData);
+      handledDatas.push({
+        dataType: OspDataType.Joined,
+        requestData: getAttestParamsOffChain(
+            OspDataType.Joined,
+            data.communityOwnerAddress,
+            encodedJoinedData
+        )
+      })
     } else if (data.name === "ProfileCreated") {
       const encodedData = encodeProfileData({
         createProfileTx: data.transactionHash,
@@ -126,14 +150,14 @@ export const handleOspRequestPrepareOffChain = (
         profileId: BigInt(data.profileId).toString(),
         handle: data.handle,
       });
-      return {
+      handledDatas.push({
         dataType: OspDataType.Profile,
         requestData: getAttestParamsOffChain(
-          OspDataType.Profile,
-          data.userAddress,
-          encodedData
+            OspDataType.Profile,
+            data.userAddress,
+            encodedData
         ),
-      };
+      });
     } else if (data.name === "CommunityCreated") {
       const encodedData = encodeCommunityData({
         createCommunityTx: data.transactionHash,
@@ -142,19 +166,26 @@ export const handleOspRequestPrepareOffChain = (
         handle: data.handle,
         joinNFT: data.joinNFT,
       });
-      return {
+      handledDatas.push({
         dataType: OspDataType.Community,
         requestData: getAttestParamsOffChain(
-          OspDataType.Community,
-          data.userAddress,
-          encodedData
+            OspDataType.Community,
+            data.userAddress,
+            encodedData
         ),
-      };
+      });
     }
+  } else {
+    handledDatas.push({
+      dataType: OspDataType.None,
+      requestData: null
+    })
   }
 
-  return {
-    dataType: OspDataType.None,
-    requestData: null,
-  };
+  return handledDatas;
+
+  // return {
+  //   dataType: OspDataType.None,
+  //   requestData: null,
+  // };
 };
