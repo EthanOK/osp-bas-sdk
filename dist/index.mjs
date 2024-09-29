@@ -1553,7 +1553,7 @@ function bufferToReadableStream(bufferData) {
 function _getBundle(objs) {
   return __async(this, null, function* () {
     const { bundle, fd } = yield Bundle.newBundle();
-    yield new Promise((resolve) => setTimeout(resolve, 100));
+    yield new Promise((resolve) => setTimeout(resolve, 0));
     try {
       try {
         for (var iter = __forAwait(objs), more, temp, error; more = !(temp = yield iter.next()).done; more = false) {
