@@ -50,8 +50,8 @@ function bufferToReadableStream(bufferData: Buffer): ReadableStream {
 
 async function _getBundle(objs: SingleBundleObject[]) {
   const { bundle, fd } = await Bundle.newBundle();
-  // wait  0.1s second
-  await new Promise((resolve) => setTimeout(resolve, 100));
+  // TODO: wait for bundle to be ready
+  await new Promise((resolve) => setTimeout(resolve, 0));
   try {
     for await (const object of objs) {
       const data = object.Data;
