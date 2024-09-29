@@ -48,27 +48,35 @@ interface Signature {
 
 declare enum OspDataType {
     None = 0,
-    Follow = 1,
-    Profile = 2,
-    Community = 3,
-    Join = 4
+    Profile = 1,
+    Follow = 2,
+    Followed = 3,
+    Community = 4,
+    Join = 5,
+    Joined = 6
 }
-declare const FollowSchemaUID = "0x1c9575bc318527d66fad7fc50aae6e2153185fcc624e14cf0af562d87d869be2";
 declare const ProfileSchemaUID = "0x7c90370dcf194ce4c2851abec14da05abd98d8860ae7147ac714755430d42f6e";
+declare const FollowSchemaUID = "0xc21ba57124d1c884e89d561c9ba60a80a98733d2553d000d06cc5a98a0534b11";
+declare const FollowedSchemaUID = "0xa0d8de56036149d7613854b8e58ce2bcc402cd065bae55a96d7a5f86095d5221";
 declare const CommunitySchemaUID = "0x18c1dbf9c1a1c6a64b661c23110116f80b7d6897839334b724ea2a46056bee94";
-declare const JoinSchemaUID = "0x3a017e34de4075a58f3a6a2826823a95bf38924b87646b68621c5fb4c2201069";
+declare const JoinSchemaUID = "0x15ce785a4cd0951c813f27917308bb632162855f33d4a93b3bf05e35a70c8510";
+declare const JoinedSchemaUID = "0xe1685d5f5e58134cbcd44a1f3250027c2192a2c9552cb1fbe048ad3e6e999ed6";
 declare const OspDataTypeMap: Map<OspDataType, string>;
-declare const FollowSchema = "bytes32 followTx, address follower, uint256 followedProfileId";
 declare const ProfileSchema = "bytes32 createProfileTx, address profileOwner, uint256 profileId, string handle";
+declare const FollowSchema = "bytes32 followTx, address follower, address followedAddress, uint256 followedProfileId";
+declare const FollowedSchema = "bytes32 followTx, string type, address follower, address followedAddress, uint256 followedProfileId";
 declare const CommunitySchema = "bytes32 createCommunityTx, address communityOwner, uint256 communityId, string handle, address joinNFT";
-declare const JoinSchema = "bytes32 joinTx, address joiner, uint256 communityId";
+declare const JoinSchema = "bytes32 joinTx, address joiner, uint256 communityId, address communityOwner";
+declare const JoinedSchema = "bytes32 joinTx, string type, address joiner, uint256 communityId, address communityOwner";
 declare const OspSchemaMap: Map<OspDataType, string>;
 type encodeFollowDataParams = {
     followTx: string;
     follower: string;
+    followedAddress: string;
     followedProfileId: string;
 };
 declare const encodeFollowData: (param: encodeFollowDataParams) => string;
+declare const encodeFollowedData: (param: encodeFollowDataParams) => string;
 type encodeProfileDataParams = {
     createProfileTx: string;
     profileOwner: string;
@@ -88,8 +96,10 @@ type encodeJoinDataParams = {
     joinTx: string;
     joiner: string;
     communityId: string;
+    communityOwner: string;
 };
 declare const encodeJoinData: (param: encodeJoinDataParams) => string;
+declare const encodeJoinedData: (param: encodeJoinDataParams) => string;
 
 type HandleOspReturnData = {
     dataType: number;
@@ -100,7 +110,7 @@ type HandleOspReturnDataOffChain = {
     dataType: number;
     requestData: AttestParams;
 };
-declare const handleOspRequestPrepareOffChain: (chainId: number, jsonData: string) => HandleOspReturnDataOffChain;
+declare const handleOspRequestPrepareOffChain: (chainId: number, jsonData: string) => HandleOspReturnDataOffChain[];
 
 /**
  * Attestation params
@@ -244,4 +254,4 @@ declare const multiAttestBasUploadGreenField_String: (bucketName: string, schema
 declare const getDeployer: () => Promise<AwsKmsSigner<ethers.JsonRpcProvider>>;
 declare const getKmsSigner: (provider?: Provider) => AwsKmsSigner<ethers.Provider>;
 
-export { type AttestParams, type AttestationRequestData, BAS, CommunitySchema, CommunitySchemaUID, type DelegatedAttestParams, FollowSchema, FollowSchemaUID, GreenFieldClientTS, type HandleOspReturnData, type HandleOspReturnDataOffChain, JoinSchema, JoinSchemaUID, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, OspDataType, OspDataTypeMap, OspSchemaMap, ProfileSchema, ProfileSchemaUID, type RegisterSchemaParams, SchemaEncoder, type Signature, type SignedOffchainAttestation, createObjectAttestOSP, createObjectMulAttestOSP, encodeAddrToBucketName, encodeCommunityData, type encodeCommunityDataParams, encodeFollowData, type encodeFollowDataParams, encodeJoinData, type encodeJoinDataParams, encodeProfileData, type encodeProfileDataParams, getAllSps, getAttestParamsOffChain, getAttestationBAS, getAttestationOffChain, getAttestationRequestData, getDeployer, getKmsSigner, getMulAttestParams, getOffchainUIDBAS, getSchemaByUID, getSigatureByDelegation, getSps, getbBundleUID, handleOspRequestData, handleOspRequestPrepareOffChain, initEAS, multiAttestBASOffChain, multiAttestBASOnChain, multiAttestBasUploadGreenField, multiAttestBasUploadGreenField_String, oneAttestBasUploadGreenField, registerSchema, selectSp, serializeJsonString };
+export { type AttestParams, type AttestationRequestData, BAS, CommunitySchema, CommunitySchemaUID, type DelegatedAttestParams, FollowSchema, FollowSchemaUID, FollowedSchema, FollowedSchemaUID, GreenFieldClientTS, type HandleOspReturnData, type HandleOspReturnDataOffChain, JoinSchema, JoinSchemaUID, JoinedSchema, JoinedSchemaUID, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, OspDataType, OspDataTypeMap, OspSchemaMap, ProfileSchema, ProfileSchemaUID, type RegisterSchemaParams, SchemaEncoder, type Signature, type SignedOffchainAttestation, createObjectAttestOSP, createObjectMulAttestOSP, encodeAddrToBucketName, encodeCommunityData, type encodeCommunityDataParams, encodeFollowData, type encodeFollowDataParams, encodeFollowedData, encodeJoinData, type encodeJoinDataParams, encodeJoinedData, encodeProfileData, type encodeProfileDataParams, getAllSps, getAttestParamsOffChain, getAttestationBAS, getAttestationOffChain, getAttestationRequestData, getDeployer, getKmsSigner, getMulAttestParams, getOffchainUIDBAS, getSchemaByUID, getSigatureByDelegation, getSps, getbBundleUID, handleOspRequestData, handleOspRequestPrepareOffChain, initEAS, multiAttestBASOffChain, multiAttestBASOnChain, multiAttestBasUploadGreenField, multiAttestBasUploadGreenField_String, oneAttestBasUploadGreenField, registerSchema, selectSp, serializeJsonString };

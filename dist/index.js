@@ -442,9 +442,13 @@ __export(src_exports, {
   CommunitySchemaUID: () => CommunitySchemaUID,
   FollowSchema: () => FollowSchema,
   FollowSchemaUID: () => FollowSchemaUID,
+  FollowedSchema: () => FollowedSchema,
+  FollowedSchemaUID: () => FollowedSchemaUID,
   GreenFieldClientTS: () => GreenFieldClientTS,
   JoinSchema: () => JoinSchema,
   JoinSchemaUID: () => JoinSchemaUID,
+  JoinedSchema: () => JoinedSchema,
+  JoinedSchemaUID: () => JoinedSchemaUID,
   OspDataType: () => OspDataType,
   OspDataTypeMap: () => OspDataTypeMap,
   OspSchemaMap: () => OspSchemaMap,
@@ -456,7 +460,9 @@ __export(src_exports, {
   encodeAddrToBucketName: () => encodeAddrToBucketName,
   encodeCommunityData: () => encodeCommunityData,
   encodeFollowData: () => encodeFollowData,
+  encodeFollowedData: () => encodeFollowedData,
   encodeJoinData: () => encodeJoinData,
+  encodeJoinedData: () => encodeJoinedData,
   encodeProfileData: () => encodeProfileData,
   getAllSps: () => getAllSps,
   getAttestParamsOffChain: () => getAttestParamsOffChain,
@@ -516,54 +522,69 @@ var import_eas_sdk3 = require("@ethereum-attestation-service/eas-sdk");
 var import_eas_sdk2 = require("@ethereum-attestation-service/eas-sdk");
 var OspDataType = /* @__PURE__ */ ((OspDataType2) => {
   OspDataType2[OspDataType2["None"] = 0] = "None";
-  OspDataType2[OspDataType2["Follow"] = 1] = "Follow";
-  OspDataType2[OspDataType2["Profile"] = 2] = "Profile";
-  OspDataType2[OspDataType2["Community"] = 3] = "Community";
-  OspDataType2[OspDataType2["Join"] = 4] = "Join";
+  OspDataType2[OspDataType2["Profile"] = 1] = "Profile";
+  OspDataType2[OspDataType2["Follow"] = 2] = "Follow";
+  OspDataType2[OspDataType2["Followed"] = 3] = "Followed";
+  OspDataType2[OspDataType2["Community"] = 4] = "Community";
+  OspDataType2[OspDataType2["Join"] = 5] = "Join";
+  OspDataType2[OspDataType2["Joined"] = 6] = "Joined";
   return OspDataType2;
 })(OspDataType || {});
-var FollowSchemaUID = "0x1c9575bc318527d66fad7fc50aae6e2153185fcc624e14cf0af562d87d869be2";
 var ProfileSchemaUID = "0x7c90370dcf194ce4c2851abec14da05abd98d8860ae7147ac714755430d42f6e";
+var FollowSchemaUID = "0xc21ba57124d1c884e89d561c9ba60a80a98733d2553d000d06cc5a98a0534b11";
+var FollowedSchemaUID = "0xa0d8de56036149d7613854b8e58ce2bcc402cd065bae55a96d7a5f86095d5221";
 var CommunitySchemaUID = "0x18c1dbf9c1a1c6a64b661c23110116f80b7d6897839334b724ea2a46056bee94";
-var JoinSchemaUID = "0x3a017e34de4075a58f3a6a2826823a95bf38924b87646b68621c5fb4c2201069";
+var JoinSchemaUID = "0x15ce785a4cd0951c813f27917308bb632162855f33d4a93b3bf05e35a70c8510";
+var JoinedSchemaUID = "0xe1685d5f5e58134cbcd44a1f3250027c2192a2c9552cb1fbe048ad3e6e999ed6";
 var OspDataTypeMap = /* @__PURE__ */ new Map([
-  [1 /* Follow */, FollowSchemaUID],
-  [2 /* Profile */, ProfileSchemaUID],
-  [3 /* Community */, CommunitySchemaUID],
-  [4 /* Join */, JoinSchemaUID]
+  [1 /* Profile */, ProfileSchemaUID],
+  [2 /* Follow */, FollowSchemaUID],
+  [3 /* Followed */, FollowedSchemaUID],
+  [4 /* Community */, CommunitySchemaUID],
+  [5 /* Join */, JoinSchemaUID],
+  [6 /* Joined */, JoinedSchemaUID]
 ]);
-var FollowSchema = "bytes32 followTx, address follower, uint256 followedProfileId";
 var ProfileSchema = "bytes32 createProfileTx, address profileOwner, uint256 profileId, string handle";
+var FollowSchema = "bytes32 followTx, address follower, address followedAddress, uint256 followedProfileId";
+var FollowedSchema = "bytes32 followTx, string type, address follower, address followedAddress, uint256 followedProfileId";
 var CommunitySchema = "bytes32 createCommunityTx, address communityOwner, uint256 communityId, string handle, address joinNFT";
-var JoinSchema = "bytes32 joinTx, address joiner, uint256 communityId";
+var JoinSchema = "bytes32 joinTx, address joiner, uint256 communityId, address communityOwner";
+var JoinedSchema = "bytes32 joinTx, string type, address joiner, uint256 communityId, address communityOwner";
 var OspSchemaMap = /* @__PURE__ */ new Map([
-  [1 /* Follow */, FollowSchema],
-  [2 /* Profile */, ProfileSchema],
-  [3 /* Community */, CommunitySchema],
-  [4 /* Join */, JoinSchema]
+  [1 /* Profile */, ProfileSchema],
+  [2 /* Follow */, FollowSchema],
+  [3 /* Followed */, FollowedSchema],
+  [4 /* Community */, CommunitySchema],
+  [5 /* Join */, JoinSchema],
+  [6 /* Joined */, JoinedSchema]
 ]);
 var encodeFollowData = (param) => {
   const schemaEncoder = new import_eas_sdk2.SchemaEncoder(FollowSchema);
-  const encodedData = schemaEncoder.encodeData([
+  return schemaEncoder.encodeData([
     { name: "followTx", value: param.followTx, type: "bytes32" },
     { name: "follower", value: param.follower, type: "address" },
-    {
-      name: "followedProfileId",
-      value: param.followedProfileId,
-      type: "uint256"
-    }
+    { name: "followedAddress", value: param.followedAddress, type: "address" },
+    { name: "followedProfileId", value: param.followedProfileId, type: "uint256" }
   ]);
-  return encodedData;
+};
+var encodeFollowedData = (param) => {
+  const schemaEncoder = new import_eas_sdk2.SchemaEncoder(FollowedSchema);
+  return schemaEncoder.encodeData([
+    { name: "followTx", value: param.followTx, type: "bytes32" },
+    { name: "type", value: "followed", type: "string" },
+    { name: "follower", value: param.follower, type: "address" },
+    { name: "followedAddress", value: param.followedAddress, type: "address" },
+    { name: "followedProfileId", value: param.followedProfileId, type: "uint256" }
+  ]);
 };
 var encodeProfileData = (param) => {
   const schemaEncoder = new import_eas_sdk2.SchemaEncoder(ProfileSchema);
-  const encodedData = schemaEncoder.encodeData([
+  return schemaEncoder.encodeData([
     { name: "createProfileTx", value: param.createProfileTx, type: "bytes32" },
     { name: "profileOwner", value: param.profileOwner, type: "address" },
     { name: "profileId", value: param.profileId, type: "uint256" },
     { name: "handle", value: param.handle, type: "string" }
   ]);
-  return encodedData;
 };
 var encodeCommunityData = (param) => {
   const schemaEncoder = new import_eas_sdk2.SchemaEncoder(CommunitySchema);
@@ -585,7 +606,19 @@ var encodeJoinData = (param) => {
   const encodedData = schemaEncoder.encodeData([
     { name: "joinTx", value: param.joinTx, type: "bytes32" },
     { name: "joiner", value: param.joiner, type: "address" },
-    { name: "communityId", value: param.communityId, type: "uint256" }
+    { name: "communityId", value: param.communityId, type: "uint256" },
+    { name: "communityOwner", value: param.communityOwner, type: "address" }
+  ]);
+  return encodedData;
+};
+var encodeJoinedData = (param) => {
+  const schemaEncoder = new import_eas_sdk2.SchemaEncoder(JoinedSchema);
+  const encodedData = schemaEncoder.encodeData([
+    { name: "joinTx", value: param.joinTx, type: "bytes32" },
+    { name: "type", value: "joined", type: "string" },
+    { name: "joiner", value: param.joiner, type: "address" },
+    { name: "communityId", value: param.communityId, type: "uint256" },
+    { name: "communityOwner", value: param.communityOwner, type: "address" }
   ]);
   return encodedData;
 };
@@ -1586,7 +1619,7 @@ function bufferToReadableStream(bufferData) {
 function _getBundle(objs) {
   return __async(this, null, function* () {
     const { bundle, fd } = yield Bundle.newBundle();
-    yield new Promise((resolve) => setTimeout(resolve, 1e3));
+    yield new Promise((resolve) => setTimeout(resolve, 100));
     try {
       try {
         for (var iter = __forAwait(objs), more, temp, error; more = !(temp = yield iter.next()).done; more = false) {
@@ -1757,20 +1790,22 @@ var handleOspRequestData = (chainId, jsonData) => {
       const encodedData = encodeFollowData({
         followTx: data.transactionHash,
         follower: data.userAddress,
+        followedAddress: data.referencedUserAddress,
         followedProfileId: BigInt(data.referencedProfileId).toString()
       });
       return {
-        dataType: 1 /* Follow */,
+        dataType: 2 /* Follow */,
         requestData: getAttestationRequestData(data.userAddress, encodedData)
       };
     } else if (data.name === "JoinNFTTransferred") {
       const encodedData = encodeJoinData({
         joinTx: data.transactionHash,
         joiner: data.userAddress,
-        communityId: BigInt(data.communityId).toString()
+        communityId: BigInt(data.communityId).toString(),
+        communityOwner: data.communityOwnerAddress
       });
       return {
-        dataType: 4 /* Join */,
+        dataType: 5 /* Join */,
         requestData: getAttestationRequestData(data.userAddress, encodedData)
       };
     } else if (data.name === "ProfileCreated") {
@@ -1781,7 +1816,7 @@ var handleOspRequestData = (chainId, jsonData) => {
         handle: data.handle
       });
       return {
-        dataType: 2 /* Profile */,
+        dataType: 1 /* Profile */,
         requestData: getAttestationRequestData(data.userAddress, encodedData)
       };
     } else if (data.name === "CommunityCreated") {
@@ -1793,7 +1828,7 @@ var handleOspRequestData = (chainId, jsonData) => {
         joinNFT: data.joinNFT
       });
       return {
-        dataType: 3 /* Community */,
+        dataType: 4 /* Community */,
         requestData: getAttestationRequestData(data.userAddress, encodedData)
       };
     }
@@ -1805,35 +1840,58 @@ var handleOspRequestData = (chainId, jsonData) => {
 };
 var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
   const data = JSON.parse(jsonData);
+  let handledDatas = new Array();
   if (Number(data.chainId) === chainId || chainId === 0) {
     if (data.name === "FollowSBTTransferred") {
-      const encodedData = encodeFollowData({
+      const followData = {
         followTx: data.transactionHash,
         follower: data.userAddress,
+        followedAddress: data.referencedUserAddress,
         followedProfileId: BigInt(data.referencedProfileId).toString()
-      });
-      return {
-        dataType: 1 /* Follow */,
-        requestData: getAttestParamsOffChain(
-          1 /* Follow */,
-          data.userAddress,
-          encodedData
-        )
       };
+      const encodedFollowData = encodeFollowData(followData);
+      handledDatas.push({
+        dataType: 2 /* Follow */,
+        requestData: getAttestParamsOffChain(
+          2 /* Follow */,
+          data.userAddress,
+          encodedFollowData
+        )
+      });
+      const encodedFollowedData = encodeFollowedData(followData);
+      handledDatas.push({
+        dataType: 3 /* Followed */,
+        requestData: getAttestParamsOffChain(
+          3 /* Followed */,
+          data.referencedUserAddress,
+          encodedFollowedData
+        )
+      });
     } else if (data.name === "JoinNFTTransferred") {
-      const encodedData = encodeJoinData({
+      const joinData = {
         joinTx: data.transactionHash,
         joiner: data.userAddress,
-        communityId: BigInt(data.communityId).toString()
-      });
-      return {
-        dataType: 4 /* Join */,
-        requestData: getAttestParamsOffChain(
-          4 /* Join */,
-          data.userAddress,
-          encodedData
-        )
+        communityId: BigInt(data.communityId).toString(),
+        communityOwner: data.communityOwnerAddress
       };
+      const encodedJoinData = encodeJoinData(joinData);
+      handledDatas.push({
+        dataType: 5 /* Join */,
+        requestData: getAttestParamsOffChain(
+          5 /* Join */,
+          data.userAddress,
+          encodedJoinData
+        )
+      });
+      const encodedJoinedData = encodeJoinedData(joinData);
+      handledDatas.push({
+        dataType: 6 /* Joined */,
+        requestData: getAttestParamsOffChain(
+          6 /* Joined */,
+          data.communityOwnerAddress,
+          encodedJoinedData
+        )
+      });
     } else if (data.name === "ProfileCreated") {
       const encodedData = encodeProfileData({
         createProfileTx: data.transactionHash,
@@ -1841,14 +1899,14 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
         profileId: BigInt(data.profileId).toString(),
         handle: data.handle
       });
-      return {
-        dataType: 2 /* Profile */,
+      handledDatas.push({
+        dataType: 1 /* Profile */,
         requestData: getAttestParamsOffChain(
-          2 /* Profile */,
+          1 /* Profile */,
           data.userAddress,
           encodedData
         )
-      };
+      });
     } else if (data.name === "CommunityCreated") {
       const encodedData = encodeCommunityData({
         createCommunityTx: data.transactionHash,
@@ -1857,20 +1915,22 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
         handle: data.handle,
         joinNFT: data.joinNFT
       });
-      return {
-        dataType: 3 /* Community */,
+      handledDatas.push({
+        dataType: 4 /* Community */,
         requestData: getAttestParamsOffChain(
-          3 /* Community */,
+          4 /* Community */,
           data.userAddress,
           encodedData
         )
-      };
+      });
     }
+  } else {
+    handledDatas.push({
+      dataType: 0 /* None */,
+      requestData: null
+    });
   }
-  return {
-    dataType: 0 /* None */,
-    requestData: null
-  };
+  return handledDatas;
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
@@ -1879,9 +1939,13 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
   CommunitySchemaUID,
   FollowSchema,
   FollowSchemaUID,
+  FollowedSchema,
+  FollowedSchemaUID,
   GreenFieldClientTS,
   JoinSchema,
   JoinSchemaUID,
+  JoinedSchema,
+  JoinedSchemaUID,
   OspDataType,
   OspDataTypeMap,
   OspSchemaMap,
@@ -1893,7 +1957,9 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
   encodeAddrToBucketName,
   encodeCommunityData,
   encodeFollowData,
+  encodeFollowedData,
   encodeJoinData,
+  encodeJoinedData,
   encodeProfileData,
   getAllSps,
   getAttestParamsOffChain,
