@@ -13302,7 +13302,6 @@ var Bundle = class _Bundle {
     return __async(this, null, function* () {
       const tempDir = path.join(process.env.TEMP || os.tmpdir(), "tempBundleDir");
       yield fs.promises.mkdir(tempDir, { recursive: true });
-      const dir = yield fs.promises.mkdtemp(path.join(tempDir, "tempBundle"));
       const bundleFile = path.join(tempDir, `tempFile-${Date.now()}.tmp`);
       const fd = yield fs.promises.open(bundleFile, "w");
       const readFile = fs.createReadStream(bundleFile);
