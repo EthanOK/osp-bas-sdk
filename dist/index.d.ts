@@ -219,7 +219,7 @@ declare const createObjectMulAttestOSP: (bucketName: string, schemaUID: string, 
  * @param addr
  * @returns bucket name
  */
-declare const encodeAddrToBucketName: (addr: string) => string;
+declare const encodeAddrToBucketName: (prefix: string, addr: string) => string;
 declare const getSps: (client: any) => Promise<any>;
 declare const getAllSps: (client: any) => Promise<any>;
 declare const selectSp: (client: any) => Promise<{

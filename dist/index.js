@@ -626,8 +626,8 @@ var encodeJoinedData = (param) => {
 // src/greenfield/utils.ts
 var import_ethers = require("ethers");
 var import_crypto = __toESM(require("crypto"));
-var encodeAddrToBucketName = (addr) => {
-  return `bas-${(0, import_ethers.hashMessage)((0, import_ethers.getAddress)(addr)).substring(2, 42)}`;
+var encodeAddrToBucketName = (prefix, addr) => {
+  return `${prefix}-${(0, import_ethers.hashMessage)((0, import_ethers.getAddress)(addr)).substring(2, 42)}`;
 };
 var getSps = (client2) => __async(void 0, null, function* () {
   const sps = yield client2.sp.getStorageProviders();
@@ -1639,7 +1639,7 @@ function _getBundle(objs) {
         }
       }
       const result = yield bundle.finalizeBundle();
-      fd.close();
+      yield fd.close();
       return result;
     } catch (err) {
       console.log(err);
@@ -1665,6 +1665,9 @@ var createObjectAttestOSP = (bucketName, attestation, privateKey, isPrivate = fa
 });
 var createObjectMulAttestOSP = (bucketName, schemaUID, attestations, privateKey, isPrivate = false) => __async(void 0, null, function* () {
   const { objectName, buffer } = yield getBundleBuffer(schemaUID, attestations);
+  if (buffer.length === 0) {
+    return false;
+  }
   const txHash = yield client.createObjectByBundle(
     bucketName,
     objectName,

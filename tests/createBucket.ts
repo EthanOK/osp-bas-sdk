@@ -1,5 +1,5 @@
 // npm link osp-bas-sdk
-import { encodeAddrToBucketName, GreenFieldClientTS } from "osp-bas-sdk";
+import { encodeAddrToBucketName, GreenFieldClientTS } from "../src";
 import { PrivateKey } from "./config";
 
 async function main() {
@@ -9,7 +9,7 @@ async function main() {
     "0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2"
   );
   await client.createBucket(
-    // encodeAddrToBucketName("0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2"),
+    // encodeAddrToBucketName("bas","0x6278A1E803A76796a3A1f7F6344fE874ebfe94B2"),
     "bas-test-3",
     PrivateKey
   );

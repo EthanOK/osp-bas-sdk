@@ -23,7 +23,7 @@ async function createAttestation() {
   const Global_UnHandle_Data: HandleOspReturnData[] = [];
   for (let i = 0; i < 4; i++) {
     const recipient = ethers.Wallet.createRandom().address;
-
+    const followedAddress = ethers.Wallet.createRandom().address;
     const followHash = hexlify(randomBytes(32));
     if (i % 2 === 0) {
       Global_UnHandle_Data.push({
@@ -33,6 +33,7 @@ async function createAttestation() {
           encodeFollowData({
             followTx: followHash,
             follower: recipient,
+            followedAddress:followedAddress,
             followedProfileId: i.toString(),
           })
         ),

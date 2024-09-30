@@ -107,14 +107,14 @@ let res = null;
               Global_UnHandle_Data.length = 0;
             }
           } else {
-            const handleOspReturnDataOffChain = handleOspRequestPrepareOffChain(
-              chainId,
-              message.MessageBody
-            );
-            console.log(handleOspReturnDataOffChain);
-            if (handleOspReturnDataOffChain.requestData != null) {
-              Global_UnHandle_Data.push(handleOspReturnDataOffChain);
+            const handleOspReturnDataOffChains =
+              handleOspRequestPrepareOffChain(chainId, message.MessageBody);
+            for (const handleOspReturnDataOffChain of handleOspReturnDataOffChains) {
+              if (handleOspReturnDataOffChain.dataType != 0) {
+                Global_UnHandle_Data.push(handleOspReturnDataOffChain);
+              }
             }
+
             if (Global_UnHandle_Data.length >= 2) {
               console.log("Global_UnHandle_Data length:");
               console.log(Global_UnHandle_Data.length);

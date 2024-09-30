@@ -51,6 +51,10 @@ export const createObjectMulAttestOSP = async (
 ): Promise<boolean> => {
   const { objectName, buffer } = await getBundleBuffer(schemaUID, attestations);
 
+  if (buffer.length === 0) {
+    return false;
+  }
+
   const txHash = await client.createObjectByBundle(
     bucketName,
     objectName,
