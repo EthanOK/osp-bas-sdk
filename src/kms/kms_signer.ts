@@ -8,8 +8,8 @@ export const getDeployer = async () => {
       keyId: process.env.AWS_KMS_KEY_ID!,
       region: process.env.AWS_REGION!,
       credentials: {
-        accessKeyId: process.env.ACCESS_KEY_ID!,
-        secretAccessKey: process.env.SECRET_ACCESS_KEY!,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
       },
     },
     provider
@@ -25,8 +25,8 @@ export const getKmsSigner = (provider?: Provider) => {
       keyId: process.env.AWS_KMS_KEY_ID!,
       region: process.env.AWS_REGION!,
       credentials: {
-        accessKeyId: process.env.ACCESS_KEY_ID!,
-        secretAccessKey: process.env.SECRET_ACCESS_KEY!,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
       },
     },
     provider

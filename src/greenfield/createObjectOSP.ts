@@ -4,11 +4,17 @@ import "dotenv/config";
 import { serializeJsonString } from "./utils";
 import { getBundleBuffer } from "../bundle/utils";
 
-const client = new GreenFieldClientTS(
-  process.env.GREEN_RPC_URL!,
-  process.env.GREEN_CHAIN_ID!,
-  process.env.GREEN_PAYMENT_ADDRESS!
-);
+let client = null;
+function getGreenFieldClientTS() {
+  console.log("init greenfield client");
+
+  const client_gf = new GreenFieldClientTS(
+    process.env.GREEN_RPC_URL!,
+    process.env.GREEN_CHAIN_ID!,
+    process.env.GREEN_PAYMENT_ADDRESS!
+  );
+  return client_gf;
+}
 
 /**
  * Create object with attestation
@@ -24,6 +30,9 @@ export const createObjectAttestOSP = async (
   privateKey: string,
   isPrivate = false
 ): Promise<boolean> => {
+  if (client === null) {
+    client = getGreenFieldClientTS();
+  }
   const txHash = await client.createObject(
     bucketName,
     serializeJsonString(attestation),
@@ -36,8 +45,8 @@ export const createObjectAttestOSP = async (
 /**
  * Create object with multiple attestation
  * @param bucketName bucket name
+ * @param schemaUID schema uid
  * @param attestations attestations
- * @param fileName file name
  * @param privateKey creator private key
  * @param isPrivate is private object
  * @returns boolean
@@ -49,6 +58,9 @@ export const createObjectMulAttestOSP = async (
   privateKey: string,
   isPrivate = false
 ): Promise<boolean> => {
+  if (client === null) {
+    client = getGreenFieldClientTS();
+  }
   const { objectName, buffer } = await getBundleBuffer(schemaUID, attestations);
 
   if (buffer.length === 0) {

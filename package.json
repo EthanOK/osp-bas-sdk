@@ -1,6 +1,6 @@
 {
   "name": "osp-bas-sdk",
-  "version": "0.0.11-beta.4",
+  "version": "0.0.11-beta.5",
   "description": "This is the BAS SDK for OSP",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -21,6 +21,7 @@
     "dist"
   ],
   "dependencies": {
+    "@alicloud/kms20160120": "^2.2.3",
     "@aliyunmq/mq-http-sdk": "^1.0.4",
     "@bnb-chain/greenfield-js-sdk": "^2.1.1",
     "@bnb-chain/reed-solomon": "^1.1.3",

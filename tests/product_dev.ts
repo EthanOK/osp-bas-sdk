@@ -5,13 +5,19 @@ import {
   OspSchemaMap,
   registerSchema,
 } from "../src";
+import { getPrivateKeyByKms } from "./config";
 
 async function prepareSchemaAndBucket() {
   // register Schema
+
+  const PrivateKey = await getPrivateKeyByKms();
+
   const signer = new ethers.Wallet(
-    process.env.GREEN_PAYMENT_PRIVATE_KEY!,
+    PrivateKey,
     new ethers.JsonRpcProvider(process.env.BNB_RPC_URL!)
   );
+  const chainId = (await signer.provider.getNetwork()).chainId.toString();
+
   const schemaNames = [];
   OspSchemaMap.forEach(async (value, key) => {
     const schemaName = value;
@@ -22,7 +28,9 @@ async function prepareSchemaAndBucket() {
     try {
       const schemaUID = await registerSchema(
         signer,
-        process.env.SCHEMA_REGISTRY_BNB!,
+        chainId == "56" || chainId == "97"
+          ? process.env.SCHEMA_REGISTRY_BNB!
+          : process.env.SCHEMA_REGISTRY_OPBNB!,
         {
           schema: schemaNames[i],
           resolverAddress: "0x0000000000000000000000000000000000000000",
