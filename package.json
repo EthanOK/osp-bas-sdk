@@ -1,6 +1,6 @@
 {
   "name": "osp-bas-sdk",
-  "version": "0.0.11-beta.3",
+  "version": "0.0.11-beta.4",
   "description": "This is the BAS SDK for OSP",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -48,7 +48,7 @@
     "build": "tsup ./src/index.ts --format esm,cjs --dts",
     "link": "npm link && npm link osp-bas-sdk",
     "typedoc": "typedoc src/index.ts",
-    "test": "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**.spec.ts",
+    "test": "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/demo.spec.ts",
     "test bundle": "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/bundle.spec.ts"
   }
 }

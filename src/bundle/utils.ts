@@ -62,7 +62,7 @@ async function _getBundle(objs: SingleBundleObject[]) {
 
     const result = await bundle.finalizeBundle();
     
-    fd.close();
+    await fd.close();
 
     return result;
   } catch (err) {

@@ -8,7 +8,7 @@ import {
   HandleOspReturnDataOffChain,
   multiAttestBasUploadGreenField,
   oneAttestBasUploadGreenField,
-// } from "osp-bas-sdk";
+  // } from "osp-bas-sdk";
 } from "../src";
 import { ethers, hexlify, keccak256, randomBytes } from "ethers";
 
@@ -21,6 +21,7 @@ async function main() {
 
   for (let i = 0; i < 5; i++) {
     const recipient = ethers.Wallet.createRandom().address;
+    const followedAddress = ethers.Wallet.createRandom().address;
     const followHash = hexlify(randomBytes(32));
     if (dataType === 1) {
       Global_UnHandle_Data.push({
@@ -31,6 +32,7 @@ async function main() {
           encodeFollowData({
             followTx: followHash,
             follower: recipient,
+            followedAddress: followedAddress,
             followedProfileId: i.toString(),
           })
         ),
@@ -66,7 +68,7 @@ async function main() {
     timestamp = Math.floor(Date.now() / 1000);
     const schemaUID = Global_UnHandle_Data[0].requestData.schemaUID;
     const success = await multiAttestBasUploadGreenField(
-      encodeAddrToBucketName(process.env.GREEN_PAYMENT_ADDRESS!),
+      encodeAddrToBucketName("bas", process.env.GREEN_PAYMENT_ADDRESS!),
       schemaUID,
       Global_UnHandle_Data,
       false

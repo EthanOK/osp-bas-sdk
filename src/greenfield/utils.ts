@@ -7,8 +7,8 @@ import crypto from "crypto";
  * @param addr
  * @returns bucket name
  */
-export const encodeAddrToBucketName = (addr: string) => {
-  return `bas-${hashMessage(getAddress(addr)).substring(2, 42)}`;
+export const encodeAddrToBucketName = (prefix: string, addr: string) => {
+  return `${prefix}-${hashMessage(getAddress(addr)).substring(2, 42)}`;
 };
 export const getSps = async (client) => {
   const sps = await client.sp.getStorageProviders();
