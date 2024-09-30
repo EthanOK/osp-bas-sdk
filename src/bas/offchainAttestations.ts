@@ -5,12 +5,14 @@ import {
   createObjectAttestOSP,
   createObjectMulAttestOSP,
 } from "../greenfield/createObjectOSP";
+import KmsClient from "../kms/kms_client";
 
+let privateKey = "";
 /**
  *  multiAttestBasUploadGreenField
  * @param bucketName
+ * @param schemaUID
  * @param unHandleDatas
- * @param fileName
  * @param isPrivate
  * @returns boolean
  */
@@ -21,7 +23,9 @@ export const multiAttestBasUploadGreenField = async (
   isPrivate?: boolean
 ) => {
   try {
-    const privateKey = process.env.GREEN_PAYMENT_PRIVATE_KEY!;
+    if (privateKey == "") {
+      privateKey = await getPrivateKeyByKms();
+    }
     const signer = new ethers.Wallet(
       privateKey,
       new ethers.JsonRpcProvider(process.env.BNB_RPC_URL!)
@@ -38,7 +42,8 @@ export const multiAttestBasUploadGreenField = async (
     );
     return success;
   } catch (e) {
-    // console.log(e);
+    console.log(e);
+    return false;
   }
   return false;
 };
@@ -49,7 +54,9 @@ export const oneAttestBasUploadGreenField = async (
   isPrivate?: boolean
 ) => {
   try {
-    const privateKey = process.env.GREEN_PAYMENT_PRIVATE_KEY!;
+    if (privateKey == "") {
+      privateKey = await getPrivateKeyByKms();
+    }
     const signer = new ethers.Wallet(
       privateKey,
       new ethers.JsonRpcProvider(process.env.BNB_RPC_URL!)
@@ -76,7 +83,9 @@ export const multiAttestBasUploadGreenField_String = async (
   isPrivate?: boolean
 ) => {
   try {
-    const privateKey = process.env.GREEN_PAYMENT_PRIVATE_KEY!;
+    if (privateKey == "") {
+      privateKey = await getPrivateKeyByKms();
+    }
     const signer = new ethers.Wallet(
       privateKey,
       new ethers.JsonRpcProvider(process.env.BNB_RPC_URL!)
@@ -90,7 +99,6 @@ export const multiAttestBasUploadGreenField_String = async (
       bucketName,
       schemaUID,
       attestations,
-
       privateKey,
       isPrivate
     );
@@ -100,3 +108,26 @@ export const multiAttestBasUploadGreenField_String = async (
   }
   return false;
 };
+
+async function getPrivateKeyByKms(): Promise<string> {
+  try {
+    console.log("init KmsClient");
+
+    let client = new KmsClient({
+      accessKeyId: process.env.ALIBABA_CLOUD_ACCESS_KEY_ID!,
+      accessKeySecret: process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET!,
+      regionId: process.env.ALIBABA_CLOUD_REGION_ID!,
+      keyId: process.env.ALIBABA_CLOUD_KMS_KEY_ID!,
+    });
+
+    let decryptRes = await client.decrypt(
+      process.env.GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT,
+      {}
+    );
+
+    return decryptRes.body.plaintext;
+  } catch (e) {
+    console.log(e);
+  }
+  return "";
+}

@@ -5,11 +5,15 @@ import {
   RegisterSchemaParams,
 } from "osp-bas-sdk";
 import { ethers } from "ethers";
-import { BNB_schemaRegistryAddress, PrivateKey } from "./config";
+import { BNB_schemaRegistryAddress, getPrivateKeyByKms } from "./config";
 
 async function main() {
+  const PrivateKey = await getPrivateKeyByKms();
+  
+  // "https://opbnb-testnet-rpc.bnbchain.org"
+  // "https://rpc.ankr.com/bsc_testnet_chapel"
   const provider = new ethers.JsonRpcProvider(
-    "https://rpc.ankr.com/bsc_testnet_chapel"
+    "https://opbnb-testnet-rpc.bnbchain.org"
   );
   const signer = new ethers.Wallet(PrivateKey, provider);
 

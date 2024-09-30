@@ -6,12 +6,12 @@ import {
   getKmsSigner,
   GreenFieldClientTS,
   SchemaEncoder,
-} from "osp-bas-sdk";
+} from "../src";
 import { ethers } from "ethers";
 import {
   BNB_basAddress,
   BNB_schemaRegistryAddress,
-  PrivateKey,
+  getPrivateKeyByKms,
 } from "./config";
 
 async function main() {

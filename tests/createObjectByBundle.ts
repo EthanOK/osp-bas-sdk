@@ -15,7 +15,7 @@ import {
 } from "../src";
 import { Readable } from "stream";
 import { Bundle } from "../src/bundle/bundle";
-import { BNB_basAddress, PrivateKey } from "./config";
+import { BNB_basAddress, getPrivateKeyByKms } from "./config";
 import { ethers } from "ethers";
 import { getBundleBuffer } from "../src/bundle/utils";
 
@@ -23,6 +23,9 @@ async function main() {
   const provider = new ethers.JsonRpcProvider(
     "https://rpc.ankr.com/bsc_testnet_chapel"
   );
+  
+  const PrivateKey = await getPrivateKeyByKms();
+
   const signer = new ethers.Wallet(PrivateKey, provider);
   const client = new GreenFieldClientTS(
     "https://gnfd-testnet-fullnode-tendermint-us.bnbchain.org",

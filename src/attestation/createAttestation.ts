@@ -42,17 +42,17 @@ export interface DelegatedAttestParams extends AttestParams {
 }
 
 /**
- * Create attestation
+ * get attestation
+ * @param offchain offchain instance
  * @param signer signer
- * @param bas bas
  * @param params attestation params
- * @returns attestation Json Object
+ * @returns attestation
  */
 export const getAttestationOffChain = async (
   offchain: Offchain,
   signer: Signer,
   params: AttestParams
-) => {
+): Promise<SignedOffchainAttestation> => {
   const timestamp = Math.floor(Date.now() / 1000);
 
   const attestation = await offchain.signOffchainAttestation(
@@ -189,19 +189,22 @@ export const multiAttestBASOnChain = async (
 };
 
 /**
- * Create multi attestation
+ * get multi attestation
  * @param signer signer
- * @param params multi attestation params
- * @returns attestations type is json object[]
+ * @param unHandleDatas
+ * @returns attestations  SignedOffchainAttestation[]
  */
 export const multiAttestBASOffChain = async (
   signer: Signer,
   unHandleDatas: HandleOspReturnDataOffChain[]
 ): Promise<SignedOffchainAttestation[]> => {
-  const offchain = await new EAS(process.env.BAS_ADDRESS_BNB!)
-    .connect(signer)
-    .getOffchain();
- 
+  const chainId = (await signer.provider.getNetwork()).chainId.toString();
+  const BAS_ADDRESS =
+    chainId == "56" || chainId == "97"
+      ? process.env.BAS_ADDRESS_BNB
+      : process.env.BAS_ADDRESS_OPBNB;
+  const offchain = await new EAS(BAS_ADDRESS).connect(signer).getOffchain();
+
   const attestations: SignedOffchainAttestation[] = [];
   try {
     for (let i = 0; i < unHandleDatas.length; i++) {
@@ -214,7 +217,7 @@ export const multiAttestBASOffChain = async (
         offchain,
         signer,
         data.requestData
-      ); 
+      );
       const attestation_new = await getAttestationBAS(signer, attestation);
       attestations.push(attestation_new);
     }
