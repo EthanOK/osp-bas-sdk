@@ -41,7 +41,7 @@ import { ethers, hexlify, keccak256, randomBytes } from "ethers";
 
 async function main() {
   
-  setOspBasSdkConfig({
+  await setOspBasSdkConfig({
     basConfig: {
       RPC_URL: process.env.BNB_RPC_URL!,
       BAS_ADDRESS: process.env.BAS_ADDRESS_OPBNB!,

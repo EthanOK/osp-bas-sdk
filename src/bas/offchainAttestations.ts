@@ -10,9 +10,9 @@ import {
   getBasConfig,
   getGreenfieldConfig,
   getKmsCryptConfig,
+  getPrivateKey,
 } from "../config/config";
 
-let privateKey = "";
 /**
  *  multiAttestBasUploadGreenField
  * @param bucketName
@@ -28,10 +28,12 @@ export const multiAttestBasUploadGreenField = async (
   isPrivate?: boolean
 ) => {
   try {
+    const privateKey = getPrivateKey();
     if (privateKey == "") {
-      privateKey = await getPrivateKeyByKms();
-      if (privateKey == "") return false;
+      console.log("private key is null");
+      return false;
     }
+
     const basConfig = getBasConfig();
     if (basConfig === null) {
       console.log("bas config is null");
@@ -65,16 +67,18 @@ export const oneAttestBasUploadGreenField = async (
   isPrivate?: boolean
 ) => {
   try {
+    const privateKey = getPrivateKey();
     if (privateKey == "") {
-      privateKey = await getPrivateKeyByKms();
-      if (privateKey == "") return false;
+      console.log("private key is null");
+      return false;
     }
+
     const basConfig = getBasConfig();
     if (basConfig === null) {
       console.log("bas config is null");
       return false;
     }
-    
+
     const signer = new ethers.Wallet(
       privateKey,
       new ethers.JsonRpcProvider(basConfig.RPC_URL!)
@@ -101,10 +105,12 @@ export const multiAttestBasUploadGreenField_String = async (
   isPrivate?: boolean
 ) => {
   try {
+    const privateKey = getPrivateKey();
     if (privateKey == "") {
-      privateKey = await getPrivateKeyByKms();
-      if (privateKey == "") return false;
+      console.log("private key is null");
+      return false;
     }
+
     const basConfig = getBasConfig();
     if (basConfig === null) {
       console.log("bas config is null");
@@ -132,37 +138,3 @@ export const multiAttestBasUploadGreenField_String = async (
     return false;
   }
 };
-
-async function getPrivateKeyByKms(): Promise<string> {
-  try {
-    console.log("init KmsClient");
-
-    const kmsConfig = getKmsCryptConfig();
-    if (kmsConfig === null) {
-      console.log("kms config is null");
-      return "";
-    }
-
-    const client = new KmsClient({
-      accessKeyId: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_ID!,
-      accessKeySecret: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_SECRET!,
-      regionId: kmsConfig.ALIBABA_CLOUD_REGION_ID!,
-      keyId: kmsConfig.ALIBABA_CLOUD_KMS_KEY_ID!,
-    });
-    const greenfieldConfig = getGreenfieldConfig();
-    if (greenfieldConfig === null) {
-      console.log("greenfield config is null");
-      return "";
-    }
-
-    let decryptRes = await client.decrypt(
-      greenfieldConfig.GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT,
-      {}
-    );
-
-    return decryptRes.body.plaintext;
-  } catch (e) {
-    console.log(e);
-    return "";
-  }
-}
