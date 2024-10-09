@@ -12630,6 +12630,43 @@ function sha256(input) {
   return "0x" + hash.digest("hex");
 }
 
+// src/config/config.ts
+var greenfieldConfig;
+var kmsCryptConfig;
+var basConfig;
+var getGreenfieldConfig = () => {
+  if (greenfieldConfig === void 0) {
+    return null;
+  }
+  return greenfieldConfig;
+};
+var setGreenfieldConfig = (config) => {
+  greenfieldConfig = config;
+};
+var getKmsCryptConfig = () => {
+  if (kmsCryptConfig === void 0) {
+    return null;
+  }
+  return kmsCryptConfig;
+};
+var setKmsCryptConfig = (config) => {
+  kmsCryptConfig = config;
+};
+var getBasConfig = () => {
+  if (basConfig === void 0) {
+    return null;
+  }
+  return basConfig;
+};
+var setBasConfig = (config) => {
+  basConfig = config;
+};
+var setOspBasSdkConfig = (config) => {
+  setBasConfig(config.basConfig);
+  setKmsCryptConfig(config.kmsCryptConfig);
+  setGreenfieldConfig(config.greenfieldConfig);
+};
+
 // src/attestation/createAttestation.ts
 var getAttestationOffChain = (offchain, signer, params) => __async(void 0, null, function* () {
   const timestamp = Math.floor(Date.now() / 1e3);
@@ -12776,9 +12813,13 @@ var getMulAttestParams = (params) => {
 };
 var multiAttestBASOnChain = (signer, params) => __async(void 0, null, function* () {
   try {
-    const basAddress = process.env.BAS_ADDRESS_OPBNB;
+    const basConfig2 = getBasConfig();
+    if (basConfig2 == null) {
+      throw new Error("basConfig is null");
+    }
+    const basAddress = basConfig2.BAS_ADDRESS;
     if (basAddress == null || basAddress == "") {
-      throw new Error("BAS_ADDRESS_OPBNB is not config in env file");
+      throw new Error("BAS_ADDRESS is null");
     }
     const bas = new EAS2(basAddress);
     bas.connect(signer);
@@ -12791,9 +12832,11 @@ var multiAttestBASOnChain = (signer, params) => __async(void 0, null, function* 
   }
 });
 var multiAttestBASOffChain = (signer, unHandleDatas) => __async(void 0, null, function* () {
-  const chainId = (yield signer.provider.getNetwork()).chainId.toString();
-  const BAS_ADDRESS = chainId == "56" || chainId == "97" ? process.env.BAS_ADDRESS_BNB : process.env.BAS_ADDRESS_OPBNB;
-  const offchain = yield new EAS2(BAS_ADDRESS).connect(signer).getOffchain();
+  const basConfig2 = getBasConfig();
+  if (basConfig2 == null) {
+    throw new Error("basConfig is null");
+  }
+  const offchain = yield new EAS2(basConfig2.BAS_ADDRESS).connect(signer).getOffchain();
   const attestations = [];
   try {
     for (let i = 0; i < unHandleDatas.length; i++) {
@@ -13599,10 +13642,15 @@ function _getBundle(objs) {
 var client = null;
 function getGreenFieldClientTS() {
   console.log("init greenfield client");
+  const greenfieldConfig2 = getGreenfieldConfig();
+  if (greenfieldConfig2 === null) {
+    console.log("greenfield config is null");
+    return null;
+  }
   const client_gf = new GreenFieldClientTS(
-    process.env.GREEN_RPC_URL,
-    process.env.GREEN_CHAIN_ID,
-    process.env.GREEN_PAYMENT_ADDRESS
+    greenfieldConfig2.GREEN_RPC_URL,
+    greenfieldConfig2.GREEN_CHAIN_ID,
+    greenfieldConfig2.GREEN_PAYMENT_ADDRESS
   );
   return client_gf;
 }
@@ -13697,10 +13745,16 @@ var multiAttestBasUploadGreenField = (bucketName, schemaUID, unHandleDatas, isPr
   try {
     if (privateKey == "") {
       privateKey = yield getPrivateKeyByKms();
+      if (privateKey == "") return false;
+    }
+    const basConfig2 = getBasConfig();
+    if (basConfig2 === null) {
+      console.log("bas config is null");
+      return false;
     }
     const signer = new ethers3.Wallet(
       privateKey,
-      new ethers3.JsonRpcProvider(process.env.BNB_RPC_URL)
+      new ethers3.JsonRpcProvider(basConfig2.RPC_URL)
     );
     const attestations = yield multiAttestBASOffChain(signer, unHandleDatas);
     const success = yield createObjectMulAttestOSP(
@@ -13720,10 +13774,16 @@ var oneAttestBasUploadGreenField = (bucketName, unHandleData, isPrivate) => __as
   try {
     if (privateKey == "") {
       privateKey = yield getPrivateKeyByKms();
+      if (privateKey == "") return false;
+    }
+    const basConfig2 = getBasConfig();
+    if (basConfig2 === null) {
+      console.log("bas config is null");
+      return false;
     }
     const signer = new ethers3.Wallet(
       privateKey,
-      new ethers3.JsonRpcProvider(process.env.BNB_RPC_URL)
+      new ethers3.JsonRpcProvider(basConfig2.RPC_URL)
     );
     const attestations = yield multiAttestBASOffChain(signer, [unHandleData]);
     const success = yield createObjectAttestOSP(
@@ -13742,10 +13802,16 @@ var multiAttestBasUploadGreenField_String = (bucketName, schemaUID, unHandleData
   try {
     if (privateKey == "") {
       privateKey = yield getPrivateKeyByKms();
+      if (privateKey == "") return false;
+    }
+    const basConfig2 = getBasConfig();
+    if (basConfig2 === null) {
+      console.log("bas config is null");
+      return false;
     }
     const signer = new ethers3.Wallet(
       privateKey,
-      new ethers3.JsonRpcProvider(process.env.BNB_RPC_URL)
+      new ethers3.JsonRpcProvider(basConfig2.RPC_URL)
     );
     const attestations = yield multiAttestBASOffChain(
       signer,
@@ -13768,14 +13834,24 @@ function getPrivateKeyByKms() {
   return __async(this, null, function* () {
     try {
       console.log("init KmsClient");
-      let client2 = new KmsClient({
-        accessKeyId: process.env.ALIBABA_CLOUD_ACCESS_KEY_ID,
-        accessKeySecret: process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET,
-        regionId: process.env.ALIBABA_CLOUD_REGION_ID,
-        keyId: process.env.ALIBABA_CLOUD_KMS_KEY_ID
+      const kmsConfig = getKmsCryptConfig();
+      if (kmsConfig === null) {
+        console.log("kms config is null");
+        return "";
+      }
+      const client2 = new KmsClient({
+        accessKeyId: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_ID,
+        accessKeySecret: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_SECRET,
+        regionId: kmsConfig.ALIBABA_CLOUD_REGION_ID,
+        keyId: kmsConfig.ALIBABA_CLOUD_KMS_KEY_ID
       });
+      const greenfieldConfig2 = getGreenfieldConfig();
+      if (greenfieldConfig2 === null) {
+        console.log("greenfield config is null");
+        return "";
+      }
       let decryptRes = yield client2.decrypt(
-        process.env.GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT,
+        greenfieldConfig2.GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT,
         {}
       );
       return decryptRes.body.plaintext;
@@ -14004,7 +14080,10 @@ export {
   getAttestationOffChain,
   getAttestationOffChainV1,
   getAttestationRequestData,
+  getBasConfig,
   getDeployer,
+  getGreenfieldConfig,
+  getKmsCryptConfig,
   getKmsSigner,
   getMulAttestParams,
   getOffchainUIDBAS,
@@ -14022,7 +14101,11 @@ export {
   oneAttestBasUploadGreenField,
   registerSchema,
   selectSp,
-  serializeJsonString
+  serializeJsonString,
+  setBasConfig,
+  setGreenfieldConfig,
+  setKmsCryptConfig,
+  setOspBasSdkConfig
 };
 /*! Bundled license information:
 

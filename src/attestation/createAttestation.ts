@@ -18,6 +18,7 @@ import {
   HandleOspReturnDataOffChain,
 } from "../handle/handleOsp";
 import { getAttestationBAS, getOffchainUIDBAS } from "../greenfield/utils";
+import { getBasConfig } from "../config/config";
 
 // Initialize SchemaEncoder with the schema string
 
@@ -133,7 +134,7 @@ export const getAttestationOffChainV1 = async (
     message.refUID,
     message.data
   );
-  
+
   const attestation: SignedOffchainAttestation = {
     domain: domain,
     primaryType: "Attest",
@@ -243,9 +244,13 @@ export const multiAttestBASOnChain = async (
   params: MultiAttestationRequest[]
 ) => {
   try {
-    const basAddress = process.env.BAS_ADDRESS_OPBNB;
+    const basConfig = getBasConfig();
+    if (basConfig == null) {
+      throw new Error("basConfig is null");
+    }
+    const basAddress = basConfig.BAS_ADDRESS;
     if (basAddress == null || basAddress == "") {
-      throw new Error("BAS_ADDRESS_OPBNB is not config in env file");
+      throw new Error("BAS_ADDRESS is null");
     }
 
     const bas = new EAS(basAddress);
@@ -269,12 +274,14 @@ export const multiAttestBASOffChain = async (
   signer: Signer,
   unHandleDatas: HandleOspReturnDataOffChain[]
 ): Promise<SignedOffchainAttestation[]> => {
-  const chainId = (await signer.provider.getNetwork()).chainId.toString();
-  const BAS_ADDRESS =
-    chainId == "56" || chainId == "97"
-      ? process.env.BAS_ADDRESS_BNB
-      : process.env.BAS_ADDRESS_OPBNB;
-  const offchain = await new EAS(BAS_ADDRESS).connect(signer).getOffchain();
+  const basConfig = getBasConfig();
+  if (basConfig == null) {
+    throw new Error("basConfig is null");
+  }
+
+  const offchain = await new EAS(basConfig.BAS_ADDRESS)
+    .connect(signer)
+    .getOffchain();
 
   const attestations: SignedOffchainAttestation[] = [];
   try {

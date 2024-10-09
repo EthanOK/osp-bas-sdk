@@ -1,7 +1,5 @@
 # config .env
 
-`Must be set`
-
 ```js
 # Greenfield
 GREEN_RPC_URL="https://gnfd-testnet-fullnode-tendermint-us.bnbchain.org"
@@ -24,7 +22,7 @@ ALIBABA_CLOUD_KMS_KEY_ID=""
 
 ```
 
-# 1. Create Attestation Off Chain
+# 1. Create Attestations Off Chain
 
 ```ts
 // npm link osp-bas-sdk
@@ -36,12 +34,35 @@ import {
   OspDataType,
   HandleOspReturnDataOffChain,
   multiAttestBasUploadGreenField,
-  oneAttestBasUploadGreenField,
+  setOspBasSdkConfig,
   } from "osp-bas-sdk";
 // } from "../src";
 import { ethers, hexlify, keccak256, randomBytes } from "ethers";
 
 async function main() {
+  
+  setOspBasSdkConfig({
+    basConfig: {
+      RPC_URL: process.env.BNB_RPC_URL!,
+      BAS_ADDRESS: process.env.BAS_ADDRESS_OPBNB!,
+      SCHEMA_REGISTRY_ADDRESS: process.env.SCHEMA_REGISTRY_OPBNB!,
+    },
+    kmsCryptConfig: {
+      ALIBABA_CLOUD_ACCESS_KEY_ID: process.env.ALIBABA_CLOUD_ACCESS_KEY_ID!,
+      ALIBABA_CLOUD_ACCESS_KEY_SECRET:
+        process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET!,
+      ALIBABA_CLOUD_REGION_ID: process.env.ALIBABA_CLOUD_REGION_ID,
+      ALIBABA_CLOUD_KMS_KEY_ID: process.env.ALIBABA_CLOUD_KMS_KEY_ID!,
+    },
+    greenfieldConfig: {
+      GREEN_RPC_URL: process.env.GREEN_RPC_URL!,
+      GREEN_CHAIN_ID: process.env.GREEN_CHAIN_ID!,
+      GREEN_PAYMENT_ADDRESS: process.env.GREEN_PAYMENT_ADDRESS!,
+      GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT:
+        process.env.GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT!,
+    },
+  });
+
   const Global_UnHandle_Data: HandleOspReturnDataOffChain[] = [];
 
   let timestamp = Math.floor(Date.now() / 1000);
@@ -50,6 +71,7 @@ async function main() {
 
   for (let i = 0; i < 5; i++) {
     const recipient = ethers.Wallet.createRandom().address;
+    const followedAddress = ethers.Wallet.createRandom().address;
     const followHash = hexlify(randomBytes(32));
     if (dataType === 1) {
       Global_UnHandle_Data.push({
@@ -60,6 +82,7 @@ async function main() {
           encodeFollowData({
             followTx: followHash,
             follower: recipient,
+            followedAddress: followedAddress,
             followedProfileId: i.toString(),
           })
         ),
@@ -82,20 +105,10 @@ async function main() {
   }
   console.log("组装数据:", Math.floor(Date.now() / 1000) - timestamp, "S");
   try {
-    // 上传 1个 attestation 至 GreenField
-    //  const success_ = await oneAttestBasUploadGreenField(
-    //   encodeAddrToBucketName(process.env.GREEN_PAYMENT_ADDRESS!),
-    //   Global_UnHandle_Data[0],
-    //   false
-    // );
-    // console.log("createObjects success:", success_);
-    // return
-
-    // TODO: 上传 attestations 至 GreenField
     timestamp = Math.floor(Date.now() / 1000);
     const schemaUID = Global_UnHandle_Data[0].requestData.schemaUID;
     const success = await multiAttestBasUploadGreenField(
-      encodeAddrToBucketName(process.env.GREEN_PAYMENT_ADDRESS!),
+      encodeAddrToBucketName("obas", process.env.GREEN_PAYMENT_ADDRESS!),
       schemaUID,
       Global_UnHandle_Data,
       false
@@ -109,6 +122,7 @@ async function main() {
 }
 
 main();
+
 ```
 
 # 2. Create Attestation On Chain

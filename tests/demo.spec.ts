@@ -8,7 +8,8 @@ import {
   MultiAttestationRequest,
   multiAttestBASOnChain,
   OspDataType,
-} from "osp-bas-sdk";
+// } from "osp-bas-sdk";
+} from "../src";
 
 describe("BNB Bas Address", () => {
   it("should A", async () => {

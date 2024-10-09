@@ -262,4 +262,33 @@ type KmsParams = {
     keyId: string;
 };
 
-export { type AttestParams, type AttestationRequestData, BAS, CommunitySchema, CommunitySchemaUID, type DelegatedAttestParams, FollowSchema, FollowSchemaUID, FollowedSchema, FollowedSchemaUID, GreenFieldClientTS, type HandleOspReturnData, type HandleOspReturnDataOffChain, JoinSchema, JoinSchemaUID, JoinedSchema, JoinedSchemaUID, type KmsParams, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, OspDataType, OspDataTypeMap, OspSchemaMap, ProfileSchema, ProfileSchemaUID, type RegisterSchemaParams, SchemaEncoder, type Signature, type SignedOffchainAttestation, createObjectAttestOSP, createObjectMulAttestOSP, encodeAddrToBucketName, encodeCommunityData, type encodeCommunityDataParams, encodeFollowData, type encodeFollowDataParams, encodeFollowedData, encodeJoinData, type encodeJoinDataParams, encodeJoinedData, encodeProfileData, type encodeProfileDataParams, getAllSps, getAttestParamsOffChain, getAttestationBAS, getAttestationOffChain, getAttestationOffChainV1, getAttestationRequestData, getDeployer, getKmsSigner, getMulAttestParams, getOffchainUIDBAS, getSchemaByUID, getSigatureByDelegation, getSps, getbBundleUID, handleOspRequestData, handleOspRequestPrepareOffChain, initEAS, multiAttestBASOffChain, multiAttestBASOnChain, multiAttestBasUploadGreenField, multiAttestBasUploadGreenField_String, oneAttestBasUploadGreenField, registerSchema, selectSp, serializeJsonString };
+type GreenfieldConfig = {
+    GREEN_RPC_URL: string;
+    GREEN_CHAIN_ID: string;
+    GREEN_PAYMENT_ADDRESS: string;
+    GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT: string;
+};
+type KmsCryptConfig = {
+    ALIBABA_CLOUD_ACCESS_KEY_ID: string;
+    ALIBABA_CLOUD_ACCESS_KEY_SECRET: string;
+    ALIBABA_CLOUD_REGION_ID: string;
+    ALIBABA_CLOUD_KMS_KEY_ID: string;
+};
+type BasConfig = {
+    RPC_URL: string;
+    BAS_ADDRESS: string;
+    SCHEMA_REGISTRY_ADDRESS: string;
+};
+declare const getGreenfieldConfig: () => GreenfieldConfig;
+declare const setGreenfieldConfig: (config: GreenfieldConfig) => void;
+declare const getKmsCryptConfig: () => KmsCryptConfig;
+declare const setKmsCryptConfig: (config: KmsCryptConfig) => void;
+declare const getBasConfig: () => BasConfig;
+declare const setBasConfig: (config: BasConfig) => void;
+declare const setOspBasSdkConfig: (config: {
+    basConfig: BasConfig;
+    kmsCryptConfig: KmsCryptConfig;
+    greenfieldConfig: GreenfieldConfig;
+}) => void;
+
+export { type AttestParams, type AttestationRequestData, BAS, type BasConfig, CommunitySchema, CommunitySchemaUID, type DelegatedAttestParams, FollowSchema, FollowSchemaUID, FollowedSchema, FollowedSchemaUID, GreenFieldClientTS, type GreenfieldConfig, type HandleOspReturnData, type HandleOspReturnDataOffChain, JoinSchema, JoinSchemaUID, JoinedSchema, JoinedSchemaUID, type KmsCryptConfig, type KmsParams, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, OspDataType, OspDataTypeMap, OspSchemaMap, ProfileSchema, ProfileSchemaUID, type RegisterSchemaParams, SchemaEncoder, type Signature, type SignedOffchainAttestation, createObjectAttestOSP, createObjectMulAttestOSP, encodeAddrToBucketName, encodeCommunityData, type encodeCommunityDataParams, encodeFollowData, type encodeFollowDataParams, encodeFollowedData, encodeJoinData, type encodeJoinDataParams, encodeJoinedData, encodeProfileData, type encodeProfileDataParams, getAllSps, getAttestParamsOffChain, getAttestationBAS, getAttestationOffChain, getAttestationOffChainV1, getAttestationRequestData, getBasConfig, getDeployer, getGreenfieldConfig, getKmsCryptConfig, getKmsSigner, getMulAttestParams, getOffchainUIDBAS, getSchemaByUID, getSigatureByDelegation, getSps, getbBundleUID, handleOspRequestData, handleOspRequestPrepareOffChain, initEAS, multiAttestBASOffChain, multiAttestBASOnChain, multiAttestBasUploadGreenField, multiAttestBasUploadGreenField_String, oneAttestBasUploadGreenField, registerSchema, selectSp, serializeJsonString, setBasConfig, setGreenfieldConfig, setKmsCryptConfig, setOspBasSdkConfig };
