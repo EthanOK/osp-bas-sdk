@@ -9,7 +9,8 @@ import {
   MultiDelegatedAttestationRequest,
   SchemaEncoder,
   Signature,
-} from "osp-bas-sdk";
+// } from "osp-bas-sdk";
+} from "../src";
 import { ethers, Signer } from "ethers";
 import { Attester_PrivateKey, getPrivateKeyByKms } from "./config";
 

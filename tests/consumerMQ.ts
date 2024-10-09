@@ -10,7 +10,8 @@ import {
   multiAttestBASOffChain,
   multiAttestBASOnChain,
   serializeJsonString,
-} from "osp-bas-sdk";
+// } from "osp-bas-sdk";
+} from "../src";
 
 const chainId = 5611;
 

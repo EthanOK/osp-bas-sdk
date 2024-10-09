@@ -3,15 +3,22 @@ import { GreenFieldClientTS } from "./create";
 import "dotenv/config";
 import { serializeJsonString } from "./utils";
 import { getBundleBuffer } from "../bundle/utils";
+import { getGreenfieldConfig } from "../config/config";
 
 let client = null;
 function getGreenFieldClientTS() {
   console.log("init greenfield client");
 
+  const greenfieldConfig = getGreenfieldConfig();
+  if (greenfieldConfig === null) {
+    console.log("greenfield config is null");
+    return null;
+  }
+
   const client_gf = new GreenFieldClientTS(
-    process.env.GREEN_RPC_URL!,
-    process.env.GREEN_CHAIN_ID!,
-    process.env.GREEN_PAYMENT_ADDRESS!
+    greenfieldConfig.GREEN_RPC_URL!,
+    greenfieldConfig.GREEN_CHAIN_ID!,
+    greenfieldConfig.GREEN_PAYMENT_ADDRESS!
   );
   return client_gf;
 }

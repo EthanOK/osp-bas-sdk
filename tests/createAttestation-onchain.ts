@@ -10,7 +10,8 @@ import {
   getDeployer,
   multiAttestBASOnChain,
   getKmsSigner,
-} from "osp-bas-sdk";
+// } from "osp-bas-sdk";
+} from "../src";
 import { ethers, hexlify, randomBytes } from "ethers";
 
 async function createAttestation() {

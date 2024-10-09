@@ -6,6 +6,11 @@ import {
   createObjectMulAttestOSP,
 } from "../greenfield/createObjectOSP";
 import KmsClient from "../kms/kms_client";
+import {
+  getBasConfig,
+  getGreenfieldConfig,
+  getKmsCryptConfig,
+} from "../config/config";
 
 let privateKey = "";
 /**
@@ -25,10 +30,17 @@ export const multiAttestBasUploadGreenField = async (
   try {
     if (privateKey == "") {
       privateKey = await getPrivateKeyByKms();
+      if (privateKey == "") return false;
     }
+    const basConfig = getBasConfig();
+    if (basConfig === null) {
+      console.log("bas config is null");
+      return false;
+    }
+
     const signer = new ethers.Wallet(
       privateKey,
-      new ethers.JsonRpcProvider(process.env.BNB_RPC_URL!)
+      new ethers.JsonRpcProvider(basConfig.RPC_URL)
     );
 
     const attestations = await multiAttestBASOffChain(signer, unHandleDatas);
@@ -55,10 +67,17 @@ export const oneAttestBasUploadGreenField = async (
   try {
     if (privateKey == "") {
       privateKey = await getPrivateKeyByKms();
+      if (privateKey == "") return false;
     }
+    const basConfig = getBasConfig();
+    if (basConfig === null) {
+      console.log("bas config is null");
+      return false;
+    }
+    
     const signer = new ethers.Wallet(
       privateKey,
-      new ethers.JsonRpcProvider(process.env.BNB_RPC_URL!)
+      new ethers.JsonRpcProvider(basConfig.RPC_URL!)
     );
 
     const attestations = await multiAttestBASOffChain(signer, [unHandleData]);
@@ -84,10 +103,16 @@ export const multiAttestBasUploadGreenField_String = async (
   try {
     if (privateKey == "") {
       privateKey = await getPrivateKeyByKms();
+      if (privateKey == "") return false;
+    }
+    const basConfig = getBasConfig();
+    if (basConfig === null) {
+      console.log("bas config is null");
+      return false;
     }
     const signer = new ethers.Wallet(
       privateKey,
-      new ethers.JsonRpcProvider(process.env.BNB_RPC_URL!)
+      new ethers.JsonRpcProvider(basConfig.RPC_URL)
     );
 
     const attestations = await multiAttestBASOffChain(
@@ -112,15 +137,26 @@ async function getPrivateKeyByKms(): Promise<string> {
   try {
     console.log("init KmsClient");
 
-    let client = new KmsClient({
-      accessKeyId: process.env.ALIBABA_CLOUD_ACCESS_KEY_ID!,
-      accessKeySecret: process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET!,
-      regionId: process.env.ALIBABA_CLOUD_REGION_ID!,
-      keyId: process.env.ALIBABA_CLOUD_KMS_KEY_ID!,
+    const kmsConfig = getKmsCryptConfig();
+    if (kmsConfig === null) {
+      console.log("kms config is null");
+      return "";
+    }
+
+    const client = new KmsClient({
+      accessKeyId: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_ID!,
+      accessKeySecret: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_SECRET!,
+      regionId: kmsConfig.ALIBABA_CLOUD_REGION_ID!,
+      keyId: kmsConfig.ALIBABA_CLOUD_KMS_KEY_ID!,
     });
+    const greenfieldConfig = getGreenfieldConfig();
+    if (greenfieldConfig === null) {
+      console.log("greenfield config is null");
+      return "";
+    }
 
     let decryptRes = await client.decrypt(
-      process.env.GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT,
+      greenfieldConfig.GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT,
       {}
     );
 

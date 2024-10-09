@@ -3,7 +3,8 @@ import {
   OspSchemaMap,
   registerSchema,
   RegisterSchemaParams,
-} from "osp-bas-sdk";
+// } from "osp-bas-sdk";
+} from "../src";
 import { ethers } from "ethers";
 import { BNB_schemaRegistryAddress, getPrivateKeyByKms } from "./config";
 
