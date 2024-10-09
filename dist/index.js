@@ -72,383 +72,6 @@ var __asyncGenerator = (__this, __arguments, generator) => {
 };
 var __forAwait = (obj, it, method) => (it = obj[__knownSymbol("asyncIterator")]) ? it.call(obj) : (obj = obj[__knownSymbol("iterator")](), it = {}, method = (key, fn) => (fn = obj[key]) && (it[key] = (arg) => new Promise((yes, no, done) => (arg = fn.call(obj, arg), done = arg.done, Promise.resolve(arg.value).then((value) => yes({ value, done }), no)))), method("next"), method("return"), it);
 
-// node_modules/dotenv/package.json
-var require_package = __commonJS({
-  "node_modules/dotenv/package.json"(exports2, module2) {
-    module2.exports = {
-      name: "dotenv",
-      version: "16.4.5",
-      description: "Loads environment variables from .env file",
-      main: "lib/main.js",
-      types: "lib/main.d.ts",
-      exports: {
-        ".": {
-          types: "./lib/main.d.ts",
-          require: "./lib/main.js",
-          default: "./lib/main.js"
-        },
-        "./config": "./config.js",
-        "./config.js": "./config.js",
-        "./lib/env-options": "./lib/env-options.js",
-        "./lib/env-options.js": "./lib/env-options.js",
-        "./lib/cli-options": "./lib/cli-options.js",
-        "./lib/cli-options.js": "./lib/cli-options.js",
-        "./package.json": "./package.json"
-      },
-      scripts: {
-        "dts-check": "tsc --project tests/types/tsconfig.json",
-        lint: "standard",
-        "lint-readme": "standard-markdown",
-        pretest: "npm run lint && npm run dts-check",
-        test: "tap tests/*.js --100 -Rspec",
-        "test:coverage": "tap --coverage-report=lcov",
-        prerelease: "npm test",
-        release: "standard-version"
-      },
-      repository: {
-        type: "git",
-        url: "git://github.com/motdotla/dotenv.git"
-      },
-      funding: "https://dotenvx.com",
-      keywords: [
-        "dotenv",
-        "env",
-        ".env",
-        "environment",
-        "variables",
-        "config",
-        "settings"
-      ],
-      readmeFilename: "README.md",
-      license: "BSD-2-Clause",
-      devDependencies: {
-        "@definitelytyped/dtslint": "^0.0.133",
-        "@types/node": "^18.11.3",
-        decache: "^4.6.1",
-        sinon: "^14.0.1",
-        standard: "^17.0.0",
-        "standard-markdown": "^7.1.0",
-        "standard-version": "^9.5.0",
-        tap: "^16.3.0",
-        tar: "^6.1.11",
-        typescript: "^4.8.4"
-      },
-      engines: {
-        node: ">=12"
-      },
-      browser: {
-        fs: false
-      }
-    };
-  }
-});
-
-// node_modules/dotenv/lib/main.js
-var require_main = __commonJS({
-  "node_modules/dotenv/lib/main.js"(exports2, module2) {
-    var fs2 = require("fs");
-    var path2 = require("path");
-    var os2 = require("os");
-    var crypto2 = require("crypto");
-    var packageJson = require_package();
-    var version = packageJson.version;
-    var LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
-    function parse(src) {
-      const obj = {};
-      let lines = src.toString();
-      lines = lines.replace(/\r\n?/mg, "\n");
-      let match;
-      while ((match = LINE.exec(lines)) != null) {
-        const key = match[1];
-        let value = match[2] || "";
-        value = value.trim();
-        const maybeQuote = value[0];
-        value = value.replace(/^(['"`])([\s\S]*)\1$/mg, "$2");
-        if (maybeQuote === '"') {
-          value = value.replace(/\\n/g, "\n");
-          value = value.replace(/\\r/g, "\r");
-        }
-        obj[key] = value;
-      }
-      return obj;
-    }
-    function _parseVault(options) {
-      const vaultPath = _vaultPath(options);
-      const result = DotenvModule.configDotenv({ path: vaultPath });
-      if (!result.parsed) {
-        const err = new Error(`MISSING_DATA: Cannot parse ${vaultPath} for an unknown reason`);
-        err.code = "MISSING_DATA";
-        throw err;
-      }
-      const keys = _dotenvKey(options).split(",");
-      const length = keys.length;
-      let decrypted;
-      for (let i = 0; i < length; i++) {
-        try {
-          const key = keys[i].trim();
-          const attrs = _instructions(result, key);
-          decrypted = DotenvModule.decrypt(attrs.ciphertext, attrs.key);
-          break;
-        } catch (error) {
-          if (i + 1 >= length) {
-            throw error;
-          }
-        }
-      }
-      return DotenvModule.parse(decrypted);
-    }
-    function _log(message) {
-      console.log(`[dotenv@${version}][INFO] ${message}`);
-    }
-    function _warn(message) {
-      console.log(`[dotenv@${version}][WARN] ${message}`);
-    }
-    function _debug(message) {
-      console.log(`[dotenv@${version}][DEBUG] ${message}`);
-    }
-    function _dotenvKey(options) {
-      if (options && options.DOTENV_KEY && options.DOTENV_KEY.length > 0) {
-        return options.DOTENV_KEY;
-      }
-      if (process.env.DOTENV_KEY && process.env.DOTENV_KEY.length > 0) {
-        return process.env.DOTENV_KEY;
-      }
-      return "";
-    }
-    function _instructions(result, dotenvKey) {
-      let uri;
-      try {
-        uri = new URL(dotenvKey);
-      } catch (error) {
-        if (error.code === "ERR_INVALID_URL") {
-          const err = new Error("INVALID_DOTENV_KEY: Wrong format. Must be in valid uri format like dotenv://:key_1234@dotenvx.com/vault/.env.vault?environment=development");
-          err.code = "INVALID_DOTENV_KEY";
-          throw err;
-        }
-        throw error;
-      }
-      const key = uri.password;
-      if (!key) {
-        const err = new Error("INVALID_DOTENV_KEY: Missing key part");
-        err.code = "INVALID_DOTENV_KEY";
-        throw err;
-      }
-      const environment = uri.searchParams.get("environment");
-      if (!environment) {
-        const err = new Error("INVALID_DOTENV_KEY: Missing environment part");
-        err.code = "INVALID_DOTENV_KEY";
-        throw err;
-      }
-      const environmentKey = `DOTENV_VAULT_${environment.toUpperCase()}`;
-      const ciphertext = result.parsed[environmentKey];
-      if (!ciphertext) {
-        const err = new Error(`NOT_FOUND_DOTENV_ENVIRONMENT: Cannot locate environment ${environmentKey} in your .env.vault file.`);
-        err.code = "NOT_FOUND_DOTENV_ENVIRONMENT";
-        throw err;
-      }
-      return { ciphertext, key };
-    }
-    function _vaultPath(options) {
-      let possibleVaultPath = null;
-      if (options && options.path && options.path.length > 0) {
-        if (Array.isArray(options.path)) {
-          for (const filepath of options.path) {
-            if (fs2.existsSync(filepath)) {
-              possibleVaultPath = filepath.endsWith(".vault") ? filepath : `${filepath}.vault`;
-            }
-          }
-        } else {
-          possibleVaultPath = options.path.endsWith(".vault") ? options.path : `${options.path}.vault`;
-        }
-      } else {
-        possibleVaultPath = path2.resolve(process.cwd(), ".env.vault");
-      }
-      if (fs2.existsSync(possibleVaultPath)) {
-        return possibleVaultPath;
-      }
-      return null;
-    }
-    function _resolveHome(envPath) {
-      return envPath[0] === "~" ? path2.join(os2.homedir(), envPath.slice(1)) : envPath;
-    }
-    function _configVault(options) {
-      _log("Loading env from encrypted .env.vault");
-      const parsed = DotenvModule._parseVault(options);
-      let processEnv = process.env;
-      if (options && options.processEnv != null) {
-        processEnv = options.processEnv;
-      }
-      DotenvModule.populate(processEnv, parsed, options);
-      return { parsed };
-    }
-    function configDotenv(options) {
-      const dotenvPath = path2.resolve(process.cwd(), ".env");
-      let encoding = "utf8";
-      const debug = Boolean(options && options.debug);
-      if (options && options.encoding) {
-        encoding = options.encoding;
-      } else {
-        if (debug) {
-          _debug("No encoding is specified. UTF-8 is used by default");
-        }
-      }
-      let optionPaths = [dotenvPath];
-      if (options && options.path) {
-        if (!Array.isArray(options.path)) {
-          optionPaths = [_resolveHome(options.path)];
-        } else {
-          optionPaths = [];
-          for (const filepath of options.path) {
-            optionPaths.push(_resolveHome(filepath));
-          }
-        }
-      }
-      let lastError;
-      const parsedAll = {};
-      for (const path3 of optionPaths) {
-        try {
-          const parsed = DotenvModule.parse(fs2.readFileSync(path3, { encoding }));
-          DotenvModule.populate(parsedAll, parsed, options);
-        } catch (e) {
-          if (debug) {
-            _debug(`Failed to load ${path3} ${e.message}`);
-          }
-          lastError = e;
-        }
-      }
-      let processEnv = process.env;
-      if (options && options.processEnv != null) {
-        processEnv = options.processEnv;
-      }
-      DotenvModule.populate(processEnv, parsedAll, options);
-      if (lastError) {
-        return { parsed: parsedAll, error: lastError };
-      } else {
-        return { parsed: parsedAll };
-      }
-    }
-    function config(options) {
-      if (_dotenvKey(options).length === 0) {
-        return DotenvModule.configDotenv(options);
-      }
-      const vaultPath = _vaultPath(options);
-      if (!vaultPath) {
-        _warn(`You set DOTENV_KEY but you are missing a .env.vault file at ${vaultPath}. Did you forget to build it?`);
-        return DotenvModule.configDotenv(options);
-      }
-      return DotenvModule._configVault(options);
-    }
-    function decrypt(encrypted, keyStr) {
-      const key = Buffer.from(keyStr.slice(-64), "hex");
-      let ciphertext = Buffer.from(encrypted, "base64");
-      const nonce = ciphertext.subarray(0, 12);
-      const authTag = ciphertext.subarray(-16);
-      ciphertext = ciphertext.subarray(12, -16);
-      try {
-        const aesgcm = crypto2.createDecipheriv("aes-256-gcm", key, nonce);
-        aesgcm.setAuthTag(authTag);
-        return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
-      } catch (error) {
-        const isRange = error instanceof RangeError;
-        const invalidKeyLength = error.message === "Invalid key length";
-        const decryptionFailed = error.message === "Unsupported state or unable to authenticate data";
-        if (isRange || invalidKeyLength) {
-          const err = new Error("INVALID_DOTENV_KEY: It must be 64 characters long (or more)");
-          err.code = "INVALID_DOTENV_KEY";
-          throw err;
-        } else if (decryptionFailed) {
-          const err = new Error("DECRYPTION_FAILED: Please check your DOTENV_KEY");
-          err.code = "DECRYPTION_FAILED";
-          throw err;
-        } else {
-          throw error;
-        }
-      }
-    }
-    function populate(processEnv, parsed, options = {}) {
-      const debug = Boolean(options && options.debug);
-      const override = Boolean(options && options.override);
-      if (typeof parsed !== "object") {
-        const err = new Error("OBJECT_REQUIRED: Please check the processEnv argument being passed to populate");
-        err.code = "OBJECT_REQUIRED";
-        throw err;
-      }
-      for (const key of Object.keys(parsed)) {
-        if (Object.prototype.hasOwnProperty.call(processEnv, key)) {
-          if (override === true) {
-            processEnv[key] = parsed[key];
-          }
-          if (debug) {
-            if (override === true) {
-              _debug(`"${key}" is already defined and WAS overwritten`);
-            } else {
-              _debug(`"${key}" is already defined and was NOT overwritten`);
-            }
-          }
-        } else {
-          processEnv[key] = parsed[key];
-        }
-      }
-    }
-    var DotenvModule = {
-      configDotenv,
-      _configVault,
-      _parseVault,
-      config,
-      decrypt,
-      parse,
-      populate
-    };
-    module2.exports.configDotenv = DotenvModule.configDotenv;
-    module2.exports._configVault = DotenvModule._configVault;
-    module2.exports._parseVault = DotenvModule._parseVault;
-    module2.exports.config = DotenvModule.config;
-    module2.exports.decrypt = DotenvModule.decrypt;
-    module2.exports.parse = DotenvModule.parse;
-    module2.exports.populate = DotenvModule.populate;
-    module2.exports = DotenvModule;
-  }
-});
-
-// node_modules/dotenv/lib/env-options.js
-var require_env_options = __commonJS({
-  "node_modules/dotenv/lib/env-options.js"(exports2, module2) {
-    var options = {};
-    if (process.env.DOTENV_CONFIG_ENCODING != null) {
-      options.encoding = process.env.DOTENV_CONFIG_ENCODING;
-    }
-    if (process.env.DOTENV_CONFIG_PATH != null) {
-      options.path = process.env.DOTENV_CONFIG_PATH;
-    }
-    if (process.env.DOTENV_CONFIG_DEBUG != null) {
-      options.debug = process.env.DOTENV_CONFIG_DEBUG;
-    }
-    if (process.env.DOTENV_CONFIG_OVERRIDE != null) {
-      options.override = process.env.DOTENV_CONFIG_OVERRIDE;
-    }
-    if (process.env.DOTENV_CONFIG_DOTENV_KEY != null) {
-      options.DOTENV_KEY = process.env.DOTENV_CONFIG_DOTENV_KEY;
-    }
-    module2.exports = options;
-  }
-});
-
-// node_modules/dotenv/lib/cli-options.js
-var require_cli_options = __commonJS({
-  "node_modules/dotenv/lib/cli-options.js"(exports2, module2) {
-    var re = /^dotenv_config_(encoding|path|debug|override|DOTENV_KEY)=(.+)$/;
-    module2.exports = function optionMatcher(args) {
-      return args.reduce(function(acc, cur) {
-        const matches = cur.match(re);
-        if (matches) {
-          acc[matches[1]] = matches[2];
-        }
-        return acc;
-      }, {});
-    };
-  }
-});
-
 // node_modules/ms/index.js
 var require_ms = __commonJS({
   "node_modules/ms/index.js"(exports2, module2) {
@@ -3399,7 +3022,7 @@ var require_ecs_ram_role_credential = __commonJS({
 });
 
 // node_modules/@alicloud/credentials/dist/package.json
-var require_package2 = __commonJS({
+var require_package = __commonJS({
   "node_modules/@alicloud/credentials/dist/package.json"(exports2, module2) {
     module2.exports = {
       name: "@alicloud/credentials",
@@ -3494,7 +3117,7 @@ var require_helper = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DEFAULT_CLIENT = exports2.DEFAULT_UA = void 0;
     var os2 = __importStar(require("os"));
-    var package_json_1 = __importDefault(require_package2());
+    var package_json_1 = __importDefault(require_package());
     exports2.DEFAULT_UA = `AlibabaCloud (${os2.platform()}; ${os2.arch()}) Node.js/${process.version} Core/${package_json_1.default.version}`;
     exports2.DEFAULT_CLIENT = `Node.js(${process.version}), ${package_json_1.default.name}: ${package_json_1.default.version}`;
   }
@@ -12362,6 +11985,383 @@ var require_client6 = __commonJS({
   }
 });
 
+// node_modules/dotenv/package.json
+var require_package2 = __commonJS({
+  "node_modules/dotenv/package.json"(exports2, module2) {
+    module2.exports = {
+      name: "dotenv",
+      version: "16.4.5",
+      description: "Loads environment variables from .env file",
+      main: "lib/main.js",
+      types: "lib/main.d.ts",
+      exports: {
+        ".": {
+          types: "./lib/main.d.ts",
+          require: "./lib/main.js",
+          default: "./lib/main.js"
+        },
+        "./config": "./config.js",
+        "./config.js": "./config.js",
+        "./lib/env-options": "./lib/env-options.js",
+        "./lib/env-options.js": "./lib/env-options.js",
+        "./lib/cli-options": "./lib/cli-options.js",
+        "./lib/cli-options.js": "./lib/cli-options.js",
+        "./package.json": "./package.json"
+      },
+      scripts: {
+        "dts-check": "tsc --project tests/types/tsconfig.json",
+        lint: "standard",
+        "lint-readme": "standard-markdown",
+        pretest: "npm run lint && npm run dts-check",
+        test: "tap tests/*.js --100 -Rspec",
+        "test:coverage": "tap --coverage-report=lcov",
+        prerelease: "npm test",
+        release: "standard-version"
+      },
+      repository: {
+        type: "git",
+        url: "git://github.com/motdotla/dotenv.git"
+      },
+      funding: "https://dotenvx.com",
+      keywords: [
+        "dotenv",
+        "env",
+        ".env",
+        "environment",
+        "variables",
+        "config",
+        "settings"
+      ],
+      readmeFilename: "README.md",
+      license: "BSD-2-Clause",
+      devDependencies: {
+        "@definitelytyped/dtslint": "^0.0.133",
+        "@types/node": "^18.11.3",
+        decache: "^4.6.1",
+        sinon: "^14.0.1",
+        standard: "^17.0.0",
+        "standard-markdown": "^7.1.0",
+        "standard-version": "^9.5.0",
+        tap: "^16.3.0",
+        tar: "^6.1.11",
+        typescript: "^4.8.4"
+      },
+      engines: {
+        node: ">=12"
+      },
+      browser: {
+        fs: false
+      }
+    };
+  }
+});
+
+// node_modules/dotenv/lib/main.js
+var require_main = __commonJS({
+  "node_modules/dotenv/lib/main.js"(exports2, module2) {
+    var fs2 = require("fs");
+    var path2 = require("path");
+    var os2 = require("os");
+    var crypto2 = require("crypto");
+    var packageJson = require_package2();
+    var version = packageJson.version;
+    var LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
+    function parse(src) {
+      const obj = {};
+      let lines = src.toString();
+      lines = lines.replace(/\r\n?/mg, "\n");
+      let match;
+      while ((match = LINE.exec(lines)) != null) {
+        const key = match[1];
+        let value = match[2] || "";
+        value = value.trim();
+        const maybeQuote = value[0];
+        value = value.replace(/^(['"`])([\s\S]*)\1$/mg, "$2");
+        if (maybeQuote === '"') {
+          value = value.replace(/\\n/g, "\n");
+          value = value.replace(/\\r/g, "\r");
+        }
+        obj[key] = value;
+      }
+      return obj;
+    }
+    function _parseVault(options) {
+      const vaultPath = _vaultPath(options);
+      const result = DotenvModule.configDotenv({ path: vaultPath });
+      if (!result.parsed) {
+        const err = new Error(`MISSING_DATA: Cannot parse ${vaultPath} for an unknown reason`);
+        err.code = "MISSING_DATA";
+        throw err;
+      }
+      const keys = _dotenvKey(options).split(",");
+      const length = keys.length;
+      let decrypted;
+      for (let i = 0; i < length; i++) {
+        try {
+          const key = keys[i].trim();
+          const attrs = _instructions(result, key);
+          decrypted = DotenvModule.decrypt(attrs.ciphertext, attrs.key);
+          break;
+        } catch (error) {
+          if (i + 1 >= length) {
+            throw error;
+          }
+        }
+      }
+      return DotenvModule.parse(decrypted);
+    }
+    function _log(message) {
+      console.log(`[dotenv@${version}][INFO] ${message}`);
+    }
+    function _warn(message) {
+      console.log(`[dotenv@${version}][WARN] ${message}`);
+    }
+    function _debug(message) {
+      console.log(`[dotenv@${version}][DEBUG] ${message}`);
+    }
+    function _dotenvKey(options) {
+      if (options && options.DOTENV_KEY && options.DOTENV_KEY.length > 0) {
+        return options.DOTENV_KEY;
+      }
+      if (process.env.DOTENV_KEY && process.env.DOTENV_KEY.length > 0) {
+        return process.env.DOTENV_KEY;
+      }
+      return "";
+    }
+    function _instructions(result, dotenvKey) {
+      let uri;
+      try {
+        uri = new URL(dotenvKey);
+      } catch (error) {
+        if (error.code === "ERR_INVALID_URL") {
+          const err = new Error("INVALID_DOTENV_KEY: Wrong format. Must be in valid uri format like dotenv://:key_1234@dotenvx.com/vault/.env.vault?environment=development");
+          err.code = "INVALID_DOTENV_KEY";
+          throw err;
+        }
+        throw error;
+      }
+      const key = uri.password;
+      if (!key) {
+        const err = new Error("INVALID_DOTENV_KEY: Missing key part");
+        err.code = "INVALID_DOTENV_KEY";
+        throw err;
+      }
+      const environment = uri.searchParams.get("environment");
+      if (!environment) {
+        const err = new Error("INVALID_DOTENV_KEY: Missing environment part");
+        err.code = "INVALID_DOTENV_KEY";
+        throw err;
+      }
+      const environmentKey = `DOTENV_VAULT_${environment.toUpperCase()}`;
+      const ciphertext = result.parsed[environmentKey];
+      if (!ciphertext) {
+        const err = new Error(`NOT_FOUND_DOTENV_ENVIRONMENT: Cannot locate environment ${environmentKey} in your .env.vault file.`);
+        err.code = "NOT_FOUND_DOTENV_ENVIRONMENT";
+        throw err;
+      }
+      return { ciphertext, key };
+    }
+    function _vaultPath(options) {
+      let possibleVaultPath = null;
+      if (options && options.path && options.path.length > 0) {
+        if (Array.isArray(options.path)) {
+          for (const filepath of options.path) {
+            if (fs2.existsSync(filepath)) {
+              possibleVaultPath = filepath.endsWith(".vault") ? filepath : `${filepath}.vault`;
+            }
+          }
+        } else {
+          possibleVaultPath = options.path.endsWith(".vault") ? options.path : `${options.path}.vault`;
+        }
+      } else {
+        possibleVaultPath = path2.resolve(process.cwd(), ".env.vault");
+      }
+      if (fs2.existsSync(possibleVaultPath)) {
+        return possibleVaultPath;
+      }
+      return null;
+    }
+    function _resolveHome(envPath) {
+      return envPath[0] === "~" ? path2.join(os2.homedir(), envPath.slice(1)) : envPath;
+    }
+    function _configVault(options) {
+      _log("Loading env from encrypted .env.vault");
+      const parsed = DotenvModule._parseVault(options);
+      let processEnv = process.env;
+      if (options && options.processEnv != null) {
+        processEnv = options.processEnv;
+      }
+      DotenvModule.populate(processEnv, parsed, options);
+      return { parsed };
+    }
+    function configDotenv(options) {
+      const dotenvPath = path2.resolve(process.cwd(), ".env");
+      let encoding = "utf8";
+      const debug = Boolean(options && options.debug);
+      if (options && options.encoding) {
+        encoding = options.encoding;
+      } else {
+        if (debug) {
+          _debug("No encoding is specified. UTF-8 is used by default");
+        }
+      }
+      let optionPaths = [dotenvPath];
+      if (options && options.path) {
+        if (!Array.isArray(options.path)) {
+          optionPaths = [_resolveHome(options.path)];
+        } else {
+          optionPaths = [];
+          for (const filepath of options.path) {
+            optionPaths.push(_resolveHome(filepath));
+          }
+        }
+      }
+      let lastError;
+      const parsedAll = {};
+      for (const path3 of optionPaths) {
+        try {
+          const parsed = DotenvModule.parse(fs2.readFileSync(path3, { encoding }));
+          DotenvModule.populate(parsedAll, parsed, options);
+        } catch (e) {
+          if (debug) {
+            _debug(`Failed to load ${path3} ${e.message}`);
+          }
+          lastError = e;
+        }
+      }
+      let processEnv = process.env;
+      if (options && options.processEnv != null) {
+        processEnv = options.processEnv;
+      }
+      DotenvModule.populate(processEnv, parsedAll, options);
+      if (lastError) {
+        return { parsed: parsedAll, error: lastError };
+      } else {
+        return { parsed: parsedAll };
+      }
+    }
+    function config(options) {
+      if (_dotenvKey(options).length === 0) {
+        return DotenvModule.configDotenv(options);
+      }
+      const vaultPath = _vaultPath(options);
+      if (!vaultPath) {
+        _warn(`You set DOTENV_KEY but you are missing a .env.vault file at ${vaultPath}. Did you forget to build it?`);
+        return DotenvModule.configDotenv(options);
+      }
+      return DotenvModule._configVault(options);
+    }
+    function decrypt(encrypted, keyStr) {
+      const key = Buffer.from(keyStr.slice(-64), "hex");
+      let ciphertext = Buffer.from(encrypted, "base64");
+      const nonce = ciphertext.subarray(0, 12);
+      const authTag = ciphertext.subarray(-16);
+      ciphertext = ciphertext.subarray(12, -16);
+      try {
+        const aesgcm = crypto2.createDecipheriv("aes-256-gcm", key, nonce);
+        aesgcm.setAuthTag(authTag);
+        return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
+      } catch (error) {
+        const isRange = error instanceof RangeError;
+        const invalidKeyLength = error.message === "Invalid key length";
+        const decryptionFailed = error.message === "Unsupported state or unable to authenticate data";
+        if (isRange || invalidKeyLength) {
+          const err = new Error("INVALID_DOTENV_KEY: It must be 64 characters long (or more)");
+          err.code = "INVALID_DOTENV_KEY";
+          throw err;
+        } else if (decryptionFailed) {
+          const err = new Error("DECRYPTION_FAILED: Please check your DOTENV_KEY");
+          err.code = "DECRYPTION_FAILED";
+          throw err;
+        } else {
+          throw error;
+        }
+      }
+    }
+    function populate(processEnv, parsed, options = {}) {
+      const debug = Boolean(options && options.debug);
+      const override = Boolean(options && options.override);
+      if (typeof parsed !== "object") {
+        const err = new Error("OBJECT_REQUIRED: Please check the processEnv argument being passed to populate");
+        err.code = "OBJECT_REQUIRED";
+        throw err;
+      }
+      for (const key of Object.keys(parsed)) {
+        if (Object.prototype.hasOwnProperty.call(processEnv, key)) {
+          if (override === true) {
+            processEnv[key] = parsed[key];
+          }
+          if (debug) {
+            if (override === true) {
+              _debug(`"${key}" is already defined and WAS overwritten`);
+            } else {
+              _debug(`"${key}" is already defined and was NOT overwritten`);
+            }
+          }
+        } else {
+          processEnv[key] = parsed[key];
+        }
+      }
+    }
+    var DotenvModule = {
+      configDotenv,
+      _configVault,
+      _parseVault,
+      config,
+      decrypt,
+      parse,
+      populate
+    };
+    module2.exports.configDotenv = DotenvModule.configDotenv;
+    module2.exports._configVault = DotenvModule._configVault;
+    module2.exports._parseVault = DotenvModule._parseVault;
+    module2.exports.config = DotenvModule.config;
+    module2.exports.decrypt = DotenvModule.decrypt;
+    module2.exports.parse = DotenvModule.parse;
+    module2.exports.populate = DotenvModule.populate;
+    module2.exports = DotenvModule;
+  }
+});
+
+// node_modules/dotenv/lib/env-options.js
+var require_env_options = __commonJS({
+  "node_modules/dotenv/lib/env-options.js"(exports2, module2) {
+    var options = {};
+    if (process.env.DOTENV_CONFIG_ENCODING != null) {
+      options.encoding = process.env.DOTENV_CONFIG_ENCODING;
+    }
+    if (process.env.DOTENV_CONFIG_PATH != null) {
+      options.path = process.env.DOTENV_CONFIG_PATH;
+    }
+    if (process.env.DOTENV_CONFIG_DEBUG != null) {
+      options.debug = process.env.DOTENV_CONFIG_DEBUG;
+    }
+    if (process.env.DOTENV_CONFIG_OVERRIDE != null) {
+      options.override = process.env.DOTENV_CONFIG_OVERRIDE;
+    }
+    if (process.env.DOTENV_CONFIG_DOTENV_KEY != null) {
+      options.DOTENV_KEY = process.env.DOTENV_CONFIG_DOTENV_KEY;
+    }
+    module2.exports = options;
+  }
+});
+
+// node_modules/dotenv/lib/cli-options.js
+var require_cli_options = __commonJS({
+  "node_modules/dotenv/lib/cli-options.js"(exports2, module2) {
+    var re = /^dotenv_config_(encoding|path|debug|override|DOTENV_KEY)=(.+)$/;
+    module2.exports = function optionMatcher(args) {
+      return args.reduce(function(acc, cur) {
+        const matches = cur.match(re);
+        if (matches) {
+          acc[matches[1]] = matches[2];
+        }
+        return acc;
+      }, {});
+    };
+  }
+});
+
 // src/index.ts
 var src_exports = {};
 __export(src_exports, {
@@ -12405,6 +12405,8 @@ __export(src_exports, {
   getKmsSigner: () => getKmsSigner,
   getMulAttestParams: () => getMulAttestParams,
   getOffchainUIDBAS: () => getOffchainUIDBAS,
+  getPrivateKey: () => getPrivateKey,
+  getPrivateKeyByKms: () => getPrivateKeyByKms,
   getSchemaByUID: () => getSchemaByUID,
   getSigatureByDelegation: () => getSigatureByDelegation,
   getSps: () => getSps,
@@ -12423,7 +12425,9 @@ __export(src_exports, {
   setBasConfig: () => setBasConfig,
   setGreenfieldConfig: () => setGreenfieldConfig,
   setKmsCryptConfig: () => setKmsCryptConfig,
-  setOspBasSdkConfig: () => setOspBasSdkConfig
+  setOspBasSdkConfig: () => setOspBasSdkConfig,
+  setPrivateKey: () => setPrivateKey,
+  setPrivateKeyByKms: () => setPrivateKeyByKms
 });
 module.exports = __toCommonJS(src_exports);
 
@@ -12689,10 +12693,52 @@ function sha256(input) {
   return "0x" + hash.digest("hex");
 }
 
+// src/kms/kms_client.ts
+var $Kms20160120 = __toESM(require("@alicloud/kms20160120"));
+var $OpenApi = __toESM(require_client6());
+var KmsClient = class _KmsClient {
+  constructor(params) {
+    this.client = _KmsClient.createClient(
+      params.accessKeyId,
+      params.accessKeySecret,
+      params.regionId
+    );
+    this.keyId = params.keyId;
+  }
+  static createClient(accessKeyId, accessKeySecret, regionId) {
+    let config = new $OpenApi.Config({
+      accessKeyId,
+      accessKeySecret,
+      regionId
+    });
+    return new $Kms20160120.default(config);
+  }
+  decrypt(ciphertextBlob, encryptionContext) {
+    return __async(this, null, function* () {
+      let request = new $Kms20160120.DecryptRequest({
+        ciphertextBlob,
+        encryptionContext
+      });
+      return yield this.client.decrypt(request);
+    });
+  }
+  encrypt(plaintext, encryptionContext) {
+    return __async(this, null, function* () {
+      let request = new $Kms20160120.EncryptRequest({
+        plaintext,
+        keyId: this.keyId,
+        encryptionContext
+      });
+      return yield this.client.encrypt(request);
+    });
+  }
+};
+
 // src/config/config.ts
 var greenfieldConfig;
 var kmsCryptConfig;
 var basConfig;
+var privateKey = "";
 var getGreenfieldConfig = () => {
   if (greenfieldConfig === void 0) {
     return null;
@@ -12720,11 +12766,74 @@ var getBasConfig = () => {
 var setBasConfig = (config) => {
   basConfig = config;
 };
-var setOspBasSdkConfig = (config) => {
+var getPrivateKey = () => {
+  return privateKey;
+};
+var setPrivateKey = (key) => {
+  privateKey = key;
+};
+function getPrivateKeyByKms() {
+  return __async(this, null, function* () {
+    try {
+      console.log("init KmsClient");
+      const kmsConfig = getKmsCryptConfig();
+      if (kmsConfig === null) {
+        console.log("kms config is null");
+        return "";
+      }
+      const client2 = new KmsClient({
+        accessKeyId: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_ID,
+        accessKeySecret: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_SECRET,
+        regionId: kmsConfig.ALIBABA_CLOUD_REGION_ID,
+        keyId: kmsConfig.ALIBABA_CLOUD_KMS_KEY_ID
+      });
+      const greenfieldConfig2 = getGreenfieldConfig();
+      if (greenfieldConfig2 === null) {
+        console.log("greenfield config is null");
+        return "";
+      }
+      let decryptRes = yield client2.decrypt(
+        greenfieldConfig2.GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT,
+        {}
+      );
+      return decryptRes.body.plaintext;
+    } catch (e) {
+      console.log(e);
+      return "";
+    }
+  });
+}
+function setPrivateKeyByKms(ciphertextBlob) {
+  return __async(this, null, function* () {
+    try {
+      const kmsConfig = getKmsCryptConfig();
+      if (kmsConfig === null) {
+        console.log("kms config is null");
+        return false;
+      }
+      const client2 = new KmsClient({
+        accessKeyId: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_ID,
+        accessKeySecret: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_SECRET,
+        regionId: kmsConfig.ALIBABA_CLOUD_REGION_ID,
+        keyId: kmsConfig.ALIBABA_CLOUD_KMS_KEY_ID
+      });
+      let decryptRes = yield client2.decrypt(ciphertextBlob, {});
+      setPrivateKey(decryptRes.body.plaintext);
+      return true;
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
+  });
+}
+var setOspBasSdkConfig = (config) => __async(void 0, null, function* () {
   setBasConfig(config.basConfig);
   setKmsCryptConfig(config.kmsCryptConfig);
   setGreenfieldConfig(config.greenfieldConfig);
-};
+  const privateKey2 = yield getPrivateKeyByKms();
+  setPrivateKey(privateKey2);
+  return true;
+});
 
 // src/attestation/createAttestation.ts
 var getAttestationOffChain = (offchain, signer, params) => __async(void 0, null, function* () {
@@ -13747,55 +13856,12 @@ var SchemaEncoder3 = import_eas_sdk4.SchemaEncoder;
 
 // src/bas/offchainAttestations.ts
 var import_ethers3 = require("ethers");
-
-// src/kms/kms_client.ts
-var $Kms20160120 = __toESM(require("@alicloud/kms20160120"));
-var $OpenApi = __toESM(require_client6());
-var KmsClient = class _KmsClient {
-  constructor(params) {
-    this.client = _KmsClient.createClient(
-      params.accessKeyId,
-      params.accessKeySecret,
-      params.regionId
-    );
-    this.keyId = params.keyId;
-  }
-  static createClient(accessKeyId, accessKeySecret, regionId) {
-    let config = new $OpenApi.Config({
-      accessKeyId,
-      accessKeySecret,
-      regionId
-    });
-    return new $Kms20160120.default(config);
-  }
-  decrypt(ciphertextBlob, encryptionContext) {
-    return __async(this, null, function* () {
-      let request = new $Kms20160120.DecryptRequest({
-        ciphertextBlob,
-        encryptionContext
-      });
-      return yield this.client.decrypt(request);
-    });
-  }
-  encrypt(plaintext, encryptionContext) {
-    return __async(this, null, function* () {
-      let request = new $Kms20160120.EncryptRequest({
-        plaintext,
-        keyId: this.keyId,
-        encryptionContext
-      });
-      return yield this.client.encrypt(request);
-    });
-  }
-};
-
-// src/bas/offchainAttestations.ts
-var privateKey = "";
 var multiAttestBasUploadGreenField = (bucketName, schemaUID, unHandleDatas, isPrivate) => __async(void 0, null, function* () {
   try {
-    if (privateKey == "") {
-      privateKey = yield getPrivateKeyByKms();
-      if (privateKey == "") return false;
+    const privateKey2 = getPrivateKey();
+    if (privateKey2 == "") {
+      console.log("private key is null");
+      return false;
     }
     const basConfig2 = getBasConfig();
     if (basConfig2 === null) {
@@ -13803,7 +13869,7 @@ var multiAttestBasUploadGreenField = (bucketName, schemaUID, unHandleDatas, isPr
       return false;
     }
     const signer = new import_ethers3.ethers.Wallet(
-      privateKey,
+      privateKey2,
       new import_ethers3.ethers.JsonRpcProvider(basConfig2.RPC_URL)
     );
     const attestations = yield multiAttestBASOffChain(signer, unHandleDatas);
@@ -13811,7 +13877,7 @@ var multiAttestBasUploadGreenField = (bucketName, schemaUID, unHandleDatas, isPr
       bucketName,
       schemaUID,
       attestations,
-      privateKey,
+      privateKey2,
       isPrivate
     );
     return success;
@@ -13822,9 +13888,10 @@ var multiAttestBasUploadGreenField = (bucketName, schemaUID, unHandleDatas, isPr
 });
 var oneAttestBasUploadGreenField = (bucketName, unHandleData, isPrivate) => __async(void 0, null, function* () {
   try {
-    if (privateKey == "") {
-      privateKey = yield getPrivateKeyByKms();
-      if (privateKey == "") return false;
+    const privateKey2 = getPrivateKey();
+    if (privateKey2 == "") {
+      console.log("private key is null");
+      return false;
     }
     const basConfig2 = getBasConfig();
     if (basConfig2 === null) {
@@ -13832,14 +13899,14 @@ var oneAttestBasUploadGreenField = (bucketName, unHandleData, isPrivate) => __as
       return false;
     }
     const signer = new import_ethers3.ethers.Wallet(
-      privateKey,
+      privateKey2,
       new import_ethers3.ethers.JsonRpcProvider(basConfig2.RPC_URL)
     );
     const attestations = yield multiAttestBASOffChain(signer, [unHandleData]);
     const success = yield createObjectAttestOSP(
       bucketName,
       attestations[0],
-      privateKey,
+      privateKey2,
       isPrivate
     );
     return success;
@@ -13850,9 +13917,10 @@ var oneAttestBasUploadGreenField = (bucketName, unHandleData, isPrivate) => __as
 });
 var multiAttestBasUploadGreenField_String = (bucketName, schemaUID, unHandleDatas, isPrivate) => __async(void 0, null, function* () {
   try {
-    if (privateKey == "") {
-      privateKey = yield getPrivateKeyByKms();
-      if (privateKey == "") return false;
+    const privateKey2 = getPrivateKey();
+    if (privateKey2 == "") {
+      console.log("private key is null");
+      return false;
     }
     const basConfig2 = getBasConfig();
     if (basConfig2 === null) {
@@ -13860,7 +13928,7 @@ var multiAttestBasUploadGreenField_String = (bucketName, schemaUID, unHandleData
       return false;
     }
     const signer = new import_ethers3.ethers.Wallet(
-      privateKey,
+      privateKey2,
       new import_ethers3.ethers.JsonRpcProvider(basConfig2.RPC_URL)
     );
     const attestations = yield multiAttestBASOffChain(
@@ -13871,7 +13939,7 @@ var multiAttestBasUploadGreenField_String = (bucketName, schemaUID, unHandleData
       bucketName,
       schemaUID,
       attestations,
-      privateKey,
+      privateKey2,
       isPrivate
     );
     return success;
@@ -13880,37 +13948,6 @@ var multiAttestBasUploadGreenField_String = (bucketName, schemaUID, unHandleData
     return false;
   }
 });
-function getPrivateKeyByKms() {
-  return __async(this, null, function* () {
-    try {
-      console.log("init KmsClient");
-      const kmsConfig = getKmsCryptConfig();
-      if (kmsConfig === null) {
-        console.log("kms config is null");
-        return "";
-      }
-      const client2 = new KmsClient({
-        accessKeyId: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_ID,
-        accessKeySecret: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_SECRET,
-        regionId: kmsConfig.ALIBABA_CLOUD_REGION_ID,
-        keyId: kmsConfig.ALIBABA_CLOUD_KMS_KEY_ID
-      });
-      const greenfieldConfig2 = getGreenfieldConfig();
-      if (greenfieldConfig2 === null) {
-        console.log("greenfield config is null");
-        return "";
-      }
-      let decryptRes = yield client2.decrypt(
-        greenfieldConfig2.GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT,
-        {}
-      );
-      return decryptRes.body.plaintext;
-    } catch (e) {
-      console.log(e);
-      return "";
-    }
-  });
-}
 
 // src/kms/kms_signer.ts
 var import_ethers_aws_kms_signer = require("@cuonghx.gu-tech/ethers-aws-kms-signer");
@@ -14138,6 +14175,8 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
   getKmsSigner,
   getMulAttestParams,
   getOffchainUIDBAS,
+  getPrivateKey,
+  getPrivateKeyByKms,
   getSchemaByUID,
   getSigatureByDelegation,
   getSps,
@@ -14156,7 +14195,9 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
   setBasConfig,
   setGreenfieldConfig,
   setKmsCryptConfig,
-  setOspBasSdkConfig
+  setOspBasSdkConfig,
+  setPrivateKey,
+  setPrivateKeyByKms
 });
 /*! Bundled license information:
 

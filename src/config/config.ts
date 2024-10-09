@@ -1,3 +1,7 @@
+import { get } from "http";
+import KmsClient from "../kms/kms_client";
+import { fail } from "assert";
+
 export type GreenfieldConfig = {
   GREEN_RPC_URL: string;
   GREEN_CHAIN_ID: string;
@@ -23,6 +27,8 @@ let greenfieldConfig: GreenfieldConfig;
 let kmsCryptConfig: KmsCryptConfig;
 
 let basConfig: BasConfig;
+
+let privateKey: string = "";
 
 export const getGreenfieldConfig = () => {
   if (greenfieldConfig === undefined) {
@@ -57,7 +63,77 @@ export const setBasConfig = (config: BasConfig) => {
   basConfig = config;
 };
 
-export const setOspBasSdkConfig = (config: {
+export const getPrivateKey = () => {
+  return privateKey;
+};
+
+export const setPrivateKey = (key: string) => {
+  privateKey = key;
+};
+
+export async function getPrivateKeyByKms(): Promise<string> {
+  try {
+    console.log("init KmsClient");
+
+    const kmsConfig = getKmsCryptConfig();
+    if (kmsConfig === null) {
+      console.log("kms config is null");
+      return "";
+    }
+
+    const client = new KmsClient({
+      accessKeyId: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_ID!,
+      accessKeySecret: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_SECRET!,
+      regionId: kmsConfig.ALIBABA_CLOUD_REGION_ID!,
+      keyId: kmsConfig.ALIBABA_CLOUD_KMS_KEY_ID!,
+    });
+    const greenfieldConfig = getGreenfieldConfig();
+    if (greenfieldConfig === null) {
+      console.log("greenfield config is null");
+      return "";
+    }
+
+    let decryptRes = await client.decrypt(
+      greenfieldConfig.GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT,
+      {}
+    );
+
+    return decryptRes.body.plaintext;
+  } catch (e) {
+    console.log(e);
+    return "";
+  }
+}
+
+export async function setPrivateKeyByKms(
+  ciphertextBlob: string
+): Promise<boolean> {
+  try {
+    const kmsConfig = getKmsCryptConfig();
+    if (kmsConfig === null) {
+      console.log("kms config is null");
+      return false;
+    }
+
+    const client = new KmsClient({
+      accessKeyId: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_ID!,
+      accessKeySecret: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_SECRET!,
+      regionId: kmsConfig.ALIBABA_CLOUD_REGION_ID!,
+      keyId: kmsConfig.ALIBABA_CLOUD_KMS_KEY_ID!,
+    });
+
+    let decryptRes = await client.decrypt(ciphertextBlob, {});
+
+    setPrivateKey(decryptRes.body.plaintext);
+
+    return true;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+}
+
+export const setOspBasSdkConfig = async (config: {
   basConfig: BasConfig;
   kmsCryptConfig: KmsCryptConfig;
   greenfieldConfig: GreenfieldConfig;
@@ -65,4 +141,7 @@ export const setOspBasSdkConfig = (config: {
   setBasConfig(config.basConfig);
   setKmsCryptConfig(config.kmsCryptConfig);
   setGreenfieldConfig(config.greenfieldConfig);
+  const privateKey = await getPrivateKeyByKms();
+  setPrivateKey(privateKey);
+  return true;
 };

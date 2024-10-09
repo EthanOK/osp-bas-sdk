@@ -14,7 +14,7 @@ import { ethers, hexlify, keccak256, randomBytes } from "ethers";
 
 async function main() {
   
-  setOspBasSdkConfig({
+  await setOspBasSdkConfig({
     basConfig: {
       RPC_URL: process.env.BNB_RPC_URL!,
       BAS_ADDRESS: process.env.BAS_ADDRESS_OPBNB!,
@@ -24,7 +24,7 @@ async function main() {
       ALIBABA_CLOUD_ACCESS_KEY_ID: process.env.ALIBABA_CLOUD_ACCESS_KEY_ID!,
       ALIBABA_CLOUD_ACCESS_KEY_SECRET:
         process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET!,
-      ALIBABA_CLOUD_REGION_ID: process.env.ALIBABA_CLOUD_REGION_ID,
+      ALIBABA_CLOUD_REGION_ID: process.env.ALIBABA_CLOUD_REGION_ID!,
       ALIBABA_CLOUD_KMS_KEY_ID: process.env.ALIBABA_CLOUD_KMS_KEY_ID!,
     },
     greenfieldConfig: {
