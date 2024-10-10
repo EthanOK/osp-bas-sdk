@@ -5,14 +5,12 @@
 GREEN_RPC_URL="https://gnfd-testnet-fullnode-tendermint-us.bnbchain.org"
 GREEN_CHAIN_ID="5600"
 GREEN_PAYMENT_ADDRESS=""
-GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT=""
+GREEN_PAYMENT_MNEMONIC_CIPHERTEXT=""
 
 # BAS
 BAS_ADDRESS_OPBNB=""
-BAS_ADDRESS_BNB=""
 SCHEMA_REGISTRY_OPBNB=""
-SCHEMA_REGISTRY_BNB=""
-BNB_RPC_URL=""
+RPC_URL_OPBNB=""
 
 # KMS ENCRYPT/DECRYPT
 ALIBABA_CLOUD_ACCESS_KEY_ID=""
@@ -41,9 +39,10 @@ import { ethers, hexlify, keccak256, randomBytes } from "ethers";
 
 async function main() {
   
+  // TODO: Set Osp Bas Config
   await setOspBasSdkConfig({
     basConfig: {
-      RPC_URL: process.env.BNB_RPC_URL!,
+      RPC_URL: process.env.RPC_URL_OPBNB!,
       BAS_ADDRESS: process.env.BAS_ADDRESS_OPBNB!,
       SCHEMA_REGISTRY_ADDRESS: process.env.SCHEMA_REGISTRY_OPBNB!,
     },

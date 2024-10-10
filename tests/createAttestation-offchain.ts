@@ -12,10 +12,10 @@ import {
 } from "../src";
 import { ethers, hexlify, keccak256, randomBytes } from "ethers";
 async function main() {
-  
+  // TODO: Set Osp Bas Config
   await setOspBasSdkConfig({
     basConfig: {
-      RPC_URL: process.env.BNB_RPC_URL!,
+      RPC_URL: process.env.RPC_URL_OPBNB!,
       BAS_ADDRESS: process.env.BAS_ADDRESS_OPBNB!,
       SCHEMA_REGISTRY_ADDRESS: process.env.SCHEMA_REGISTRY_OPBNB!,
     },
