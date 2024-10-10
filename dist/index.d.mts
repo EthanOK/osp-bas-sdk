@@ -4,6 +4,8 @@ import { Signer, Provider, ethers } from 'ethers';
 import * as _ethereum_attestation_service_eas_sdk_dist_offchain_typed_data_handler from '@ethereum-attestation-service/eas-sdk/dist/offchain/typed-data-handler';
 import { Client } from '@bnb-chain/greenfield-js-sdk';
 import { AwsKmsSigner } from '@cuonghx.gu-tech/ethers-aws-kms-signer';
+import * as Kms20160120 from '@alicloud/kms20160120';
+import Kms20160120__default from '@alicloud/kms20160120';
 
 declare const initEAS: (provider: any, BASContractAddress: string) => void;
 /**
@@ -261,12 +263,27 @@ type KmsParams = {
     regionId: string;
     keyId: string;
 };
+/**
+ * KMS client
+ */
+declare class KmsClient {
+    client: Kms20160120__default;
+    keyId: string;
+    constructor(params: KmsParams);
+    static createClient(accessKeyId: string, accessKeySecret: string, regionId: string): Kms20160120__default;
+    decrypt(ciphertextBlob: string, encryptionContext: {
+        [key: string]: any;
+    }): Promise<Kms20160120.DecryptResponse>;
+    encrypt(plaintext: string, encryptionContext: {
+        [key: string]: any;
+    }): Promise<Kms20160120.EncryptResponse>;
+}
 
 type GreenfieldConfig = {
     GREEN_RPC_URL: string;
     GREEN_CHAIN_ID: string;
     GREEN_PAYMENT_ADDRESS: string;
-    GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT: string;
+    GREEN_PAYMENT_MNEMONIC_CIPHERTEXT: string;
 };
 type KmsCryptConfig = {
     ALIBABA_CLOUD_ACCESS_KEY_ID: string;
@@ -295,4 +312,4 @@ declare const setOspBasSdkConfig: (config: {
     greenfieldConfig: GreenfieldConfig;
 }) => Promise<boolean>;
 
-export { type AttestParams, type AttestationRequestData, BAS, type BasConfig, CommunitySchema, CommunitySchemaUID, type DelegatedAttestParams, FollowSchema, FollowSchemaUID, FollowedSchema, FollowedSchemaUID, GreenFieldClientTS, type GreenfieldConfig, type HandleOspReturnData, type HandleOspReturnDataOffChain, JoinSchema, JoinSchemaUID, JoinedSchema, JoinedSchemaUID, type KmsCryptConfig, type KmsParams, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, OspDataType, OspDataTypeMap, OspSchemaMap, ProfileSchema, ProfileSchemaUID, type RegisterSchemaParams, SchemaEncoder, type Signature, type SignedOffchainAttestation, createObjectAttestOSP, createObjectMulAttestOSP, encodeAddrToBucketName, encodeCommunityData, type encodeCommunityDataParams, encodeFollowData, type encodeFollowDataParams, encodeFollowedData, encodeJoinData, type encodeJoinDataParams, encodeJoinedData, encodeProfileData, type encodeProfileDataParams, getAllSps, getAttestParamsOffChain, getAttestationBAS, getAttestationOffChain, getAttestationOffChainV1, getAttestationRequestData, getBasConfig, getDeployer, getGreenfieldConfig, getKmsCryptConfig, getKmsSigner, getMulAttestParams, getOffchainUIDBAS, getPrivateKey, getPrivateKeyByKms, getSchemaByUID, getSigatureByDelegation, getSps, getbBundleUID, handleOspRequestData, handleOspRequestPrepareOffChain, initEAS, multiAttestBASOffChain, multiAttestBASOnChain, multiAttestBasUploadGreenField, multiAttestBasUploadGreenField_String, oneAttestBasUploadGreenField, registerSchema, selectSp, serializeJsonString, setBasConfig, setGreenfieldConfig, setKmsCryptConfig, setOspBasSdkConfig, setPrivateKey, setPrivateKeyByKms };
+export { type AttestParams, type AttestationRequestData, BAS, type BasConfig, CommunitySchema, CommunitySchemaUID, type DelegatedAttestParams, FollowSchema, FollowSchemaUID, FollowedSchema, FollowedSchemaUID, GreenFieldClientTS, type GreenfieldConfig, type HandleOspReturnData, type HandleOspReturnDataOffChain, JoinSchema, JoinSchemaUID, JoinedSchema, JoinedSchemaUID, KmsClient, type KmsCryptConfig, type KmsParams, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, OspDataType, OspDataTypeMap, OspSchemaMap, ProfileSchema, ProfileSchemaUID, type RegisterSchemaParams, SchemaEncoder, type Signature, type SignedOffchainAttestation, createObjectAttestOSP, createObjectMulAttestOSP, encodeAddrToBucketName, encodeCommunityData, type encodeCommunityDataParams, encodeFollowData, type encodeFollowDataParams, encodeFollowedData, encodeJoinData, type encodeJoinDataParams, encodeJoinedData, encodeProfileData, type encodeProfileDataParams, getAllSps, getAttestParamsOffChain, getAttestationBAS, getAttestationOffChain, getAttestationOffChainV1, getAttestationRequestData, getBasConfig, getDeployer, getGreenfieldConfig, getKmsCryptConfig, getKmsSigner, getMulAttestParams, getOffchainUIDBAS, getPrivateKey, getPrivateKeyByKms, getSchemaByUID, getSigatureByDelegation, getSps, getbBundleUID, handleOspRequestData, handleOspRequestPrepareOffChain, initEAS, multiAttestBASOffChain, multiAttestBASOnChain, multiAttestBasUploadGreenField, multiAttestBasUploadGreenField_String, oneAttestBasUploadGreenField, registerSchema, selectSp, serializeJsonString, setBasConfig, setGreenfieldConfig, setKmsCryptConfig, setOspBasSdkConfig, setPrivateKey, setPrivateKeyByKms };

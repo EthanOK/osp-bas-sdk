@@ -5,7 +5,8 @@ import { serializeJsonString } from "./utils";
 import { getBundleBuffer } from "../bundle/utils";
 import { getGreenfieldConfig } from "../config/config";
 
-let client = null;
+let client: GreenFieldClientTS = null;
+let bucketNameTemp: string = null;
 function getGreenFieldClientTS() {
   console.log("init greenfield client");
 
@@ -40,6 +41,17 @@ export const createObjectAttestOSP = async (
   if (client === null) {
     client = getGreenFieldClientTS();
   }
+
+  if (bucketNameTemp === null) {
+    const success_ = await client.createBucket(bucketName, privateKey);
+    if (!success_) {
+      return false;
+    }
+    bucketNameTemp = bucketName;
+    console.log("createBucket:", bucketNameTemp);
+
+  }
+
   const txHash = await client.createObject(
     bucketName,
     serializeJsonString(attestation),
@@ -68,6 +80,16 @@ export const createObjectMulAttestOSP = async (
   if (client === null) {
     client = getGreenFieldClientTS();
   }
+
+  if (bucketNameTemp === null) {
+    const success_ = await client.createBucket(bucketName, privateKey);
+    if (!success_) {
+      return false;
+    }
+    bucketNameTemp = bucketName;
+    console.log("createBucket:", bucketNameTemp);
+  }
+
   const { objectName, buffer } = await getBundleBuffer(schemaUID, attestations);
 
   if (buffer.length === 0) {

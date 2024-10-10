@@ -1,5 +1,6 @@
 import "dotenv/config";
-import KmsClient from "../src/kms/kms_client";
+import { KmsClient } from "../src";
+
 
 export const BNB_schemaRegistryAddress =
   "0x08C8b8417313fF130526862f90cd822B55002D72";

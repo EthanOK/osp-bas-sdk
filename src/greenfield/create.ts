@@ -75,7 +75,7 @@ export class GreenFieldClientTS {
         privateKey: privateKey,
       });
 
-      console.log("transactionHash", res.transactionHash);
+      // console.log("transactionHash", res.transactionHash);
       return true;
     } catch (error) {}
 
@@ -217,7 +217,7 @@ export class GreenFieldClientTS {
         }
         // highlight-end
       );
-      console.log("uploadRes", uploadRes);
+      // console.log("uploadRes", uploadRes);
       if (uploadRes.code === 0) {
         return transactionHash;
       }

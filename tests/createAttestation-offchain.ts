@@ -11,7 +11,6 @@ import {
   // } from "osp-bas-sdk";
 } from "../src";
 import { ethers, hexlify, keccak256, randomBytes } from "ethers";
-
 async function main() {
   
   await setOspBasSdkConfig({
@@ -31,8 +30,8 @@ async function main() {
       GREEN_RPC_URL: process.env.GREEN_RPC_URL!,
       GREEN_CHAIN_ID: process.env.GREEN_CHAIN_ID!,
       GREEN_PAYMENT_ADDRESS: process.env.GREEN_PAYMENT_ADDRESS!,
-      GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT:
-        process.env.GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT!,
+      GREEN_PAYMENT_MNEMONIC_CIPHERTEXT:
+        process.env.GREEN_PAYMENT_MNEMONIC_CIPHERTEXT!,
     },
   });
 
@@ -81,7 +80,7 @@ async function main() {
     timestamp = Math.floor(Date.now() / 1000);
     const schemaUID = Global_UnHandle_Data[0].requestData.schemaUID;
     const success = await multiAttestBasUploadGreenField(
-      encodeAddrToBucketName("obas", process.env.GREEN_PAYMENT_ADDRESS!),
+      encodeAddrToBucketName("obas", "0x0000000000000000000000000000000000000001"),
       schemaUID,
       Global_UnHandle_Data,
       false
