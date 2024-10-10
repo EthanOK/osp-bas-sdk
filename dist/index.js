@@ -12377,6 +12377,7 @@ __export(src_exports, {
   JoinSchemaUID: () => JoinSchemaUID,
   JoinedSchema: () => JoinedSchema,
   JoinedSchemaUID: () => JoinedSchemaUID,
+  KmsClient: () => KmsClient,
   OspDataType: () => OspDataType,
   OspDataTypeMap: () => OspDataTypeMap,
   OspSchemaMap: () => OspSchemaMap,
@@ -12457,7 +12458,7 @@ var getSchemaByUID = (provider, schemaRegistryAddress, schemaUID) => __async(voi
 
 // src/attestation/createAttestation.ts
 var import_eas_sdk3 = require("@ethereum-attestation-service/eas-sdk");
-var import_ethers2 = require("ethers");
+var import_ethers3 = require("ethers");
 
 // src/attestation/encodedOspData.ts
 var import_eas_sdk2 = require("@ethereum-attestation-service/eas-sdk");
@@ -12735,6 +12736,7 @@ var KmsClient = class _KmsClient {
 };
 
 // src/config/config.ts
+var import_ethers2 = require("ethers");
 var greenfieldConfig;
 var kmsCryptConfig;
 var basConfig;
@@ -12792,11 +12794,14 @@ function getPrivateKeyByKms() {
         console.log("greenfield config is null");
         return "";
       }
-      let decryptRes = yield client2.decrypt(
-        greenfieldConfig2.GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT,
+      const decryptRes = yield client2.decrypt(
+        greenfieldConfig2.GREEN_PAYMENT_MNEMONIC_CIPHERTEXT,
         {}
       );
-      return decryptRes.body.plaintext;
+      const privateKey2 = import_ethers2.ethers.Wallet.fromPhrase(
+        decryptRes.body.plaintext
+      ).privateKey;
+      return privateKey2;
     } catch (e) {
       console.log(e);
       return "";
@@ -12897,9 +12902,9 @@ var getAttestationOffChainV1 = (offchain, signer, params) => __async(void 0, nul
   };
   const signature = yield signer.signTypedData(domain, types, message);
   const new_signature = {
-    v: import_ethers2.Signature.from(signature).v,
-    r: import_ethers2.Signature.from(signature).r,
-    s: import_ethers2.Signature.from(signature).s
+    v: import_ethers3.Signature.from(signature).v,
+    r: import_ethers3.Signature.from(signature).r,
+    s: import_ethers3.Signature.from(signature).s
   };
   const uid = getOffchainUIDBAS(
     message.version,
@@ -13080,7 +13085,6 @@ var GreenFieldClientTS = class {
           granter: "",
           privateKey: privateKey2
         });
-        console.log("transactionHash", res.transactionHash);
         return true;
       } catch (error) {
       }
@@ -13193,7 +13197,6 @@ var GreenFieldClientTS = class {
           }
           // highlight-end
         );
-        console.log("uploadRes", uploadRes);
         if (uploadRes.code === 0) {
           return transactionHash;
         }
@@ -13802,6 +13805,7 @@ function _getBundle(objs) {
 
 // src/greenfield/createObjectOSP.ts
 var client = null;
+var bucketNameTemp = null;
 function getGreenFieldClientTS() {
   console.log("init greenfield client");
   const greenfieldConfig2 = getGreenfieldConfig();
@@ -13820,6 +13824,14 @@ var createObjectAttestOSP = (bucketName, attestation, privateKey2, isPrivate = f
   if (client === null) {
     client = getGreenFieldClientTS();
   }
+  if (bucketNameTemp === null) {
+    const success_ = yield client.createBucket(bucketName, privateKey2);
+    if (!success_) {
+      return false;
+    }
+    bucketNameTemp = bucketName;
+    console.log("createBucket:", bucketNameTemp);
+  }
   const txHash = yield client.createObject(
     bucketName,
     serializeJsonString(attestation),
@@ -13831,6 +13843,14 @@ var createObjectAttestOSP = (bucketName, attestation, privateKey2, isPrivate = f
 var createObjectMulAttestOSP = (bucketName, schemaUID, attestations, privateKey2, isPrivate = false) => __async(void 0, null, function* () {
   if (client === null) {
     client = getGreenFieldClientTS();
+  }
+  if (bucketNameTemp === null) {
+    const success_ = yield client.createBucket(bucketName, privateKey2);
+    if (!success_) {
+      return false;
+    }
+    bucketNameTemp = bucketName;
+    console.log("createBucket:", bucketNameTemp);
   }
   const { objectName, buffer } = yield getBundleBuffer(schemaUID, attestations);
   if (buffer.length === 0) {
@@ -13855,7 +13875,7 @@ var BAS = import_eas_sdk4.EAS;
 var SchemaEncoder3 = import_eas_sdk4.SchemaEncoder;
 
 // src/bas/offchainAttestations.ts
-var import_ethers3 = require("ethers");
+var import_ethers4 = require("ethers");
 var multiAttestBasUploadGreenField = (bucketName, schemaUID, unHandleDatas, isPrivate) => __async(void 0, null, function* () {
   try {
     const privateKey2 = getPrivateKey();
@@ -13868,9 +13888,9 @@ var multiAttestBasUploadGreenField = (bucketName, schemaUID, unHandleDatas, isPr
       console.log("bas config is null");
       return false;
     }
-    const signer = new import_ethers3.ethers.Wallet(
+    const signer = new import_ethers4.ethers.Wallet(
       privateKey2,
-      new import_ethers3.ethers.JsonRpcProvider(basConfig2.RPC_URL)
+      new import_ethers4.ethers.JsonRpcProvider(basConfig2.RPC_URL)
     );
     const attestations = yield multiAttestBASOffChain(signer, unHandleDatas);
     const success = yield createObjectMulAttestOSP(
@@ -13898,9 +13918,9 @@ var oneAttestBasUploadGreenField = (bucketName, unHandleData, isPrivate) => __as
       console.log("bas config is null");
       return false;
     }
-    const signer = new import_ethers3.ethers.Wallet(
+    const signer = new import_ethers4.ethers.Wallet(
       privateKey2,
-      new import_ethers3.ethers.JsonRpcProvider(basConfig2.RPC_URL)
+      new import_ethers4.ethers.JsonRpcProvider(basConfig2.RPC_URL)
     );
     const attestations = yield multiAttestBASOffChain(signer, [unHandleData]);
     const success = yield createObjectAttestOSP(
@@ -13927,9 +13947,9 @@ var multiAttestBasUploadGreenField_String = (bucketName, schemaUID, unHandleData
       console.log("bas config is null");
       return false;
     }
-    const signer = new import_ethers3.ethers.Wallet(
+    const signer = new import_ethers4.ethers.Wallet(
       privateKey2,
-      new import_ethers3.ethers.JsonRpcProvider(basConfig2.RPC_URL)
+      new import_ethers4.ethers.JsonRpcProvider(basConfig2.RPC_URL)
     );
     const attestations = yield multiAttestBASOffChain(
       signer,
@@ -13951,9 +13971,9 @@ var multiAttestBasUploadGreenField_String = (bucketName, schemaUID, unHandleData
 
 // src/kms/kms_signer.ts
 var import_ethers_aws_kms_signer = require("@cuonghx.gu-tech/ethers-aws-kms-signer");
-var import_ethers4 = require("ethers");
+var import_ethers5 = require("ethers");
 var getDeployer = () => __async(void 0, null, function* () {
-  const provider = new import_ethers4.ethers.JsonRpcProvider(process.env.RPC_URL);
+  const provider = new import_ethers5.ethers.JsonRpcProvider(process.env.RPC_URL);
   const signer = new import_ethers_aws_kms_signer.AwsKmsSigner(
     {
       keyId: process.env.AWS_KMS_KEY_ID,
@@ -14147,6 +14167,7 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
   JoinSchemaUID,
   JoinedSchema,
   JoinedSchemaUID,
+  KmsClient,
   OspDataType,
   OspDataTypeMap,
   OspSchemaMap,

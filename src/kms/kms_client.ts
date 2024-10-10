@@ -7,7 +7,11 @@ export type KmsParams = {
   regionId: string;
   keyId: string;
 };
-export default class KmsClient {
+
+/**
+ * KMS client
+ */
+export class KmsClient {
   client: Kms20160120;
   keyId: string;
 
@@ -57,5 +61,3 @@ export default class KmsClient {
     return await this.client.encrypt(request);
   }
 }
-
-

@@ -1,12 +1,11 @@
-import { get } from "http";
-import KmsClient from "../kms/kms_client";
-import { fail } from "assert";
+import { KmsClient } from "../kms/kms_client";
+import { ethers } from "ethers";
 
 export type GreenfieldConfig = {
   GREEN_RPC_URL: string;
   GREEN_CHAIN_ID: string;
   GREEN_PAYMENT_ADDRESS: string;
-  GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT: string;
+  GREEN_PAYMENT_MNEMONIC_CIPHERTEXT: string;
 };
 
 export type KmsCryptConfig = {
@@ -93,12 +92,16 @@ export async function getPrivateKeyByKms(): Promise<string> {
       return "";
     }
 
-    let decryptRes = await client.decrypt(
-      greenfieldConfig.GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT,
+    const decryptRes = await client.decrypt(
+      greenfieldConfig.GREEN_PAYMENT_MNEMONIC_CIPHERTEXT,
       {}
     );
 
-    return decryptRes.body.plaintext;
+    const privateKey = ethers.Wallet.fromPhrase(
+      decryptRes.body.plaintext
+    ).privateKey;
+
+    return privateKey;
   } catch (e) {
     console.log(e);
     return "";

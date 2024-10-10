@@ -5,7 +5,7 @@ import {
   createObjectAttestOSP,
   createObjectMulAttestOSP,
 } from "../greenfield/createObjectOSP";
-import KmsClient from "../kms/kms_client";
+
 import {
   getBasConfig,
   getGreenfieldConfig,
