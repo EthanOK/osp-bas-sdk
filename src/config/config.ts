@@ -1,4 +1,4 @@
-import { KmsClient } from "../kms/kms_client";
+import { getKmsPlainText, KmsClient, KmsClientParams } from "../kms/kms_client";
 import { ethers } from "ethers";
 
 export type GreenfieldConfig = {
@@ -8,12 +8,7 @@ export type GreenfieldConfig = {
   GREEN_PAYMENT_MNEMONIC_CIPHERTEXT: string;
 };
 
-export type KmsCryptConfig = {
-  ALIBABA_CLOUD_ACCESS_KEY_ID: string;
-  ALIBABA_CLOUD_ACCESS_KEY_SECRET: string;
-  ALIBABA_CLOUD_REGION_ID: string;
-  ALIBABA_CLOUD_KMS_KEY_ID: string;
-};
+export type KmsCryptConfig = KmsClientParams;
 
 export type BasConfig = {
   RPC_URL: string;
@@ -80,26 +75,18 @@ export async function getPrivateKeyByKms(): Promise<string> {
       return "";
     }
 
-    const client = new KmsClient({
-      accessKeyId: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_ID!,
-      accessKeySecret: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_SECRET!,
-      regionId: kmsConfig.ALIBABA_CLOUD_REGION_ID!,
-      keyId: kmsConfig.ALIBABA_CLOUD_KMS_KEY_ID!,
-    });
     const greenfieldConfig = getGreenfieldConfig();
     if (greenfieldConfig === null) {
       console.log("greenfield config is null");
       return "";
     }
 
-    const decryptRes = await client.decrypt(
-      greenfieldConfig.GREEN_PAYMENT_MNEMONIC_CIPHERTEXT,
-      {}
+    const mnemonic = await getKmsPlainText(
+      kmsConfig,
+      greenfieldConfig.GREEN_PAYMENT_MNEMONIC_CIPHERTEXT
     );
 
-    const privateKey = ethers.Wallet.fromPhrase(
-      decryptRes.body.plaintext
-    ).privateKey;
+    const privateKey = ethers.Wallet.fromPhrase(mnemonic).privateKey;
 
     return privateKey;
   } catch (e) {
@@ -119,10 +106,8 @@ export async function setPrivateKeyByKms(
     }
 
     const client = new KmsClient({
-      accessKeyId: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_ID!,
-      accessKeySecret: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_SECRET!,
-      regionId: kmsConfig.ALIBABA_CLOUD_REGION_ID!,
-      keyId: kmsConfig.ALIBABA_CLOUD_KMS_KEY_ID!,
+      clientParams: kmsConfig.clientParams!,
+      keyId: kmsConfig.keyId!,
     });
 
     let decryptRes = await client.decrypt(ciphertextBlob, {});

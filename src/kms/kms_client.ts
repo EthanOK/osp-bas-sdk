@@ -1,12 +1,40 @@
 import Kms20160120, * as $Kms20160120 from "@alicloud/kms20160120";
-import OpenApi, * as $OpenApi from "@alicloud/openapi-client";
+import { Config, GlobalParameters } from "@alicloud/openapi-client";
 
-export type KmsParams = {
-  accessKeyId: string;
-  accessKeySecret: string;
-  regionId: string;
-  keyId: string;
+export type ClientParams = {
+  accessKeyId?: string;
+  accessKeySecret?: string;
+  securityToken?: string;
+  bearerToken?: string;
+  protocol?: string;
+  method?: string;
+  regionId?: string;
+  readTimeout?: number;
+  connectTimeout?: number;
+  httpProxy?: string;
+  httpsProxy?: string;
+  credential?: Credential;
+  endpoint?: string;
+  noProxy?: string;
+  maxIdleConns?: number;
+  network?: string;
+  userAgent?: string;
+  suffix?: string;
+  socks5Proxy?: string;
+  socks5NetWork?: string;
+  endpointType?: string;
+  openPlatformEndpoint?: string;
+  type?: string;
+  signatureVersion?: string;
+  signatureAlgorithm?: string;
+  globalParameters?: GlobalParameters;
+  key?: string;
+  cert?: string;
+  ca?: string;
+  disableHttp2?: boolean;
 };
+
+export type KmsClientParams = { clientParams: ClientParams; keyId: string };
 
 /**
  * KMS client
@@ -15,25 +43,13 @@ export class KmsClient {
   client: Kms20160120;
   keyId: string;
 
-  constructor(params: KmsParams) {
-    this.client = KmsClient.createClient(
-      params.accessKeyId,
-      params.accessKeySecret,
-      params.regionId
-    );
+  constructor(params: KmsClientParams) {
+    this.client = KmsClient.createClient(params.clientParams);
     this.keyId = params.keyId;
   }
 
-  static createClient(
-    accessKeyId: string,
-    accessKeySecret: string,
-    regionId: string
-  ): Kms20160120 {
-    let config = new $OpenApi.Config({
-      accessKeyId: accessKeyId,
-      accessKeySecret: accessKeySecret,
-      regionId: regionId,
-    });
+  static createClient(param: ClientParams): Kms20160120 {
+    let config = new Config(param);
 
     return new Kms20160120(config);
   }
@@ -61,3 +77,33 @@ export class KmsClient {
     return await this.client.encrypt(request);
   }
 }
+
+export const getKmsCipherText = async (
+  kms_params: KmsClientParams,
+  plaintext: string
+) => {
+  try {
+    let client = new KmsClient(kms_params);
+    let encryptRes = await client.encrypt(plaintext, {});
+    const ciphertextBlob = encryptRes.body.ciphertextBlob;
+    return ciphertextBlob;
+  } catch (e) {
+    console.log(e);
+    return "";
+  }
+};
+
+export const getKmsPlainText = async (
+  kms_params: KmsClientParams,
+  ciphertextBlob: string
+) => {
+  try {
+    let client = new KmsClient(kms_params);
+    let decryptRes = await client.decrypt(ciphertextBlob, {});
+    const plaintext = decryptRes.body.plaintext;
+    return plaintext;
+  } catch (e) {
+    console.log(e);
+    return "";
+  }
+};
