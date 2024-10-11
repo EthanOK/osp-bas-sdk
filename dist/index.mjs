@@ -10753,7 +10753,7 @@ var require_client6 = __commonJS({
     var $SPI = __importStar(require_client4());
     var tea_xml_1 = __importDefault(require_client5());
     var $tea = __importStar(require_tea());
-    var GlobalParameters = class extends $tea.Model {
+    var GlobalParameters2 = class extends $tea.Model {
       constructor(map) {
         super(map);
       }
@@ -10770,7 +10770,7 @@ var require_client6 = __commonJS({
         };
       }
     };
-    exports.GlobalParameters = GlobalParameters;
+    exports.GlobalParameters = GlobalParameters2;
     var Config2 = class extends $tea.Model {
       constructor(map) {
         super(map);
@@ -10836,7 +10836,7 @@ var require_client6 = __commonJS({
           type: "string",
           signatureVersion: "string",
           signatureAlgorithm: "string",
-          globalParameters: GlobalParameters,
+          globalParameters: GlobalParameters2,
           key: "string",
           cert: "string",
           ca: "string",
@@ -12631,23 +12631,15 @@ function sha256(input) {
 }
 
 // src/kms/kms_client.ts
-var $OpenApi = __toESM(require_client6());
+var import_openapi_client = __toESM(require_client6());
 import Kms20160120, * as $Kms20160120 from "@alicloud/kms20160120";
 var KmsClient = class _KmsClient {
   constructor(params) {
-    this.client = _KmsClient.createClient(
-      params.accessKeyId,
-      params.accessKeySecret,
-      params.regionId
-    );
+    this.client = _KmsClient.createClient(params.clientParams);
     this.keyId = params.keyId;
   }
-  static createClient(accessKeyId, accessKeySecret, regionId) {
-    let config = new $OpenApi.Config({
-      accessKeyId,
-      accessKeySecret,
-      regionId
-    });
+  static createClient(param) {
+    let config = new import_openapi_client.Config(param);
     return new Kms20160120(config);
   }
   decrypt(ciphertextBlob, encryptionContext) {
@@ -12670,6 +12662,28 @@ var KmsClient = class _KmsClient {
     });
   }
 };
+var getKmsCipherText = (kms_params, plaintext) => __async(void 0, null, function* () {
+  try {
+    let client2 = new KmsClient(kms_params);
+    let encryptRes = yield client2.encrypt(plaintext, {});
+    const ciphertextBlob = encryptRes.body.ciphertextBlob;
+    return ciphertextBlob;
+  } catch (e) {
+    console.log(e);
+    return "";
+  }
+});
+var getKmsPlainText = (kms_params, ciphertextBlob) => __async(void 0, null, function* () {
+  try {
+    let client2 = new KmsClient(kms_params);
+    let decryptRes = yield client2.decrypt(ciphertextBlob, {});
+    const plaintext = decryptRes.body.plaintext;
+    return plaintext;
+  } catch (e) {
+    console.log(e);
+    return "";
+  }
+});
 
 // src/config/config.ts
 import { ethers as ethers2 } from "ethers";
@@ -12719,24 +12733,16 @@ function getPrivateKeyByKms() {
         console.log("kms config is null");
         return "";
       }
-      const client2 = new KmsClient({
-        accessKeyId: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_ID,
-        accessKeySecret: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_SECRET,
-        regionId: kmsConfig.ALIBABA_CLOUD_REGION_ID,
-        keyId: kmsConfig.ALIBABA_CLOUD_KMS_KEY_ID
-      });
       const greenfieldConfig2 = getGreenfieldConfig();
       if (greenfieldConfig2 === null) {
         console.log("greenfield config is null");
         return "";
       }
-      const decryptRes = yield client2.decrypt(
-        greenfieldConfig2.GREEN_PAYMENT_MNEMONIC_CIPHERTEXT,
-        {}
+      const mnemonic = yield getKmsPlainText(
+        kmsConfig,
+        greenfieldConfig2.GREEN_PAYMENT_MNEMONIC_CIPHERTEXT
       );
-      const privateKey2 = ethers2.Wallet.fromPhrase(
-        decryptRes.body.plaintext
-      ).privateKey;
+      const privateKey2 = ethers2.Wallet.fromPhrase(mnemonic).privateKey;
       return privateKey2;
     } catch (e) {
       console.log(e);
@@ -12753,10 +12759,8 @@ function setPrivateKeyByKms(ciphertextBlob) {
         return false;
       }
       const client2 = new KmsClient({
-        accessKeyId: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_ID,
-        accessKeySecret: kmsConfig.ALIBABA_CLOUD_ACCESS_KEY_SECRET,
-        regionId: kmsConfig.ALIBABA_CLOUD_REGION_ID,
-        keyId: kmsConfig.ALIBABA_CLOUD_KMS_KEY_ID
+        clientParams: kmsConfig.clientParams,
+        keyId: kmsConfig.keyId
       });
       let decryptRes = yield client2.decrypt(ciphertextBlob, {});
       setPrivateKey(decryptRes.body.plaintext);
@@ -14136,7 +14140,9 @@ export {
   getBasConfig,
   getDeployer,
   getGreenfieldConfig,
+  getKmsCipherText,
   getKmsCryptConfig,
+  getKmsPlainText,
   getKmsSigner,
   getMulAttestParams,
   getOffchainUIDBAS,

@@ -19,7 +19,6 @@ ALIBABA_CLOUD_REGION_ID=""
 ALIBABA_CLOUD_KMS_KEY_ID=""
 
 ```
-
 # 1. Create Attestations Off Chain
 
 ```ts
@@ -47,11 +46,12 @@ async function main() {
       SCHEMA_REGISTRY_ADDRESS: process.env.SCHEMA_REGISTRY_OPBNB!,
     },
     kmsCryptConfig: {
-      ALIBABA_CLOUD_ACCESS_KEY_ID: process.env.ALIBABA_CLOUD_ACCESS_KEY_ID!,
-      ALIBABA_CLOUD_ACCESS_KEY_SECRET:
-        process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET!,
-      ALIBABA_CLOUD_REGION_ID: process.env.ALIBABA_CLOUD_REGION_ID!,
-      ALIBABA_CLOUD_KMS_KEY_ID: process.env.ALIBABA_CLOUD_KMS_KEY_ID!,
+      clientParams: {
+        accessKeyId: process.env.ALIBABA_CLOUD_ACCESS_KEY_ID!,
+        accessKeySecret: process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET!,
+        regionId: process.env.ALIBABA_CLOUD_REGION_ID!,
+      },
+      keyId: process.env.ALIBABA_CLOUD_KMS_KEY_ID!,
     },
     greenfieldConfig: {
       GREEN_RPC_URL: process.env.GREEN_RPC_URL!,

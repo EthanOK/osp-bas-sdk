@@ -20,11 +20,12 @@ async function main() {
       SCHEMA_REGISTRY_ADDRESS: process.env.SCHEMA_REGISTRY_OPBNB!,
     },
     kmsCryptConfig: {
-      ALIBABA_CLOUD_ACCESS_KEY_ID: process.env.ALIBABA_CLOUD_ACCESS_KEY_ID!,
-      ALIBABA_CLOUD_ACCESS_KEY_SECRET:
-        process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET!,
-      ALIBABA_CLOUD_REGION_ID: process.env.ALIBABA_CLOUD_REGION_ID!,
-      ALIBABA_CLOUD_KMS_KEY_ID: process.env.ALIBABA_CLOUD_KMS_KEY_ID!,
+      clientParams: {
+        accessKeyId: process.env.ALIBABA_CLOUD_ACCESS_KEY_ID!,
+        accessKeySecret: process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET!,
+        regionId: process.env.ALIBABA_CLOUD_REGION_ID!,
+      },
+      keyId: process.env.ALIBABA_CLOUD_KMS_KEY_ID!,
     },
     greenfieldConfig: {
       GREEN_RPC_URL: process.env.GREEN_RPC_URL!,
@@ -80,7 +81,10 @@ async function main() {
     timestamp = Math.floor(Date.now() / 1000);
     const schemaUID = Global_UnHandle_Data[0].requestData.schemaUID;
     const success = await multiAttestBasUploadGreenField(
-      encodeAddrToBucketName("obas", "0x0000000000000000000000000000000000000001"),
+      encodeAddrToBucketName(
+        "obas",
+        "0x0000000000000000000000000000000000000001"
+      ),
       schemaUID,
       Global_UnHandle_Data,
       false
