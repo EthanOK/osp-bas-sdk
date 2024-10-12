@@ -83,11 +83,12 @@ async function main() {
     const success = await multiAttestBasUploadGreenField(
       encodeAddrToBucketName(
         "obas",
-        "0x0000000000000000000000000000000000000001"
+        "0x1000000000000000000000000000000000000002"
       ),
       schemaUID,
       Global_UnHandle_Data,
-      false
+      false,
+      2,
     );
     console.log("createObjects success:", success);
 

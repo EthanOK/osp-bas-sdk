@@ -36,20 +36,24 @@ export const createObjectAttestOSP = async (
   bucketName: string,
   attestation: SignedOffchainAttestation,
   privateKey: string,
-  isPrivate = false
+  isPrivate = false,
+  quota_GB = 0
 ): Promise<boolean> => {
   if (client === null) {
     client = getGreenFieldClientTS();
   }
 
   if (bucketNameTemp === null) {
-    const success_ = await client.createBucket(bucketName, privateKey);
+    const success_ = await client.createBucket(
+      bucketName,
+      quota_GB,
+      privateKey
+    );
     if (!success_) {
       return false;
     }
     bucketNameTemp = bucketName;
     console.log("createBucket:", bucketNameTemp);
-
   }
 
   const txHash = await client.createObject(
@@ -67,7 +71,8 @@ export const createObjectAttestOSP = async (
  * @param schemaUID schema uid
  * @param attestations attestations
  * @param privateKey creator private key
- * @param isPrivate is private object
+ * @param isPrivate  object default is public
+ * @param quota_GB  default 0
  * @returns boolean
  */
 export const createObjectMulAttestOSP = async (
@@ -75,14 +80,19 @@ export const createObjectMulAttestOSP = async (
   schemaUID: string,
   attestations: SignedOffchainAttestation[],
   privateKey: string,
-  isPrivate = false
+  isPrivate = false,
+  quota_GB = 0
 ): Promise<boolean> => {
   if (client === null) {
     client = getGreenFieldClientTS();
   }
 
   if (bucketNameTemp === null) {
-    const success_ = await client.createBucket(bucketName, privateKey);
+    const success_ = await client.createBucket(
+      bucketName,
+      quota_GB,
+      privateKey
+    );
     if (!success_) {
       return false;
     }

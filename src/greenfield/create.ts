@@ -13,6 +13,8 @@ import { ReedSolomon } from "@bnb-chain/reed-solomon";
 const rs = new ReedSolomon();
 // const rs = new NodeAdapterReedSolomon();
 
+const ONE_GB = 1024 ** 3;
+
 /**
  * GreenField Client
  */
@@ -33,10 +35,11 @@ export class GreenFieldClientTS {
   /**
    * create bucket
    * @param bucketName bucket name
+   * @param quota_GB quota GB/month
    * @param privateKey creator private key
    * @returns boolean
    */
-  async createBucket(bucketName: string, privateKey: string) {
+  async createBucket(bucketName: string, quota_GB: number, privateKey: string) {
     const spInfo = await selectSp(this.client);
     // console.log("spInfo", spInfo);
 
@@ -56,11 +59,12 @@ export class GreenFieldClientTS {
         bucketName: bucketName,
         creator: this.address,
         visibility: VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
-        chargedReadQuota: Long.fromString("0"),
+        chargedReadQuota: Long.fromString((quota_GB * ONE_GB).toString()),
+        // chargedReadQuota: Long.fromString("0"),
         paymentAddress: this.address,
         primarySpAddress: spInfo.primarySpAddress,
       });
-      // console.log({ createBucketTx });
+      console.log({ createBucketTx });
 
       const simulateInfo = await createBucketTx.simulate({
         denom: "BNB",
@@ -80,6 +84,46 @@ export class GreenFieldClientTS {
     } catch (error) {}
 
     return false;
+  }
+
+  async updateBucketQuota(
+    bucketName: string,
+    chargedQuota_GB: number,
+    privateKey: string
+  ): Promise<boolean> {
+    if (!privateKey.startsWith("0x")) {
+      privateKey = "0x" + privateKey;
+    }
+
+    try {
+      const bucketMeta = await this.client.bucket.getBucketMeta({ bucketName });
+
+      const updateBucketTx = await this.client.bucket.updateBucketInfo({
+        bucketName: bucketName,
+        operator: this.address,
+        visibility: VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
+        paymentAddress: this.address,
+        chargedReadQuota: (chargedQuota_GB * ONE_GB).toString(),
+      });
+
+      const simulateInfo = await updateBucketTx.simulate({
+        denom: "BNB",
+      });
+      // console.log("simulateInfo", simulateInfo);
+      const res = await updateBucketTx.broadcast({
+        denom: "BNB",
+        gasLimit: Number(simulateInfo?.gasLimit),
+        gasPrice: simulateInfo?.gasPrice || "5000000000",
+        payer: this.address,
+        granter: "",
+        privateKey: privateKey,
+      });
+      return true;
+    } catch (error) {
+      console.log(error);
+
+      return false;
+    }
   }
 
   /**
@@ -222,7 +266,6 @@ export class GreenFieldClientTS {
         return transactionHash;
       }
     } catch (error) {
-      
       console.log(error);
       return null;
     }

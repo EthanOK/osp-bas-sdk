@@ -53,6 +53,7 @@ async function prepareSchemaAndBucket() {
     );
     const success = await client.createBucket(
       encodeAddrToBucketName("bas", process.env.GREEN_PAYMENT_ADDRESS!),
+      0,
       process.env.GREEN_PAYMENT_PRIVATE_KEY!
     );
   } catch (error) {}

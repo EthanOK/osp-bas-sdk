@@ -18,14 +18,16 @@ import {
  * @param bucketName
  * @param schemaUID
  * @param unHandleDatas
- * @param isPrivate
+ * @param isPrivate object is private
+ * @param quota_GB  bucket quota
  * @returns boolean
  */
 export const multiAttestBasUploadGreenField = async (
   bucketName: string,
   schemaUID: string,
   unHandleDatas: HandleOspReturnDataOffChain[],
-  isPrivate?: boolean
+  isPrivate?: boolean,
+  quota_GB?: number
 ) => {
   try {
     const privateKey = getPrivateKey();
@@ -52,7 +54,8 @@ export const multiAttestBasUploadGreenField = async (
       schemaUID,
       attestations,
       privateKey,
-      isPrivate
+      isPrivate,
+      quota_GB
     );
     return success;
   } catch (e) {
