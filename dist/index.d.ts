@@ -175,10 +175,12 @@ declare class GreenFieldClientTS {
     /**
      * create bucket
      * @param bucketName bucket name
+     * @param quota_GB quota GB/month
      * @param privateKey creator private key
      * @returns boolean
      */
-    createBucket(bucketName: string, privateKey: string): Promise<boolean>;
+    createBucket(bucketName: string, quota_GB: number, privateKey: string): Promise<boolean>;
+    updateBucketQuota(bucketName: string, chargedQuota_GB: number, privateKey: string): Promise<boolean>;
     /**
      * create object
      * @param bucketName bucket name
@@ -206,17 +208,18 @@ declare class GreenFieldClientTS {
  * @param isPrivate is private object
  * @returns boolean
  */
-declare const createObjectAttestOSP: (bucketName: string, attestation: SignedOffchainAttestation, privateKey: string, isPrivate?: boolean) => Promise<boolean>;
+declare const createObjectAttestOSP: (bucketName: string, attestation: SignedOffchainAttestation, privateKey: string, isPrivate?: boolean, quota_GB?: number) => Promise<boolean>;
 /**
  * Create object with multiple attestation
  * @param bucketName bucket name
  * @param schemaUID schema uid
  * @param attestations attestations
  * @param privateKey creator private key
- * @param isPrivate is private object
+ * @param isPrivate  object default is public
+ * @param quota_GB  default 0
  * @returns boolean
  */
-declare const createObjectMulAttestOSP: (bucketName: string, schemaUID: string, attestations: SignedOffchainAttestation[], privateKey: string, isPrivate?: boolean) => Promise<boolean>;
+declare const createObjectMulAttestOSP: (bucketName: string, schemaUID: string, attestations: SignedOffchainAttestation[], privateKey: string, isPrivate?: boolean, quota_GB?: number) => Promise<boolean>;
 
 /**
  * encode address to bucket name
@@ -248,10 +251,11 @@ declare function getbBundleUID(attestationUIDs: string[]): string;
  * @param bucketName
  * @param schemaUID
  * @param unHandleDatas
- * @param isPrivate
+ * @param isPrivate object is private
+ * @param quota_GB  bucket quota
  * @returns boolean
  */
-declare const multiAttestBasUploadGreenField: (bucketName: string, schemaUID: string, unHandleDatas: HandleOspReturnDataOffChain[], isPrivate?: boolean) => Promise<boolean>;
+declare const multiAttestBasUploadGreenField: (bucketName: string, schemaUID: string, unHandleDatas: HandleOspReturnDataOffChain[], isPrivate?: boolean, quota_GB?: number) => Promise<boolean>;
 declare const oneAttestBasUploadGreenField: (bucketName: string, unHandleData: HandleOspReturnDataOffChain, isPrivate?: boolean) => Promise<boolean>;
 declare const multiAttestBasUploadGreenField_String: (bucketName: string, schemaUID: string, unHandleDatas: string, isPrivate?: boolean) => Promise<boolean>;
 

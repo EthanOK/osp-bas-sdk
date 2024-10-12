@@ -110,7 +110,8 @@ async function main() {
       encodeAddrToBucketName("obas", process.env.GREEN_PAYMENT_ADDRESS!),
       schemaUID,
       Global_UnHandle_Data,
-      false
+      false,
+      2
     );
     console.log("createObjects success:", success);
 

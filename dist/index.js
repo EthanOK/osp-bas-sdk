@@ -8,6 +8,7 @@ var __knownSymbol = (name, symbol) => (symbol = Symbol[name]) ? symbol : Symbol.
 var __typeError = (msg) => {
   throw TypeError(msg);
 };
+var __pow = Math.pow;
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
@@ -13041,6 +13042,7 @@ var multiAttestBASOffChain = (signer, unHandleDatas) => __async(void 0, null, fu
 var import_greenfield_js_sdk = require("@bnb-chain/greenfield-js-sdk");
 var import_reed_solomon = require("@bnb-chain/reed-solomon");
 var rs = new import_reed_solomon.ReedSolomon();
+var ONE_GB = __pow(1024, 3);
 var GreenFieldClientTS = class {
   /**
    * @param url greenfield rpc url
@@ -13056,10 +13058,11 @@ var GreenFieldClientTS = class {
   /**
    * create bucket
    * @param bucketName bucket name
+   * @param quota_GB quota GB/month
    * @param privateKey creator private key
    * @returns boolean
    */
-  createBucket(bucketName, privateKey2) {
+  createBucket(bucketName, quota_GB, privateKey2) {
     return __async(this, null, function* () {
       const spInfo = yield selectSp(this.client);
       if (!privateKey2.startsWith("0x")) {
@@ -13076,10 +13079,12 @@ var GreenFieldClientTS = class {
           bucketName,
           creator: this.address,
           visibility: import_greenfield_js_sdk.VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
-          chargedReadQuota: import_greenfield_js_sdk.Long.fromString("0"),
+          chargedReadQuota: import_greenfield_js_sdk.Long.fromString((quota_GB * ONE_GB).toString()),
+          // chargedReadQuota: Long.fromString("0"),
           paymentAddress: this.address,
           primarySpAddress: spInfo.primarySpAddress
         });
+        console.log({ createBucketTx });
         const simulateInfo = yield createBucketTx.simulate({
           denom: "BNB"
         });
@@ -13095,6 +13100,38 @@ var GreenFieldClientTS = class {
       } catch (error) {
       }
       return false;
+    });
+  }
+  updateBucketQuota(bucketName, chargedQuota_GB, privateKey2) {
+    return __async(this, null, function* () {
+      if (!privateKey2.startsWith("0x")) {
+        privateKey2 = "0x" + privateKey2;
+      }
+      try {
+        const bucketMeta = yield this.client.bucket.getBucketMeta({ bucketName });
+        const updateBucketTx = yield this.client.bucket.updateBucketInfo({
+          bucketName,
+          operator: this.address,
+          visibility: import_greenfield_js_sdk.VisibilityType.VISIBILITY_TYPE_PUBLIC_READ,
+          paymentAddress: this.address,
+          chargedReadQuota: (chargedQuota_GB * ONE_GB).toString()
+        });
+        const simulateInfo = yield updateBucketTx.simulate({
+          denom: "BNB"
+        });
+        const res = yield updateBucketTx.broadcast({
+          denom: "BNB",
+          gasLimit: Number(simulateInfo == null ? void 0 : simulateInfo.gasLimit),
+          gasPrice: (simulateInfo == null ? void 0 : simulateInfo.gasPrice) || "5000000000",
+          payer: this.address,
+          granter: "",
+          privateKey: privateKey2
+        });
+        return true;
+      } catch (error) {
+        console.log(error);
+        return false;
+      }
     });
   }
   /**
@@ -13826,12 +13863,16 @@ function getGreenFieldClientTS() {
   );
   return client_gf;
 }
-var createObjectAttestOSP = (bucketName, attestation, privateKey2, isPrivate = false) => __async(void 0, null, function* () {
+var createObjectAttestOSP = (bucketName, attestation, privateKey2, isPrivate = false, quota_GB = 0) => __async(void 0, null, function* () {
   if (client === null) {
     client = getGreenFieldClientTS();
   }
   if (bucketNameTemp === null) {
-    const success_ = yield client.createBucket(bucketName, privateKey2);
+    const success_ = yield client.createBucket(
+      bucketName,
+      quota_GB,
+      privateKey2
+    );
     if (!success_) {
       return false;
     }
@@ -13846,12 +13887,16 @@ var createObjectAttestOSP = (bucketName, attestation, privateKey2, isPrivate = f
   );
   return txHash !== null;
 });
-var createObjectMulAttestOSP = (bucketName, schemaUID, attestations, privateKey2, isPrivate = false) => __async(void 0, null, function* () {
+var createObjectMulAttestOSP = (bucketName, schemaUID, attestations, privateKey2, isPrivate = false, quota_GB = 0) => __async(void 0, null, function* () {
   if (client === null) {
     client = getGreenFieldClientTS();
   }
   if (bucketNameTemp === null) {
-    const success_ = yield client.createBucket(bucketName, privateKey2);
+    const success_ = yield client.createBucket(
+      bucketName,
+      quota_GB,
+      privateKey2
+    );
     if (!success_) {
       return false;
     }
@@ -13882,7 +13927,7 @@ var SchemaEncoder3 = import_eas_sdk4.SchemaEncoder;
 
 // src/bas/offchainAttestations.ts
 var import_ethers4 = require("ethers");
-var multiAttestBasUploadGreenField = (bucketName, schemaUID, unHandleDatas, isPrivate) => __async(void 0, null, function* () {
+var multiAttestBasUploadGreenField = (bucketName, schemaUID, unHandleDatas, isPrivate, quota_GB) => __async(void 0, null, function* () {
   try {
     const privateKey2 = getPrivateKey();
     if (privateKey2 == "") {
@@ -13904,7 +13949,8 @@ var multiAttestBasUploadGreenField = (bucketName, schemaUID, unHandleDatas, isPr
       schemaUID,
       attestations,
       privateKey2,
-      isPrivate
+      isPrivate,
+      quota_GB
     );
     return success;
   } catch (e) {

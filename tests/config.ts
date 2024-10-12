@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { KmsClient } from "../src";
-
+import { ethers } from "ethers";
 
 export const BNB_schemaRegistryAddress =
   "0x08C8b8417313fF130526862f90cd822B55002D72";
@@ -25,11 +25,14 @@ export async function getPrivateKeyByKms(): Promise<string> {
     });
 
     let decryptRes = await client.decrypt(
-      process.env.GREEN_PAYMENT_PRIVATE_KEY_KMS_CIPHERTEXT,
+      process.env.GREEN_PAYMENT_MNEMONIC_CIPHERTEXT,
       {}
     );
+    const privateKey = ethers.Wallet.fromPhrase(
+      decryptRes.body.plaintext
+    ).privateKey;
 
-    return decryptRes.body.plaintext;
+    return privateKey;
   } catch (e) {
     console.log(e);
   }
