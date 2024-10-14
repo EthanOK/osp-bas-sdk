@@ -71,7 +71,7 @@ export class Bundle {
     const tempDir = path.join(process.env.TEMP || os.tmpdir(), "tempBundleDir");
     await fs.promises.mkdir(tempDir, { recursive: true });
 
-    const dir = await fs.promises.mkdtemp(path.join(tempDir, "tempBundle"));
+    // const dir = await fs.promises.mkdtemp(path.join(tempDir, "tempBundle"));
     const bundleFile = path.join(tempDir, `tempFile-${Date.now()}.tmp`);
 
     const fd = await fs.promises.open(bundleFile, "w");

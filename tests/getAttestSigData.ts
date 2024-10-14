@@ -3,6 +3,7 @@ import {
   AttestParams,
   BAS,
   getAttestationOffChain,
+  getAttestationOffChainV1,
   getKmsSigner,
   GreenFieldClientTS,
   SchemaEncoder,
@@ -38,8 +39,10 @@ async function main() {
     refUID:
       "0x0000000000000000000000000000000000000000000000000000000000000000",
   };
-  const attestation = await getAttestationOffChain(offchain, signer, params_a);
-  console.log(attestation);
+  // const attestation = await getAttestationOffChain(offchain, signer, params_a);
+  // console.log(attestation);
+  const attestationv1 = await getAttestationOffChainV1(offchain, signer, params_a);
+  console.log(attestationv1);
 }
 
 main();

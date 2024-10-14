@@ -68,7 +68,7 @@ async function main() {
     timestamp = Math.floor(Date.now() / 1000);
     const schemaUID = Global_UnHandle_Data[0].requestData.schemaUID;
     const success = await multiAttestBasUploadGreenField(
-      encodeAddrToBucketName("bas", process.env.GREEN_PAYMENT_ADDRESS!),
+      encodeAddrToBucketName("obas", process.env.GREEN_PAYMENT_ADDRESS!),
       schemaUID,
       Global_UnHandle_Data,
       false

@@ -45,7 +45,6 @@ export const multiAttestBasUploadGreenField = async (
     console.log(e);
     return false;
   }
-  return false;
 };
 
 export const oneAttestBasUploadGreenField = async (
@@ -71,9 +70,9 @@ export const oneAttestBasUploadGreenField = async (
     );
     return success;
   } catch (e) {
-    // console.log(e);
+    console.log(e);
+    return false;
   }
-  return false;
 };
 
 export const multiAttestBasUploadGreenField_String = async (
@@ -104,9 +103,9 @@ export const multiAttestBasUploadGreenField_String = async (
     );
     return success;
   } catch (e) {
-    // console.log(e);
+    console.log(e);
+    return false;
   }
-  return false;
 };
 
 async function getPrivateKeyByKms(): Promise<string> {
@@ -128,6 +127,6 @@ async function getPrivateKeyByKms(): Promise<string> {
     return decryptRes.body.plaintext;
   } catch (e) {
     console.log(e);
+    return "";
   }
-  return "";
 }

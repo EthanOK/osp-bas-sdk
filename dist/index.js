@@ -12396,6 +12396,7 @@ __export(src_exports, {
   getAttestParamsOffChain: () => getAttestParamsOffChain,
   getAttestationBAS: () => getAttestationBAS,
   getAttestationOffChain: () => getAttestationOffChain,
+  getAttestationOffChainV1: () => getAttestationOffChainV1,
   getAttestationRequestData: () => getAttestationRequestData,
   getDeployer: () => getDeployer,
   getKmsSigner: () => getKmsSigner,
@@ -12445,6 +12446,7 @@ var getSchemaByUID = (provider, schemaRegistryAddress, schemaUID) => __async(voi
 
 // src/attestation/createAttestation.ts
 var import_eas_sdk3 = require("@ethereum-attestation-service/eas-sdk");
+var import_ethers2 = require("ethers");
 
 // src/attestation/encodedOspData.ts
 var import_eas_sdk2 = require("@ethereum-attestation-service/eas-sdk");
@@ -12703,6 +12705,69 @@ var getAttestationOffChain = (offchain, signer, params) => __async(void 0, null,
   );
   return attestation;
 });
+var getAttestationOffChainV1 = (offchain, signer, params) => __async(void 0, null, function* () {
+  const timestamp = Math.floor(Date.now() / 1e3);
+  const temp_domain = offchain.getDomainTypedData();
+  const message = {
+    recipient: params.recipient,
+    // Unix timestamp of when attestation expires. (0 for no expiration)
+    expirationTime: BigInt(0),
+    // Unix timestamp of current time
+    time: BigInt(timestamp),
+    revocable: true,
+    version: 1,
+    // Fixed value
+    nonce: BigInt(0),
+    // Fixed value
+    schema: params.schemaUID,
+    refUID: params.refUID,
+    data: params.encodedData
+  };
+  const types = {
+    Attest: [
+      { name: "version", type: "uint16" },
+      { name: "schema", type: "bytes32" },
+      { name: "recipient", type: "address" },
+      { name: "time", type: "uint64" },
+      { name: "expirationTime", type: "uint64" },
+      { name: "revocable", type: "bool" },
+      { name: "refUID", type: "bytes32" },
+      { name: "data", type: "bytes" },
+      { name: "nonce", type: "uint64" }
+    ]
+  };
+  const domain = {
+    name: "BAS Attestation",
+    version: temp_domain.version,
+    chainId: temp_domain.chainId,
+    verifyingContract: temp_domain.verifyingContract
+  };
+  const signature = yield signer.signTypedData(domain, types, message);
+  const new_signature = {
+    v: import_ethers2.Signature.from(signature).v,
+    r: import_ethers2.Signature.from(signature).r,
+    s: import_ethers2.Signature.from(signature).s
+  };
+  const uid = getOffchainUIDBAS(
+    message.version,
+    message.schema,
+    message.recipient,
+    message.time,
+    message.expirationTime,
+    message.revocable,
+    message.refUID,
+    message.data
+  );
+  const attestation = {
+    domain,
+    primaryType: "Attest",
+    message,
+    types,
+    signature: new_signature,
+    uid
+  };
+  return attestation;
+});
 var getSigatureByDelegation = (bas, params, signer) => __async(void 0, null, function* () {
   if (signer.provider == null) {
     throw new Error("Signer provider is not defined");
@@ -12788,12 +12853,11 @@ var multiAttestBASOffChain = (signer, unHandleDatas) => __async(void 0, null, fu
       if (data.dataType == 0 /* None */) {
         continue;
       }
-      const attestation = yield getAttestationOffChain(
+      const attestation_new = yield getAttestationOffChainV1(
         offchain,
         signer,
         data.requestData
       );
-      const attestation_new = yield getAttestationBAS(signer, attestation);
       attestations.push(attestation_new);
     }
     return attestations;
@@ -13347,7 +13411,6 @@ var Bundle = class _Bundle {
     return __async(this, null, function* () {
       const tempDir = path.join(process.env.TEMP || os.tmpdir(), "tempBundleDir");
       yield fs.promises.mkdir(tempDir, { recursive: true });
-      const dir = yield fs.promises.mkdtemp(path.join(tempDir, "tempBundle"));
       const bundleFile = path.join(tempDir, `tempFile-${Date.now()}.tmp`);
       const fd = yield fs.promises.open(bundleFile, "w");
       const readFile = fs.createReadStream(bundleFile);
@@ -13628,7 +13691,7 @@ var BAS = import_eas_sdk4.EAS;
 var SchemaEncoder3 = import_eas_sdk4.SchemaEncoder;
 
 // src/bas/offchainAttestations.ts
-var import_ethers2 = require("ethers");
+var import_ethers3 = require("ethers");
 
 // src/kms/kms_client.ts
 var $Kms20160120 = __toESM(require("@alicloud/kms20160120"));
@@ -13678,9 +13741,9 @@ var multiAttestBasUploadGreenField = (bucketName, schemaUID, unHandleDatas, isPr
     if (privateKey == "") {
       privateKey = yield getPrivateKeyByKms();
     }
-    const signer = new import_ethers2.ethers.Wallet(
+    const signer = new import_ethers3.ethers.Wallet(
       privateKey,
-      new import_ethers2.ethers.JsonRpcProvider(process.env.BNB_RPC_URL)
+      new import_ethers3.ethers.JsonRpcProvider(process.env.BNB_RPC_URL)
     );
     const attestations = yield multiAttestBASOffChain(signer, unHandleDatas);
     const success = yield createObjectMulAttestOSP(
@@ -13695,16 +13758,15 @@ var multiAttestBasUploadGreenField = (bucketName, schemaUID, unHandleDatas, isPr
     console.log(e);
     return false;
   }
-  return false;
 });
 var oneAttestBasUploadGreenField = (bucketName, unHandleData, isPrivate) => __async(void 0, null, function* () {
   try {
     if (privateKey == "") {
       privateKey = yield getPrivateKeyByKms();
     }
-    const signer = new import_ethers2.ethers.Wallet(
+    const signer = new import_ethers3.ethers.Wallet(
       privateKey,
-      new import_ethers2.ethers.JsonRpcProvider(process.env.BNB_RPC_URL)
+      new import_ethers3.ethers.JsonRpcProvider(process.env.BNB_RPC_URL)
     );
     const attestations = yield multiAttestBASOffChain(signer, [unHandleData]);
     const success = yield createObjectAttestOSP(
@@ -13715,17 +13777,18 @@ var oneAttestBasUploadGreenField = (bucketName, unHandleData, isPrivate) => __as
     );
     return success;
   } catch (e) {
+    console.log(e);
+    return false;
   }
-  return false;
 });
 var multiAttestBasUploadGreenField_String = (bucketName, schemaUID, unHandleDatas, isPrivate) => __async(void 0, null, function* () {
   try {
     if (privateKey == "") {
       privateKey = yield getPrivateKeyByKms();
     }
-    const signer = new import_ethers2.ethers.Wallet(
+    const signer = new import_ethers3.ethers.Wallet(
       privateKey,
-      new import_ethers2.ethers.JsonRpcProvider(process.env.BNB_RPC_URL)
+      new import_ethers3.ethers.JsonRpcProvider(process.env.BNB_RPC_URL)
     );
     const attestations = yield multiAttestBASOffChain(
       signer,
@@ -13740,8 +13803,9 @@ var multiAttestBasUploadGreenField_String = (bucketName, schemaUID, unHandleData
     );
     return success;
   } catch (e) {
+    console.log(e);
+    return false;
   }
-  return false;
 });
 function getPrivateKeyByKms() {
   return __async(this, null, function* () {
@@ -13760,16 +13824,16 @@ function getPrivateKeyByKms() {
       return decryptRes.body.plaintext;
     } catch (e) {
       console.log(e);
+      return "";
     }
-    return "";
   });
 }
 
 // src/kms/kms_signer.ts
 var import_ethers_aws_kms_signer = require("@cuonghx.gu-tech/ethers-aws-kms-signer");
-var import_ethers3 = require("ethers");
+var import_ethers4 = require("ethers");
 var getDeployer = () => __async(void 0, null, function* () {
-  const provider = new import_ethers3.ethers.JsonRpcProvider(process.env.RPC_URL);
+  const provider = new import_ethers4.ethers.JsonRpcProvider(process.env.RPC_URL);
   const signer = new import_ethers_aws_kms_signer.AwsKmsSigner(
     {
       keyId: process.env.AWS_KMS_KEY_ID,
@@ -13982,6 +14046,7 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
   getAttestParamsOffChain,
   getAttestationBAS,
   getAttestationOffChain,
+  getAttestationOffChainV1,
   getAttestationRequestData,
   getDeployer,
   getKmsSigner,

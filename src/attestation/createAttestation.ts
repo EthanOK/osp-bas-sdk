@@ -7,7 +7,7 @@ import {
   SchemaEncoder,
   SignedOffchainAttestation,
 } from "@ethereum-attestation-service/eas-sdk";
-import { ethers, Signer } from "ethers";
+import { ethers, Signature, Signer } from "ethers";
 import { BNB_schemaRegistryAddress } from "../../tests/config";
 import { getSchemaByUID } from "../schema/register";
 import { throws } from "assert";
@@ -17,8 +17,7 @@ import {
   HandleOspReturnData,
   HandleOspReturnDataOffChain,
 } from "../handle/handleOsp";
-import { off } from "process";
-import { getAttestationBAS } from "../greenfield/utils";
+import { getAttestationBAS, getOffchainUIDBAS } from "../greenfield/utils";
 
 // Initialize SchemaEncoder with the schema string
 
@@ -71,6 +70,78 @@ export const getAttestationOffChain = async (
     },
     signer
   );
+
+  return attestation;
+};
+
+export const getAttestationOffChainV1 = async (
+  offchain: Offchain,
+  signer: Signer,
+  params: AttestParams
+): Promise<SignedOffchainAttestation> => {
+  const timestamp = Math.floor(Date.now() / 1000);
+  const temp_domain = offchain.getDomainTypedData();
+
+  const message = {
+    recipient: params.recipient,
+    // Unix timestamp of when attestation expires. (0 for no expiration)
+    expirationTime: BigInt(0),
+    // Unix timestamp of current time
+    time: BigInt(timestamp),
+    revocable: true,
+    version: 1, // Fixed value
+    nonce: BigInt(0), // Fixed value
+    schema: params.schemaUID,
+    refUID: params.refUID,
+    data: params.encodedData,
+  };
+
+  const types = {
+    Attest: [
+      { name: "version", type: "uint16" },
+      { name: "schema", type: "bytes32" },
+      { name: "recipient", type: "address" },
+      { name: "time", type: "uint64" },
+      { name: "expirationTime", type: "uint64" },
+      { name: "revocable", type: "bool" },
+      { name: "refUID", type: "bytes32" },
+      { name: "data", type: "bytes" },
+      { name: "nonce", type: "uint64" },
+    ],
+  };
+
+  const domain = {
+    name: "BAS Attestation",
+    version: temp_domain.version,
+    chainId: temp_domain.chainId,
+    verifyingContract: temp_domain.verifyingContract,
+  };
+  const signature = await signer.signTypedData(domain, types, message);
+  const new_signature = {
+    v: Signature.from(signature).v,
+    r: Signature.from(signature).r,
+    s: Signature.from(signature).s,
+  };
+
+  const uid = getOffchainUIDBAS(
+    message.version,
+    message.schema,
+    message.recipient,
+    message.time,
+    message.expirationTime,
+    message.revocable,
+    message.refUID,
+    message.data
+  );
+  
+  const attestation: SignedOffchainAttestation = {
+    domain: domain,
+    primaryType: "Attest",
+    message: message,
+    types: types as any,
+    signature: new_signature,
+    uid: uid,
+  };
 
   return attestation;
 };
@@ -212,13 +283,18 @@ export const multiAttestBASOffChain = async (
       if (data.dataType == OspDataType.None) {
         continue;
       }
-      // TODO: 优化签名
-      const attestation = await getAttestationOffChain(
+      // const attestation = await getAttestationOffChain(
+      //   offchain,
+      //   signer,
+      //   data.requestData
+      // );
+      // Re-sign:
+      // const attestation_new = await getAttestationBAS(signer, attestation);
+      const attestation_new = await getAttestationOffChainV1(
         offchain,
         signer,
         data.requestData
       );
-      const attestation_new = await getAttestationBAS(signer, attestation);
       attestations.push(attestation_new);
     }
     return attestations;
