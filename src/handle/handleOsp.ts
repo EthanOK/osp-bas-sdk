@@ -7,6 +7,7 @@ import {
   encodeJoinedData,
   encodeProfileData,
   encodeSeasonPassData,
+  encodeSubscribeData,
   OspDataType,
 } from "../attestation/encodedOspData";
 import {
@@ -281,12 +282,32 @@ export const handleOspRequestPrepareOffChainV2 = (
         purchaser: data.user,
         seasonId: BigInt(data.id).toString(),
         count: BigInt(data.count).toString(),
+        currency: data.currency,
+        amount: BigInt(data.amount).toString(),
       });
       handledDatas.push({
         dataType: OspDataType.SeasonPass,
         requestData: getAttestParamsOffChain(
           OspDataType.SeasonPass,
           data.user,
+          encodedData,
+          data.block_timestamp
+        ),
+      });
+    } else if (data.name === "subscription_purchased") {
+      const encodedData = encodeSubscribeData({
+        subscribeTx: data.transaction_hash,
+        subscriber: data.account,
+        communityId: BigInt(data.community_id).toString(),
+        currency: data.currency,
+        price:  BigInt(data.price).toString(),
+        duration:  BigInt(data.duration).toString(),
+      });
+      handledDatas.push({
+        dataType: OspDataType.Subscribe,
+        requestData: getAttestParamsOffChain(
+          OspDataType.Subscribe,
+          data.account,
           encodedData,
           data.block_timestamp
         ),

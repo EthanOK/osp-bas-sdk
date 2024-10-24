@@ -9,6 +9,7 @@ export enum OspDataType {
   Join = 5,
   Joined = 6,
   SeasonPass = 7,
+  Subscribe = 8,
 }
 
 export const ProfileSchemaUID =
@@ -24,7 +25,9 @@ export const JoinSchemaUID =
 export const JoinedSchemaUID =
   "0xe1685d5f5e58134cbcd44a1f3250027c2192a2c9552cb1fbe048ad3e6e999ed6";
 export const SeasonPassSchemaUID =
-  "0x4609ac6fb186f5039fdcd79af66ecae94c45bd0ad8b68032014a3930dbdc70af";
+  "0xa34e00fdc96e3686fa961f6d4ae9f904e42fc2717a214226f9840b8a7b9eca7c";
+export const SubscribeSchemaUID =
+  "0x8e4bf4cb7a111ae35b49994893ff6f33803b52305c0ba980c4150dd4e7b344f9";
 
 export const OspDataTypeMap = new Map([
   [OspDataType.Profile, ProfileSchemaUID],
@@ -34,6 +37,7 @@ export const OspDataTypeMap = new Map([
   [OspDataType.Join, JoinSchemaUID],
   [OspDataType.Joined, JoinedSchemaUID],
   [OspDataType.SeasonPass, SeasonPassSchemaUID],
+  [OspDataType.Subscribe, SubscribeSchemaUID],
 ]);
 
 export const ProfileSchema =
@@ -50,7 +54,9 @@ export const JoinedSchema =
   "bytes32 joinTx, string type, address joiner, uint256 communityId, address communityOwner";
 // TODO
 export const SeasonPassSchema =
-  "bytes32 purchaseTx, address purchaser, uint256 seasonId, uint256 count";
+  "bytes32 purchaseTx, address purchaser, uint256 seasonId, uint256 count, address currency, uint256 amount";
+export const SubscribeSchema =
+  "bytes32 subscribeTx, address subscriber, uint256 communityId, address currency, uint256 price, uint256 duration";
 
 export const OspSchemaMap = new Map([
   [OspDataType.Profile, ProfileSchema],
@@ -60,6 +66,7 @@ export const OspSchemaMap = new Map([
   [OspDataType.Join, JoinSchema],
   [OspDataType.Joined, JoinedSchema],
   [OspDataType.SeasonPass, SeasonPassSchema],
+  [OspDataType.Subscribe, SubscribeSchema],
 ]);
 
 export type encodeFollowDataParams = {
@@ -161,15 +168,39 @@ export type encodeSeasonPassDataParams = {
   purchaser: string;
   seasonId: string;
   count: string;
+  currency: string;
+  amount: string;
 };
 
 export const encodeSeasonPassData = (param: encodeSeasonPassDataParams) => {
   const schemaEncoder = new SchemaEncoder(SeasonPassSchema);
-
   return schemaEncoder.encodeData([
     { name: "purchaseTx", value: param.purchaseTx, type: "bytes32" },
     { name: "purchaser", value: param.purchaser, type: "address" },
     { name: "seasonId", value: param.seasonId, type: "uint256" },
     { name: "count", value: param.count, type: "uint256" },
+    { name: "currency", value: param.currency, type: "address" },
+    { name: "amount", value: param.amount, type: "uint256" },
+  ]);
+};
+
+export type encodeSubscribeDataParams = {
+  subscribeTx: string;
+  subscriber: string;
+  communityId: string;
+  currency: string;
+  price: string;
+  duration: string;
+};
+
+export const encodeSubscribeData = (param: encodeSubscribeDataParams) => {
+  const schemaEncoder = new SchemaEncoder(SubscribeSchema);
+  return schemaEncoder.encodeData([
+    { name: "subscribeTx", value: param.subscribeTx, type: "bytes32" },
+    { name: "subscriber", value: param.subscriber, type: "address" },
+    { name: "communityId", value: param.communityId, type: "uint256" },
+    { name: "currency", value: param.currency, type: "address" },
+    { name: "price", value: param.price, type: "uint256" },
+    { name: "duration", value: param.duration, type: "uint256" },
   ]);
 };
