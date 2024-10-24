@@ -57,7 +57,8 @@ async function main() {
             follower: recipient,
             followedAddress: followedAddress,
             followedProfileId: i.toString(),
-          })
+          }),
+          1729750000
         ),
       });
     } else if (dataType == 2) {
@@ -88,7 +89,7 @@ async function main() {
       schemaUID,
       Global_UnHandle_Data,
       false,
-      2,
+      2
     );
     console.log("createObjects success:", success);
 
