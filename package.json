@@ -1,6 +1,6 @@
 {
   "name": "osp-bas-sdk",
-  "version": "0.0.12-beta.1",
+  "version": "0.0.12-beta.3",
   "description": "This is the BAS SDK for OSP",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

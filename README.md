@@ -19,6 +19,7 @@ ALIBABA_CLOUD_REGION_ID=""
 ALIBABA_CLOUD_KMS_KEY_ID=""
 
 ```
+
 # 1. Create Attestations Off Chain
 
 ```ts
@@ -32,12 +33,11 @@ import {
   HandleOspReturnDataOffChain,
   multiAttestBasUploadGreenField,
   setOspBasSdkConfig,
-  } from "osp-bas-sdk";
+} from "osp-bas-sdk";
 // } from "../src";
 import { ethers, hexlify, keccak256, randomBytes } from "ethers";
 
 async function main() {
-  
   // TODO: Set Osp Bas Config
   await setOspBasSdkConfig({
     basConfig: {
@@ -57,8 +57,7 @@ async function main() {
       GREEN_RPC_URL: process.env.GREEN_RPC_URL!,
       GREEN_CHAIN_ID: process.env.GREEN_CHAIN_ID!,
       GREEN_PAYMENT_ADDRESS: process.env.GREEN_PAYMENT_ADDRESS!,
-      GREEN_PAYMENT_MNEMONIC_CIPHERTEXT:
-        process.env.GREEN_PAYMENT_MNEMONIC_CIPHERTEXT!,
+      GREEN_PAYMENT_MNEMONIC_CIPHERTEXT: process.env.GREEN_PAYMENT_MNEMONIC_CIPHERTEXT!,
     },
   });
 
@@ -122,7 +121,6 @@ async function main() {
 }
 
 main();
-
 ```
 
 # 2. Create Attestation On Chain
@@ -144,9 +142,7 @@ import {
 import { ethers, hexlify, randomBytes } from "ethers";
 
 async function createAttestation() {
-  const provider = new ethers.JsonRpcProvider(
-    "https://opbnb-testnet-rpc.bnbchain.org"
-  );
+  const provider = new ethers.JsonRpcProvider("https://opbnb-testnet-rpc.bnbchain.org");
   // const signer = new ethers.Wallet(PrivateKey, provider);
   const signer = getKmsSigner(provider);
 
@@ -183,8 +179,7 @@ async function createAttestation() {
     }
   }
 
-  const params: MultiAttestationRequest[] =
-    getMulAttestParams(Global_UnHandle_Data);
+  const params: MultiAttestationRequest[] = getMulAttestParams(Global_UnHandle_Data);
 
   const uids = await multiAttestBASOnChain(signer, params);
   console.log("uids:", uids);
@@ -213,17 +208,14 @@ import { PrivateKey, Attester_PrivateKey } from "./config";
 
 const deadline = Math.floor(Date.now() / 1000) + 60;
 
-const provider = new ethers.JsonRpcProvider(
-  "https://opbnb-testnet-rpc.bnbchain.org"
-);
+const provider = new ethers.JsonRpcProvider("https://opbnb-testnet-rpc.bnbchain.org");
 const payer = new ethers.Wallet(PrivateKey, provider);
 const attester = new ethers.Wallet(Attester_PrivateKey, provider);
 
 const bas = new BAS("0x5e905F77f59491F03eBB78c204986aaDEB0C6bDa");
 
 async function createAttestationByDelegation() {
-  const schemaUID =
-    "0xb375a6d216ba084094bbaae989bf76a31357cc88e7fe270fd477a96e1fbdadb1";
+  const schemaUID = "0xb375a6d216ba084094bbaae989bf76a31357cc88e7fe270fd477a96e1fbdadb1";
 
   let params: MultiDelegatedAttestationRequest[] = [];
   let attestationRequestDatas: AttestationRequestData[] = [];
@@ -286,21 +278,27 @@ async function getAttestationRequestData() {
     expirationTime: BigInt(0),
     revocable: true,
     data: encodedData,
-    refUID:
-      "0x0000000000000000000000000000000000000000000000000000000000000000",
+    refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
   };
 
   return attestationRequestData;
 }
 
-async function getSigature(
-  bas,
-  params: DelegatedAttestParams,
-  attester: Signer
-) {
+async function getSigature(bas, params: DelegatedAttestParams, attester: Signer) {
   const signature = await getSigatureByDelegation(bas, params, attester);
   return signature;
 }
 
 createAttestationByDelegation();
+```
+
+# 4. updateBucketQuota
+
+```js
+// await ospconfig
+const r = await updateBucketQuota(
+  encodeAddrToBucketName("obas", "0x1000000000000000000000000000000000000002"),
+  20
+);
+console.log(r);
 ```

@@ -12441,7 +12441,8 @@ __export(src_exports, {
   setKmsCryptConfig: () => setKmsCryptConfig,
   setOspBasSdkConfig: () => setOspBasSdkConfig,
   setPrivateKey: () => setPrivateKey,
-  setPrivateKeyByKms: () => setPrivateKeyByKms
+  setPrivateKeyByKms: () => setPrivateKeyByKms,
+  updateBucketQuota: () => updateBucketQuota
 });
 module.exports = __toCommonJS(src_exports);
 
@@ -13921,11 +13922,7 @@ var createObjectAttestOSP = (bucketName, attestation, privateKey2, isPrivate = f
     client = getGreenFieldClientTS();
   }
   if (bucketNameTemp === null) {
-    const success_ = yield client.createBucket(
-      bucketName,
-      quota_GB,
-      privateKey2
-    );
+    const success_ = yield client.createBucket(bucketName, quota_GB, privateKey2);
     if (!success_) {
       return false;
     }
@@ -13945,11 +13942,7 @@ var createObjectMulAttestOSP = (bucketName, schemaUID, attestations, privateKey2
     client = getGreenFieldClientTS();
   }
   if (bucketNameTemp === null) {
-    const success_ = yield client.createBucket(
-      bucketName,
-      quota_GB,
-      privateKey2
-    );
+    const success_ = yield client.createBucket(bucketName, quota_GB, privateKey2);
     if (!success_) {
       return false;
     }
@@ -13971,6 +13964,23 @@ var createObjectMulAttestOSP = (bucketName, schemaUID, attestations, privateKey2
     return false;
   }
   return true;
+});
+var updateBucketQuota = (bucketName, chargedQuota_GB) => __async(void 0, null, function* () {
+  try {
+    if (client === null) {
+      client = getGreenFieldClientTS();
+    }
+    const privateKey2 = getPrivateKey();
+    const success = yield client.updateBucketQuota(
+      bucketName,
+      chargedQuota_GB,
+      privateKey2
+    );
+    return success;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
 });
 
 // src/bas/index.ts
@@ -14488,7 +14498,8 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
   setKmsCryptConfig,
   setOspBasSdkConfig,
   setPrivateKey,
-  setPrivateKeyByKms
+  setPrivateKeyByKms,
+  updateBucketQuota
 });
 /*! Bundled license information:
 

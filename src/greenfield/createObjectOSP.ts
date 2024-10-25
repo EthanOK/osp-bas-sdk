@@ -3,7 +3,7 @@ import { GreenFieldClientTS } from "./create";
 import "dotenv/config";
 import { serializeJsonString } from "./utils";
 import { getBundleBuffer } from "../bundle/utils";
-import { getGreenfieldConfig } from "../config/config";
+import { getGreenfieldConfig, getPrivateKey } from "../config/config";
 
 let client: GreenFieldClientTS = null;
 let bucketNameTemp: string = null;
@@ -44,11 +44,7 @@ export const createObjectAttestOSP = async (
   }
 
   if (bucketNameTemp === null) {
-    const success_ = await client.createBucket(
-      bucketName,
-      quota_GB,
-      privateKey
-    );
+    const success_ = await client.createBucket(bucketName, quota_GB, privateKey);
     if (!success_) {
       return false;
     }
@@ -88,11 +84,7 @@ export const createObjectMulAttestOSP = async (
   }
 
   if (bucketNameTemp === null) {
-    const success_ = await client.createBucket(
-      bucketName,
-      quota_GB,
-      privateKey
-    );
+    const success_ = await client.createBucket(bucketName, quota_GB, privateKey);
     if (!success_) {
       return false;
     }
@@ -118,4 +110,25 @@ export const createObjectMulAttestOSP = async (
     return false;
   }
   return true;
+};
+
+export const updateBucketQuota = async (
+  bucketName: string,
+  chargedQuota_GB: number
+): Promise<boolean> => {
+  try {
+    if (client === null) {
+      client = getGreenFieldClientTS();
+    }
+    const privateKey = getPrivateKey();
+    const success = await client.updateBucketQuota(
+      bucketName,
+      chargedQuota_GB,
+      privateKey
+    );
+    return success;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
 };
