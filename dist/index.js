@@ -14267,8 +14267,7 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
         const followData = {
           followTx: data.transaction_hash,
           follower: data.follower,
-          // TODO: add followed_address
-          followedAddress: data.followed_address,
+          followedAddress: data.followed,
           followedProfileId: BigInt(data.profile_id).toString()
         };
         const encode_FollowData = encodeFollowData(followData);
@@ -14285,7 +14284,7 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
           dataType: 3 /* Followed */,
           requestData: getAttestParamsOffChain(
             3 /* Followed */,
-            data.followed_address,
+            data.followed,
             encode_FollowedData
           )
         });
@@ -14295,8 +14294,7 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
           joinTx: data.transaction_hash,
           joiner: data.joiner,
           communityId: BigInt(data.community_id).toString(),
-          // TODO: add community_owner_address
-          communityOwner: data.community_owner_address
+          communityOwner: data.community_owner
         };
         const encode_JoinData = encodeJoinData(joinData);
         const encode_JoinedData = encodeJoinedData(joinData);
@@ -14312,7 +14310,7 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
           dataType: 6 /* Joined */,
           requestData: getAttestParamsOffChain(
             6 /* Joined */,
-            data.community_owner_address,
+            data.community_owner,
             encode_JoinedData
           )
         });
@@ -14339,7 +14337,7 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
           communityOwner: data.to,
           communityId: BigInt(data.community_id).toString(),
           handle: data.handle,
-          joinNFT: data.joinNFT
+          joinNFT: data.join_nft
         });
         handledDatas.push({
           dataType: 4 /* Community */,

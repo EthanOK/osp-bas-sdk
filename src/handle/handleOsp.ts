@@ -205,8 +205,7 @@ export const handleOspRequestPrepareOffChainV2 = (
         const followData = {
           followTx: data.transaction_hash,
           follower: data.follower,
-          // TODO: add followed_address
-          followedAddress: data.followed_address,
+          followedAddress: data.followed,
           followedProfileId: BigInt(data.profile_id).toString(),
         };
         const encode_FollowData = encodeFollowData(followData);
@@ -223,7 +222,7 @@ export const handleOspRequestPrepareOffChainV2 = (
           dataType: OspDataType.Followed,
           requestData: getAttestParamsOffChain(
             OspDataType.Followed,
-            data.followed_address,
+            data.followed,
             encode_FollowedData
           ),
         });
@@ -234,8 +233,7 @@ export const handleOspRequestPrepareOffChainV2 = (
           joinTx: data.transaction_hash,
           joiner: data.joiner,
           communityId: BigInt(data.community_id).toString(),
-          // TODO: add community_owner_address
-          communityOwner: data.community_owner_address,
+          communityOwner: data.community_owner,
         };
         const encode_JoinData = encodeJoinData(joinData);
         const encode_JoinedData = encodeJoinedData(joinData);
@@ -251,7 +249,7 @@ export const handleOspRequestPrepareOffChainV2 = (
           dataType: OspDataType.Joined,
           requestData: getAttestParamsOffChain(
             OspDataType.Joined,
-            data.community_owner_address,
+            data.community_owner,
             encode_JoinedData
           ),
         });
@@ -280,7 +278,7 @@ export const handleOspRequestPrepareOffChainV2 = (
           communityOwner: data.to,
           communityId: BigInt(data.community_id).toString(),
           handle: data.handle,
-          joinNFT: data.joinNFT,
+          joinNFT: data.join_nft,
         });
         handledDatas.push({
           dataType: OspDataType.Community,
