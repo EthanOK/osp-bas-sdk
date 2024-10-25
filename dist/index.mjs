@@ -12407,6 +12407,9 @@ var OspDataType = /* @__PURE__ */ ((OspDataType2) => {
   OspDataType2[OspDataType2["Community"] = 4] = "Community";
   OspDataType2[OspDataType2["Join"] = 5] = "Join";
   OspDataType2[OspDataType2["Joined"] = 6] = "Joined";
+  OspDataType2[OspDataType2["SeasonPass"] = 7] = "SeasonPass";
+  OspDataType2[OspDataType2["Subscribe"] = 8] = "Subscribe";
+  OspDataType2[OspDataType2["FixFeePaid"] = 9] = "FixFeePaid";
   return OspDataType2;
 })(OspDataType || {});
 var ProfileSchemaUID = "0x7c90370dcf194ce4c2851abec14da05abd98d8860ae7147ac714755430d42f6e";
@@ -12415,13 +12418,19 @@ var FollowedSchemaUID = "0xa0d8de56036149d7613854b8e58ce2bcc402cd065bae55a96d7a5
 var CommunitySchemaUID = "0x18c1dbf9c1a1c6a64b661c23110116f80b7d6897839334b724ea2a46056bee94";
 var JoinSchemaUID = "0x15ce785a4cd0951c813f27917308bb632162855f33d4a93b3bf05e35a70c8510";
 var JoinedSchemaUID = "0xe1685d5f5e58134cbcd44a1f3250027c2192a2c9552cb1fbe048ad3e6e999ed6";
+var SeasonPassSchemaUID = "0xa34e00fdc96e3686fa961f6d4ae9f904e42fc2717a214226f9840b8a7b9eca7c";
+var SubscribeSchemaUID = "0x8e4bf4cb7a111ae35b49994893ff6f33803b52305c0ba980c4150dd4e7b344f9";
+var FixFeePaidSchemaUID = "0x16da17e8b479593ccaf2fea0dbc801b0a69c7ddb443facb1f129fdfe8afbc85b";
 var OspDataTypeMap = /* @__PURE__ */ new Map([
   [1 /* Profile */, ProfileSchemaUID],
   [2 /* Follow */, FollowSchemaUID],
   [3 /* Followed */, FollowedSchemaUID],
   [4 /* Community */, CommunitySchemaUID],
   [5 /* Join */, JoinSchemaUID],
-  [6 /* Joined */, JoinedSchemaUID]
+  [6 /* Joined */, JoinedSchemaUID],
+  [7 /* SeasonPass */, SeasonPassSchemaUID],
+  [8 /* Subscribe */, SubscribeSchemaUID],
+  [9 /* FixFeePaid */, FixFeePaidSchemaUID]
 ]);
 var ProfileSchema = "bytes32 createProfileTx, address profileOwner, uint256 profileId, string handle";
 var FollowSchema = "bytes32 followTx, address follower, address followedAddress, uint256 followedProfileId";
@@ -12429,13 +12438,19 @@ var FollowedSchema = "bytes32 followTx, string type, address follower, address f
 var CommunitySchema = "bytes32 createCommunityTx, address communityOwner, uint256 communityId, string handle, address joinNFT";
 var JoinSchema = "bytes32 joinTx, address joiner, uint256 communityId, address communityOwner";
 var JoinedSchema = "bytes32 joinTx, string type, address joiner, uint256 communityId, address communityOwner";
+var SeasonPassSchema = "bytes32 purchaseTx, address purchaser, uint256 seasonId, uint256 count, address currency, uint256 amount";
+var SubscribeSchema = "bytes32 subscribeTx, address subscriber, uint256 communityId, address currency, uint256 price, uint256 duration";
+var FixFeePaidSchema = "bytes32 fixFeePaidTx, address payer, string handle, uint256 price";
 var OspSchemaMap = /* @__PURE__ */ new Map([
   [1 /* Profile */, ProfileSchema],
   [2 /* Follow */, FollowSchema],
   [3 /* Followed */, FollowedSchema],
   [4 /* Community */, CommunitySchema],
   [5 /* Join */, JoinSchema],
-  [6 /* Joined */, JoinedSchema]
+  [6 /* Joined */, JoinedSchema],
+  [7 /* SeasonPass */, SeasonPassSchema],
+  [8 /* Subscribe */, SubscribeSchema],
+  [9 /* FixFeePaid */, FixFeePaidSchema]
 ]);
 var encodeFollowData = (param) => {
   const schemaEncoder = new SchemaEncoder(FollowSchema);
@@ -12468,11 +12483,7 @@ var encodeProfileData = (param) => {
 var encodeCommunityData = (param) => {
   const schemaEncoder = new SchemaEncoder(CommunitySchema);
   const encodedData = schemaEncoder.encodeData([
-    {
-      name: "createCommunityTx",
-      value: param.createCommunityTx,
-      type: "bytes32"
-    },
+    { name: "createCommunityTx", value: param.createCommunityTx, type: "bytes32" },
     { name: "communityOwner", value: param.communityOwner, type: "address" },
     { name: "communityId", value: param.communityId, type: "uint256" },
     { name: "handle", value: param.handle, type: "string" },
@@ -12500,6 +12511,37 @@ var encodeJoinedData = (param) => {
     { name: "communityOwner", value: param.communityOwner, type: "address" }
   ]);
   return encodedData;
+};
+var encodeSeasonPassData = (param) => {
+  const schemaEncoder = new SchemaEncoder(SeasonPassSchema);
+  return schemaEncoder.encodeData([
+    { name: "purchaseTx", value: param.purchaseTx, type: "bytes32" },
+    { name: "purchaser", value: param.purchaser, type: "address" },
+    { name: "seasonId", value: param.seasonId, type: "uint256" },
+    { name: "count", value: param.count, type: "uint256" },
+    { name: "currency", value: param.currency, type: "address" },
+    { name: "amount", value: param.amount, type: "uint256" }
+  ]);
+};
+var encodeSubscribeData = (param) => {
+  const schemaEncoder = new SchemaEncoder(SubscribeSchema);
+  return schemaEncoder.encodeData([
+    { name: "subscribeTx", value: param.subscribeTx, type: "bytes32" },
+    { name: "subscriber", value: param.subscriber, type: "address" },
+    { name: "communityId", value: param.communityId, type: "uint256" },
+    { name: "currency", value: param.currency, type: "address" },
+    { name: "price", value: param.price, type: "uint256" },
+    { name: "duration", value: param.duration, type: "uint256" }
+  ]);
+};
+var encodeFixFeePaidData = (param) => {
+  const schemaEncoder = new SchemaEncoder(FixFeePaidSchema);
+  return schemaEncoder.encodeData([
+    { name: "fixFeePaidTx", value: param.fixFeePaidTx, type: "bytes32" },
+    { name: "payer", value: param.payer, type: "address" },
+    { name: "handle", value: param.handle, type: "string" },
+    { name: "price", value: param.price, type: "uint256" }
+  ]);
 };
 
 // src/greenfield/utils.ts
@@ -12783,14 +12825,14 @@ var setOspBasSdkConfig = (config) => __async(void 0, null, function* () {
 
 // src/attestation/createAttestation.ts
 var getAttestationOffChain = (offchain, signer, params) => __async(void 0, null, function* () {
-  const timestamp = Math.floor(Date.now() / 1e3);
+  const timestamp_temp = Math.floor(Date.now() / 1e3);
   const attestation = yield offchain.signOffchainAttestation(
     {
       recipient: params.recipient,
       // Unix timestamp of when attestation expires. (0 for no expiration)
       expirationTime: BigInt(0),
       // Unix timestamp of current time
-      time: BigInt(timestamp),
+      time: BigInt(params.timestamp ? params.timestamp : timestamp_temp),
       revocable: true,
       version: 1,
       // Fixed value
@@ -12812,7 +12854,7 @@ var getAttestationOffChainV1 = (offchain, signer, params) => __async(void 0, nul
     // Unix timestamp of when attestation expires. (0 for no expiration)
     expirationTime: BigInt(0),
     // Unix timestamp of current time
-    time: BigInt(timestamp),
+    time: BigInt(params.timestamp ? params.timestamp : timestamp),
     revocable: true,
     version: 1,
     // Fixed value
@@ -12898,12 +12940,13 @@ var getAttestationRequestData = (recipient, encodedData) => {
   };
   return attestationRequestData;
 };
-var getAttestParamsOffChain = (dataType, recipient, encodedData) => {
+var getAttestParamsOffChain = (dataType, recipient, encodedData, timestamp) => {
   const params = {
     schemaUID: OspDataTypeMap.get(dataType),
     encodedData,
     recipient,
-    refUID: "0x0000000000000000000000000000000000000000000000000000000000000000"
+    refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
+    timestamp
   };
   return params;
 };
@@ -14148,10 +14191,167 @@ var handleOspRequestPrepareOffChain = (chainId, jsonData) => {
   }
   return handledDatas;
 };
+var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
+  const data = JSON.parse(jsonData);
+  const handledDatas = [];
+  try {
+    switch (data.event_name) {
+      case "followed":
+        const followData = {
+          followTx: data.transaction_hash,
+          follower: data.follower,
+          // TODO: add followed_address
+          followedAddress: data.followed_address,
+          followedProfileId: BigInt(data.profile_id).toString()
+        };
+        const encode_FollowData = encodeFollowData(followData);
+        const encode_FollowedData = encodeFollowedData(followData);
+        handledDatas.push({
+          dataType: 2 /* Follow */,
+          requestData: getAttestParamsOffChain(
+            2 /* Follow */,
+            data.follower,
+            encode_FollowData
+          )
+        });
+        handledDatas.push({
+          dataType: 3 /* Followed */,
+          requestData: getAttestParamsOffChain(
+            3 /* Followed */,
+            data.followed_address,
+            encode_FollowedData
+          )
+        });
+        break;
+      case "joined":
+        const joinData = {
+          joinTx: data.transaction_hash,
+          joiner: data.joiner,
+          communityId: BigInt(data.community_id).toString(),
+          // TODO: add community_owner_address
+          communityOwner: data.community_owner_address
+        };
+        const encode_JoinData = encodeJoinData(joinData);
+        const encode_JoinedData = encodeJoinedData(joinData);
+        handledDatas.push({
+          dataType: 5 /* Join */,
+          requestData: getAttestParamsOffChain(
+            5 /* Join */,
+            data.joiner,
+            encode_JoinData
+          )
+        });
+        handledDatas.push({
+          dataType: 6 /* Joined */,
+          requestData: getAttestParamsOffChain(
+            6 /* Joined */,
+            data.community_owner_address,
+            encode_JoinedData
+          )
+        });
+        break;
+      case "profile_created":
+        const encode_ProfileData = encodeProfileData({
+          createProfileTx: data.transaction_hash,
+          profileOwner: data.to,
+          profileId: BigInt(data.profile_id).toString(),
+          handle: data.handle
+        });
+        handledDatas.push({
+          dataType: 1 /* Profile */,
+          requestData: getAttestParamsOffChain(
+            1 /* Profile */,
+            data.to,
+            encode_ProfileData
+          )
+        });
+        break;
+      case "community_created":
+        const encode_CommunityData = encodeCommunityData({
+          createCommunityTx: data.transaction_hash,
+          communityOwner: data.to,
+          communityId: BigInt(data.community_id).toString(),
+          handle: data.handle,
+          joinNFT: data.joinNFT
+        });
+        handledDatas.push({
+          dataType: 4 /* Community */,
+          requestData: getAttestParamsOffChain(
+            4 /* Community */,
+            data.to,
+            encode_CommunityData
+          )
+        });
+        break;
+      case "season_pass_purchased":
+        const encode_SeasonPassData = encodeSeasonPassData({
+          purchaseTx: data.transaction_hash,
+          purchaser: data.user,
+          seasonId: BigInt(data.id).toString(),
+          count: BigInt(data.count).toString(),
+          currency: data.currency,
+          amount: BigInt(data.amount).toString()
+        });
+        handledDatas.push({
+          dataType: 7 /* SeasonPass */,
+          requestData: getAttestParamsOffChain(
+            7 /* SeasonPass */,
+            data.user,
+            encode_SeasonPassData,
+            data.block_timestamp
+          )
+        });
+        break;
+      case "subscription_purchased":
+        const encode_SubscribeData = encodeSubscribeData({
+          subscribeTx: data.transaction_hash,
+          subscriber: data.account,
+          communityId: BigInt(data.community_id).toString(),
+          currency: data.currency,
+          price: BigInt(data.price).toString(),
+          duration: BigInt(data.duration).toString()
+        });
+        handledDatas.push({
+          dataType: 8 /* Subscribe */,
+          requestData: getAttestParamsOffChain(
+            8 /* Subscribe */,
+            data.account,
+            encode_SubscribeData,
+            data.block_timestamp
+          )
+        });
+        break;
+      case "fix_fee_paid":
+        const encode_FixFeeData = encodeFixFeePaidData({
+          fixFeePaidTx: data.transaction_hash,
+          payer: data.to,
+          handle: data.handle,
+          price: BigInt(data.price).toString()
+        });
+        handledDatas.push({
+          dataType: 9 /* FixFeePaid */,
+          requestData: getAttestParamsOffChain(
+            9 /* FixFeePaid */,
+            data.to,
+            encode_FixFeeData,
+            data.block_timestamp
+          )
+        });
+        break;
+      default:
+        break;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+  return handledDatas;
+};
 export {
   BAS,
   CommunitySchema,
   CommunitySchemaUID,
+  FixFeePaidSchema,
+  FixFeePaidSchemaUID,
   FollowSchema,
   FollowSchemaUID,
   FollowedSchema,
@@ -14168,15 +14368,22 @@ export {
   ProfileSchema,
   ProfileSchemaUID,
   SchemaEncoder3 as SchemaEncoder,
+  SeasonPassSchema,
+  SeasonPassSchemaUID,
+  SubscribeSchema,
+  SubscribeSchemaUID,
   createObjectAttestOSP,
   createObjectMulAttestOSP,
   encodeAddrToBucketName,
   encodeCommunityData,
+  encodeFixFeePaidData,
   encodeFollowData,
   encodeFollowedData,
   encodeJoinData,
   encodeJoinedData,
   encodeProfileData,
+  encodeSeasonPassData,
+  encodeSubscribeData,
   getAllSps,
   getAttestParamsOffChain,
   getAttestationBAS,
@@ -14200,6 +14407,7 @@ export {
   getbBundleUID,
   handleOspRequestData,
   handleOspRequestPrepareOffChain,
+  handleOspRequestPrepareOffChainV2,
   initEAS,
   multiAttestBASOffChain,
   multiAttestBASOnChain,

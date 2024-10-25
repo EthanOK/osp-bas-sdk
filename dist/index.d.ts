@@ -56,7 +56,10 @@ declare enum OspDataType {
     Followed = 3,
     Community = 4,
     Join = 5,
-    Joined = 6
+    Joined = 6,
+    SeasonPass = 7,
+    Subscribe = 8,
+    FixFeePaid = 9
 }
 declare const ProfileSchemaUID = "0x7c90370dcf194ce4c2851abec14da05abd98d8860ae7147ac714755430d42f6e";
 declare const FollowSchemaUID = "0xc21ba57124d1c884e89d561c9ba60a80a98733d2553d000d06cc5a98a0534b11";
@@ -64,6 +67,9 @@ declare const FollowedSchemaUID = "0xa0d8de56036149d7613854b8e58ce2bcc402cd065ba
 declare const CommunitySchemaUID = "0x18c1dbf9c1a1c6a64b661c23110116f80b7d6897839334b724ea2a46056bee94";
 declare const JoinSchemaUID = "0x15ce785a4cd0951c813f27917308bb632162855f33d4a93b3bf05e35a70c8510";
 declare const JoinedSchemaUID = "0xe1685d5f5e58134cbcd44a1f3250027c2192a2c9552cb1fbe048ad3e6e999ed6";
+declare const SeasonPassSchemaUID = "0xa34e00fdc96e3686fa961f6d4ae9f904e42fc2717a214226f9840b8a7b9eca7c";
+declare const SubscribeSchemaUID = "0x8e4bf4cb7a111ae35b49994893ff6f33803b52305c0ba980c4150dd4e7b344f9";
+declare const FixFeePaidSchemaUID = "0x16da17e8b479593ccaf2fea0dbc801b0a69c7ddb443facb1f129fdfe8afbc85b";
 declare const OspDataTypeMap: Map<OspDataType, string>;
 declare const ProfileSchema = "bytes32 createProfileTx, address profileOwner, uint256 profileId, string handle";
 declare const FollowSchema = "bytes32 followTx, address follower, address followedAddress, uint256 followedProfileId";
@@ -71,6 +77,9 @@ declare const FollowedSchema = "bytes32 followTx, string type, address follower,
 declare const CommunitySchema = "bytes32 createCommunityTx, address communityOwner, uint256 communityId, string handle, address joinNFT";
 declare const JoinSchema = "bytes32 joinTx, address joiner, uint256 communityId, address communityOwner";
 declare const JoinedSchema = "bytes32 joinTx, string type, address joiner, uint256 communityId, address communityOwner";
+declare const SeasonPassSchema = "bytes32 purchaseTx, address purchaser, uint256 seasonId, uint256 count, address currency, uint256 amount";
+declare const SubscribeSchema = "bytes32 subscribeTx, address subscriber, uint256 communityId, address currency, uint256 price, uint256 duration";
+declare const FixFeePaidSchema = "bytes32 fixFeePaidTx, address payer, string handle, uint256 price";
 declare const OspSchemaMap: Map<OspDataType, string>;
 type encodeFollowDataParams = {
     followTx: string;
@@ -103,6 +112,31 @@ type encodeJoinDataParams = {
 };
 declare const encodeJoinData: (param: encodeJoinDataParams) => string;
 declare const encodeJoinedData: (param: encodeJoinDataParams) => string;
+type encodeSeasonPassDataParams = {
+    purchaseTx: string;
+    purchaser: string;
+    seasonId: string;
+    count: string;
+    currency: string;
+    amount: string;
+};
+declare const encodeSeasonPassData: (param: encodeSeasonPassDataParams) => string;
+type encodeSubscribeDataParams = {
+    subscribeTx: string;
+    subscriber: string;
+    communityId: string;
+    currency: string;
+    price: string;
+    duration: string;
+};
+declare const encodeSubscribeData: (param: encodeSubscribeDataParams) => string;
+type encodeFixFeePaidDataParams = {
+    fixFeePaidTx: string;
+    payer: string;
+    handle: string;
+    price: string;
+};
+declare const encodeFixFeePaidData: (param: encodeFixFeePaidDataParams) => string;
 
 type HandleOspReturnData = {
     dataType: number;
@@ -114,6 +148,7 @@ type HandleOspReturnDataOffChain = {
     requestData: AttestParams;
 };
 declare const handleOspRequestPrepareOffChain: (chainId: number, jsonData: string) => HandleOspReturnDataOffChain[];
+declare const handleOspRequestPrepareOffChainV2: (chainId: number, jsonData: string) => HandleOspReturnDataOffChain[];
 
 /**
  * Attestation params
@@ -127,6 +162,7 @@ type AttestParams = {
     encodedData: string;
     refUID: string;
     recipient: string;
+    timestamp?: string | number;
 };
 interface DelegatedAttestParams extends AttestParams {
     deadline: bigint;
@@ -143,7 +179,7 @@ declare const getAttestationOffChain: (offchain: Offchain, signer: Signer, param
 declare const getAttestationOffChainV1: (offchain: Offchain, signer: Signer, params: AttestParams) => Promise<SignedOffchainAttestation$1>;
 declare const getSigatureByDelegation: (bas: EAS, params: DelegatedAttestParams, signer: Signer) => Promise<_ethereum_attestation_service_eas_sdk_dist_offchain_typed_data_handler.Signature>;
 declare const getAttestationRequestData: (recipient: string, encodedData: string) => _ethereum_attestation_service_eas_sdk.AttestationRequestData;
-declare const getAttestParamsOffChain: (dataType: OspDataType, recipient: string, encodedData: string) => AttestParams;
+declare const getAttestParamsOffChain: (dataType: OspDataType, recipient: string, encodedData: string, timestamp?: string | number) => AttestParams;
 declare const getMulAttestParams: (params: HandleOspReturnData[]) => MultiAttestationRequest[];
 /**
  * Create multi attestation
@@ -344,4 +380,4 @@ declare const setOspBasSdkConfig: (config: {
     greenfieldConfig: GreenfieldConfig;
 }) => Promise<boolean>;
 
-export { type AttestParams, type AttestationRequestData, BAS, type BasConfig, type ClientParams, CommunitySchema, CommunitySchemaUID, type DelegatedAttestParams, FollowSchema, FollowSchemaUID, FollowedSchema, FollowedSchemaUID, GreenFieldClientTS, type GreenfieldConfig, type HandleOspReturnData, type HandleOspReturnDataOffChain, JoinSchema, JoinSchemaUID, JoinedSchema, JoinedSchemaUID, KmsClient, type KmsClientParams, type KmsCryptConfig, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, OspDataType, OspDataTypeMap, OspSchemaMap, ProfileSchema, ProfileSchemaUID, type RegisterSchemaParams, SchemaEncoder, type Signature, type SignedOffchainAttestation, createObjectAttestOSP, createObjectMulAttestOSP, encodeAddrToBucketName, encodeCommunityData, type encodeCommunityDataParams, encodeFollowData, type encodeFollowDataParams, encodeFollowedData, encodeJoinData, type encodeJoinDataParams, encodeJoinedData, encodeProfileData, type encodeProfileDataParams, getAllSps, getAttestParamsOffChain, getAttestationBAS, getAttestationOffChain, getAttestationOffChainV1, getAttestationRequestData, getBasConfig, getDeployer, getGreenfieldConfig, getKmsCipherText, getKmsCryptConfig, getKmsPlainText, getKmsSigner, getMulAttestParams, getOffchainUIDBAS, getPrivateKey, getPrivateKeyByKms, getSchemaByUID, getSigatureByDelegation, getSps, getbBundleUID, handleOspRequestData, handleOspRequestPrepareOffChain, initEAS, multiAttestBASOffChain, multiAttestBASOnChain, multiAttestBasUploadGreenField, multiAttestBasUploadGreenField_String, oneAttestBasUploadGreenField, registerSchema, selectSp, serializeJsonString, setBasConfig, setGreenfieldConfig, setKmsCryptConfig, setOspBasSdkConfig, setPrivateKey, setPrivateKeyByKms };
+export { type AttestParams, type AttestationRequestData, BAS, type BasConfig, type ClientParams, CommunitySchema, CommunitySchemaUID, type DelegatedAttestParams, FixFeePaidSchema, FixFeePaidSchemaUID, FollowSchema, FollowSchemaUID, FollowedSchema, FollowedSchemaUID, GreenFieldClientTS, type GreenfieldConfig, type HandleOspReturnData, type HandleOspReturnDataOffChain, JoinSchema, JoinSchemaUID, JoinedSchema, JoinedSchemaUID, KmsClient, type KmsClientParams, type KmsCryptConfig, type MultiAttestationRequest, type MultiDelegatedAttestationRequest, OspDataType, OspDataTypeMap, OspSchemaMap, ProfileSchema, ProfileSchemaUID, type RegisterSchemaParams, SchemaEncoder, SeasonPassSchema, SeasonPassSchemaUID, type Signature, type SignedOffchainAttestation, SubscribeSchema, SubscribeSchemaUID, createObjectAttestOSP, createObjectMulAttestOSP, encodeAddrToBucketName, encodeCommunityData, type encodeCommunityDataParams, encodeFixFeePaidData, type encodeFixFeePaidDataParams, encodeFollowData, type encodeFollowDataParams, encodeFollowedData, encodeJoinData, type encodeJoinDataParams, encodeJoinedData, encodeProfileData, type encodeProfileDataParams, encodeSeasonPassData, type encodeSeasonPassDataParams, encodeSubscribeData, type encodeSubscribeDataParams, getAllSps, getAttestParamsOffChain, getAttestationBAS, getAttestationOffChain, getAttestationOffChainV1, getAttestationRequestData, getBasConfig, getDeployer, getGreenfieldConfig, getKmsCipherText, getKmsCryptConfig, getKmsPlainText, getKmsSigner, getMulAttestParams, getOffchainUIDBAS, getPrivateKey, getPrivateKeyByKms, getSchemaByUID, getSigatureByDelegation, getSps, getbBundleUID, handleOspRequestData, handleOspRequestPrepareOffChain, handleOspRequestPrepareOffChainV2, initEAS, multiAttestBASOffChain, multiAttestBASOnChain, multiAttestBasUploadGreenField, multiAttestBasUploadGreenField_String, oneAttestBasUploadGreenField, registerSchema, selectSp, serializeJsonString, setBasConfig, setGreenfieldConfig, setKmsCryptConfig, setOspBasSdkConfig, setPrivateKey, setPrivateKeyByKms };
