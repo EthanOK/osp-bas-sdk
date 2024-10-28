@@ -1,7 +1,9 @@
 import { AttestationRequestData } from "@ethereum-attestation-service/eas-sdk";
 import {
   encodeCommunityData,
-  encodeFixFeePaidData,
+  
+  encodeCreationFeePaidData,
+  
   encodeFollowData,
   encodeFollowedData,
   encodeJoinData,
@@ -215,7 +217,8 @@ export const handleOspRequestPrepareOffChainV2 = (
           requestData: getAttestParamsOffChain(
             OspDataType.Follow,
             data.follower,
-            encode_FollowData
+            encode_FollowData,
+            data.block_timestamp
           ),
         });
         handledDatas.push({
@@ -223,7 +226,8 @@ export const handleOspRequestPrepareOffChainV2 = (
           requestData: getAttestParamsOffChain(
             OspDataType.Followed,
             data.followed,
-            encode_FollowedData
+            encode_FollowedData,
+            data.block_timestamp
           ),
         });
         break;
@@ -242,7 +246,8 @@ export const handleOspRequestPrepareOffChainV2 = (
           requestData: getAttestParamsOffChain(
             OspDataType.Join,
             data.joiner,
-            encode_JoinData
+            encode_JoinData,
+            data.block_timestamp
           ),
         });
         handledDatas.push({
@@ -250,7 +255,8 @@ export const handleOspRequestPrepareOffChainV2 = (
           requestData: getAttestParamsOffChain(
             OspDataType.Joined,
             data.community_owner,
-            encode_JoinedData
+            encode_JoinedData,
+            data.block_timestamp
           ),
         });
         break;
@@ -267,7 +273,8 @@ export const handleOspRequestPrepareOffChainV2 = (
           requestData: getAttestParamsOffChain(
             OspDataType.Profile,
             data.to,
-            encode_ProfileData
+            encode_ProfileData,
+            data.block_timestamp
           ),
         });
         break;
@@ -285,7 +292,8 @@ export const handleOspRequestPrepareOffChainV2 = (
           requestData: getAttestParamsOffChain(
             OspDataType.Community,
             data.to,
-            encode_CommunityData
+            encode_CommunityData,
+            data.block_timestamp
           ),
         });
         break;
@@ -294,7 +302,7 @@ export const handleOspRequestPrepareOffChainV2 = (
         const encode_SeasonPassData = encodeSeasonPassData({
           purchaseTx: data.transaction_hash,
           purchaser: data.user,
-          seasonId: BigInt(data.id).toString(),
+          seasonId: BigInt(data.season_pass_id).toString(),
           count: BigInt(data.count).toString(),
           currency: data.currency,
           amount: BigInt(data.amount).toString(),
@@ -325,22 +333,23 @@ export const handleOspRequestPrepareOffChainV2 = (
             OspDataType.Subscribe,
             data.account,
             encode_SubscribeData,
-            data.block_timestamp
+            data.block_timestamp,
+            data.deadline
           ),
         });
         break;
 
       case "fix_fee_paid":
-        const encode_FixFeeData = encodeFixFeePaidData({
-          fixFeePaidTx: data.transaction_hash,
+        const encode_FixFeeData = encodeCreationFeePaidData({
+          creationFeePaidTx: data.transaction_hash,
           payer: data.to,
           handle: data.handle,
           price: BigInt(data.price).toString(),
         });
         handledDatas.push({
-          dataType: OspDataType.FixFeePaid,
+          dataType: OspDataType.CreationFeePaid,
           requestData: getAttestParamsOffChain(
-            OspDataType.FixFeePaid,
+            OspDataType.CreationFeePaid,
             data.to,
             encode_FixFeeData,
             data.block_timestamp

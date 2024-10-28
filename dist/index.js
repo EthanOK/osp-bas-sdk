@@ -12369,8 +12369,8 @@ __export(src_exports, {
   BAS: () => BAS,
   CommunitySchema: () => CommunitySchema,
   CommunitySchemaUID: () => CommunitySchemaUID,
-  FixFeePaidSchema: () => FixFeePaidSchema,
-  FixFeePaidSchemaUID: () => FixFeePaidSchemaUID,
+  CreationFeePaidSchema: () => CreationFeePaidSchema,
+  CreationFeePaidSchemaUID: () => CreationFeePaidSchemaUID,
   FollowSchema: () => FollowSchema,
   FollowSchemaUID: () => FollowSchemaUID,
   FollowedSchema: () => FollowedSchema,
@@ -12395,7 +12395,7 @@ __export(src_exports, {
   createObjectMulAttestOSP: () => createObjectMulAttestOSP,
   encodeAddrToBucketName: () => encodeAddrToBucketName,
   encodeCommunityData: () => encodeCommunityData,
-  encodeFixFeePaidData: () => encodeFixFeePaidData,
+  encodeCreationFeePaidData: () => encodeCreationFeePaidData,
   encodeFollowData: () => encodeFollowData,
   encodeFollowedData: () => encodeFollowedData,
   encodeJoinData: () => encodeJoinData,
@@ -12486,7 +12486,7 @@ var OspDataType = /* @__PURE__ */ ((OspDataType2) => {
   OspDataType2[OspDataType2["Joined"] = 6] = "Joined";
   OspDataType2[OspDataType2["SeasonPass"] = 7] = "SeasonPass";
   OspDataType2[OspDataType2["Subscribe"] = 8] = "Subscribe";
-  OspDataType2[OspDataType2["FixFeePaid"] = 9] = "FixFeePaid";
+  OspDataType2[OspDataType2["CreationFeePaid"] = 9] = "CreationFeePaid";
   return OspDataType2;
 })(OspDataType || {});
 var ProfileSchemaUID = "0x7c90370dcf194ce4c2851abec14da05abd98d8860ae7147ac714755430d42f6e";
@@ -12497,7 +12497,7 @@ var JoinSchemaUID = "0x15ce785a4cd0951c813f27917308bb632162855f33d4a93b3bf05e35a
 var JoinedSchemaUID = "0xe1685d5f5e58134cbcd44a1f3250027c2192a2c9552cb1fbe048ad3e6e999ed6";
 var SeasonPassSchemaUID = "0xa34e00fdc96e3686fa961f6d4ae9f904e42fc2717a214226f9840b8a7b9eca7c";
 var SubscribeSchemaUID = "0x8e4bf4cb7a111ae35b49994893ff6f33803b52305c0ba980c4150dd4e7b344f9";
-var FixFeePaidSchemaUID = "0x16da17e8b479593ccaf2fea0dbc801b0a69c7ddb443facb1f129fdfe8afbc85b";
+var CreationFeePaidSchemaUID = "0x16da17e8b479593ccaf2fea0dbc801b0a69c7ddb443facb1f129fdfe8afbc85b";
 var OspDataTypeMap = /* @__PURE__ */ new Map([
   [1 /* Profile */, ProfileSchemaUID],
   [2 /* Follow */, FollowSchemaUID],
@@ -12507,7 +12507,7 @@ var OspDataTypeMap = /* @__PURE__ */ new Map([
   [6 /* Joined */, JoinedSchemaUID],
   [7 /* SeasonPass */, SeasonPassSchemaUID],
   [8 /* Subscribe */, SubscribeSchemaUID],
-  [9 /* FixFeePaid */, FixFeePaidSchemaUID]
+  [9 /* CreationFeePaid */, CreationFeePaidSchemaUID]
 ]);
 var ProfileSchema = "bytes32 createProfileTx, address profileOwner, uint256 profileId, string handle";
 var FollowSchema = "bytes32 followTx, address follower, address followedAddress, uint256 followedProfileId";
@@ -12517,7 +12517,7 @@ var JoinSchema = "bytes32 joinTx, address joiner, uint256 communityId, address c
 var JoinedSchema = "bytes32 joinTx, string type, address joiner, uint256 communityId, address communityOwner";
 var SeasonPassSchema = "bytes32 purchaseTx, address purchaser, uint256 seasonId, uint256 count, address currency, uint256 amount";
 var SubscribeSchema = "bytes32 subscribeTx, address subscriber, uint256 communityId, address currency, uint256 price, uint256 duration";
-var FixFeePaidSchema = "bytes32 fixFeePaidTx, address payer, string handle, uint256 price";
+var CreationFeePaidSchema = "bytes32 creationFeePaidTx, address payer, string handle, uint256 price";
 var OspSchemaMap = /* @__PURE__ */ new Map([
   [1 /* Profile */, ProfileSchema],
   [2 /* Follow */, FollowSchema],
@@ -12527,7 +12527,7 @@ var OspSchemaMap = /* @__PURE__ */ new Map([
   [6 /* Joined */, JoinedSchema],
   [7 /* SeasonPass */, SeasonPassSchema],
   [8 /* Subscribe */, SubscribeSchema],
-  [9 /* FixFeePaid */, FixFeePaidSchema]
+  [9 /* CreationFeePaid */, CreationFeePaidSchema]
 ]);
 var encodeFollowData = (param) => {
   const schemaEncoder = new import_eas_sdk2.SchemaEncoder(FollowSchema);
@@ -12611,10 +12611,10 @@ var encodeSubscribeData = (param) => {
     { name: "duration", value: param.duration, type: "uint256" }
   ]);
 };
-var encodeFixFeePaidData = (param) => {
-  const schemaEncoder = new import_eas_sdk2.SchemaEncoder(FixFeePaidSchema);
+var encodeCreationFeePaidData = (param) => {
+  const schemaEncoder = new import_eas_sdk2.SchemaEncoder(CreationFeePaidSchema);
   return schemaEncoder.encodeData([
-    { name: "fixFeePaidTx", value: param.fixFeePaidTx, type: "bytes32" },
+    { name: "creationFeePaidTx", value: param.creationFeePaidTx, type: "bytes32" },
     { name: "payer", value: param.payer, type: "address" },
     { name: "handle", value: param.handle, type: "string" },
     { name: "price", value: param.price, type: "uint256" }
@@ -12907,7 +12907,7 @@ var getAttestationOffChain = (offchain, signer, params) => __async(void 0, null,
     {
       recipient: params.recipient,
       // Unix timestamp of when attestation expires. (0 for no expiration)
-      expirationTime: BigInt(0),
+      expirationTime: BigInt(params.expirationTime ? params.expirationTime : 0),
       // Unix timestamp of current time
       time: BigInt(params.timestamp ? params.timestamp : timestamp_temp),
       revocable: true,
@@ -13017,13 +13017,14 @@ var getAttestationRequestData = (recipient, encodedData) => {
   };
   return attestationRequestData;
 };
-var getAttestParamsOffChain = (dataType, recipient, encodedData, timestamp) => {
+var getAttestParamsOffChain = (dataType, recipient, encodedData, timestamp, expirationTime) => {
   const params = {
     schemaUID: OspDataTypeMap.get(dataType),
     encodedData,
     recipient,
     refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
-    timestamp
+    timestamp,
+    expirationTime
   };
   return params;
 };
@@ -14287,7 +14288,8 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
           requestData: getAttestParamsOffChain(
             2 /* Follow */,
             data.follower,
-            encode_FollowData
+            encode_FollowData,
+            data.block_timestamp
           )
         });
         handledDatas.push({
@@ -14295,7 +14297,8 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
           requestData: getAttestParamsOffChain(
             3 /* Followed */,
             data.followed,
-            encode_FollowedData
+            encode_FollowedData,
+            data.block_timestamp
           )
         });
         break;
@@ -14313,7 +14316,8 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
           requestData: getAttestParamsOffChain(
             5 /* Join */,
             data.joiner,
-            encode_JoinData
+            encode_JoinData,
+            data.block_timestamp
           )
         });
         handledDatas.push({
@@ -14321,7 +14325,8 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
           requestData: getAttestParamsOffChain(
             6 /* Joined */,
             data.community_owner,
-            encode_JoinedData
+            encode_JoinedData,
+            data.block_timestamp
           )
         });
         break;
@@ -14337,7 +14342,8 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
           requestData: getAttestParamsOffChain(
             1 /* Profile */,
             data.to,
-            encode_ProfileData
+            encode_ProfileData,
+            data.block_timestamp
           )
         });
         break;
@@ -14354,7 +14360,8 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
           requestData: getAttestParamsOffChain(
             4 /* Community */,
             data.to,
-            encode_CommunityData
+            encode_CommunityData,
+            data.block_timestamp
           )
         });
         break;
@@ -14362,7 +14369,7 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
         const encode_SeasonPassData = encodeSeasonPassData({
           purchaseTx: data.transaction_hash,
           purchaser: data.user,
-          seasonId: BigInt(data.id).toString(),
+          seasonId: BigInt(data.season_pass_id).toString(),
           count: BigInt(data.count).toString(),
           currency: data.currency,
           amount: BigInt(data.amount).toString()
@@ -14392,21 +14399,22 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
             8 /* Subscribe */,
             data.account,
             encode_SubscribeData,
-            data.block_timestamp
+            data.block_timestamp,
+            data.deadline
           )
         });
         break;
       case "fix_fee_paid":
-        const encode_FixFeeData = encodeFixFeePaidData({
-          fixFeePaidTx: data.transaction_hash,
+        const encode_FixFeeData = encodeCreationFeePaidData({
+          creationFeePaidTx: data.transaction_hash,
           payer: data.to,
           handle: data.handle,
           price: BigInt(data.price).toString()
         });
         handledDatas.push({
-          dataType: 9 /* FixFeePaid */,
+          dataType: 9 /* CreationFeePaid */,
           requestData: getAttestParamsOffChain(
-            9 /* FixFeePaid */,
+            9 /* CreationFeePaid */,
             data.to,
             encode_FixFeeData,
             data.block_timestamp
@@ -14426,8 +14434,8 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
   BAS,
   CommunitySchema,
   CommunitySchemaUID,
-  FixFeePaidSchema,
-  FixFeePaidSchemaUID,
+  CreationFeePaidSchema,
+  CreationFeePaidSchemaUID,
   FollowSchema,
   FollowSchemaUID,
   FollowedSchema,
@@ -14452,7 +14460,7 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
   createObjectMulAttestOSP,
   encodeAddrToBucketName,
   encodeCommunityData,
-  encodeFixFeePaidData,
+  encodeCreationFeePaidData,
   encodeFollowData,
   encodeFollowedData,
   encodeJoinData,

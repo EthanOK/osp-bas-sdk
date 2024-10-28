@@ -295,7 +295,8 @@ createAttestationByDelegation();
 # 4. updateBucketQuota
 
 ```js
-// await ospconfig
+await setOspBasSdkConfig();
+
 const r = await updateBucketQuota(
   encodeAddrToBucketName("obas", "0x1000000000000000000000000000000000000002"),
   20

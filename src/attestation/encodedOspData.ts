@@ -10,8 +10,10 @@ export enum OspDataType {
   Joined = 6,
   SeasonPass = 7,
   Subscribe = 8,
-  FixFeePaid = 9,
+  CreationFeePaid = 9,
 }
+
+
 
 export const ProfileSchemaUID =
   "0x7c90370dcf194ce4c2851abec14da05abd98d8860ae7147ac714755430d42f6e";
@@ -29,7 +31,7 @@ export const SeasonPassSchemaUID =
   "0xa34e00fdc96e3686fa961f6d4ae9f904e42fc2717a214226f9840b8a7b9eca7c";
 export const SubscribeSchemaUID =
   "0x8e4bf4cb7a111ae35b49994893ff6f33803b52305c0ba980c4150dd4e7b344f9";
-export const FixFeePaidSchemaUID =
+export const CreationFeePaidSchemaUID =
   "0x16da17e8b479593ccaf2fea0dbc801b0a69c7ddb443facb1f129fdfe8afbc85b";
 
 export const OspDataTypeMap = new Map([
@@ -41,7 +43,7 @@ export const OspDataTypeMap = new Map([
   [OspDataType.Joined, JoinedSchemaUID],
   [OspDataType.SeasonPass, SeasonPassSchemaUID],
   [OspDataType.Subscribe, SubscribeSchemaUID],
-  [OspDataType.FixFeePaid, FixFeePaidSchemaUID],
+  [OspDataType.CreationFeePaid, CreationFeePaidSchemaUID],
 ]);
 
 export const ProfileSchema =
@@ -61,8 +63,8 @@ export const SeasonPassSchema =
   "bytes32 purchaseTx, address purchaser, uint256 seasonId, uint256 count, address currency, uint256 amount";
 export const SubscribeSchema =
   "bytes32 subscribeTx, address subscriber, uint256 communityId, address currency, uint256 price, uint256 duration";
-export const FixFeePaidSchema =
-  "bytes32 fixFeePaidTx, address payer, string handle, uint256 price";
+export const CreationFeePaidSchema =
+  "bytes32 creationFeePaidTx, address payer, string handle, uint256 price";
 
 export const OspSchemaMap = new Map([
   [OspDataType.Profile, ProfileSchema],
@@ -73,7 +75,7 @@ export const OspSchemaMap = new Map([
   [OspDataType.Joined, JoinedSchema],
   [OspDataType.SeasonPass, SeasonPassSchema],
   [OspDataType.Subscribe, SubscribeSchema],
-  [OspDataType.FixFeePaid, FixFeePaidSchema],
+  [OspDataType.CreationFeePaid, CreationFeePaidSchema],
 ]);
 
 export type encodeFollowDataParams = {
@@ -212,17 +214,17 @@ export const encodeSubscribeData = (param: encodeSubscribeDataParams) => {
   ]);
 };
 
-export type encodeFixFeePaidDataParams = {
-  fixFeePaidTx: string;
+export type encodeCreationFeePaidDataParams = {
+  creationFeePaidTx: string;
   payer: string;
   handle: string;
   price: string;
 };
 
-export const encodeFixFeePaidData = (param: encodeFixFeePaidDataParams) => {
-  const schemaEncoder = new SchemaEncoder(FixFeePaidSchema);
+export const encodeCreationFeePaidData = (param: encodeCreationFeePaidDataParams) => {
+  const schemaEncoder = new SchemaEncoder(CreationFeePaidSchema);
   return schemaEncoder.encodeData([
-    { name: "fixFeePaidTx", value: param.fixFeePaidTx, type: "bytes32" },
+    { name: "creationFeePaidTx", value: param.creationFeePaidTx, type: "bytes32" },
     { name: "payer", value: param.payer, type: "address" },
     { name: "handle", value: param.handle, type: "string" },
     { name: "price", value: param.price, type: "uint256" },

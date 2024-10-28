@@ -35,6 +35,7 @@ export type AttestParams = {
   refUID: string;
   recipient: string;
   timestamp?: string | number;
+  expirationTime?: string | number;
 };
 
 export interface DelegatedAttestParams extends AttestParams {
@@ -60,7 +61,7 @@ export const getAttestationOffChain = async (
     {
       recipient: params.recipient,
       // Unix timestamp of when attestation expires. (0 for no expiration)
-      expirationTime: BigInt(0),
+      expirationTime: BigInt(params.expirationTime ? params.expirationTime : 0),
       // Unix timestamp of current time
       time: BigInt(params.timestamp ? params.timestamp : timestamp_temp),
       revocable: true,
@@ -199,7 +200,8 @@ export const getAttestParamsOffChain = (
   dataType: OspDataType,
   recipient: string,
   encodedData: string,
-  timestamp?: string | number
+  timestamp?: string | number,
+  expirationTime?: string | number
 ) => {
   const params: AttestParams = {
     schemaUID: OspDataTypeMap.get(dataType),
@@ -208,6 +210,7 @@ export const getAttestParamsOffChain = (
     refUID:
       "0x0000000000000000000000000000000000000000000000000000000000000000",
     timestamp: timestamp,
+    expirationTime: expirationTime,
   };
   return params;
 };

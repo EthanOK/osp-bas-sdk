@@ -30,7 +30,7 @@ describe("Test handleOspRequestPrepareOffChainV2", () => {
       null,
       JSON.stringify(new_followJson)
     );
-    // console.log(handleOspReturnData);
+    console.log("Follow Data:\n", handleOspReturnData);
   });
 
   it("Test Join", async () => {
@@ -60,7 +60,7 @@ describe("Test handleOspRequestPrepareOffChainV2", () => {
       null,
       JSON.stringify(new_joinJson)
     );
-    // console.log(handleOspReturnData);
+    console.log("Join Data:\n", handleOspReturnData);
   });
 
   it("Test Proifle", async () => {
@@ -84,7 +84,7 @@ describe("Test handleOspRequestPrepareOffChainV2", () => {
       null,
       JSON.stringify(profileJson)
     );
-    // console.log(handleOspReturnData);
+    console.log("Profile Data:\n", handleOspReturnData);
   });
 
   it("Test Community", async () => {
@@ -110,16 +110,30 @@ describe("Test handleOspRequestPrepareOffChainV2", () => {
       null,
       JSON.stringify(communityJson)
     );
-    // console.log(handleOspReturnData);
+    console.log("Community Data:\n", handleOspReturnData);
   });
 
   it("Test SeasonPass", async () => {
-    const seasonPassJson = {};
+    const seasonPassJson = {
+      vid: 3,
+      season_pass_id: 1,
+      user: "0x70fd21dec636771844ac5ba1c8086aff8c0d1cd7",
+      count: 1,
+      currency: "0x0000000000000000000000000000000000000000",
+      amount: 5000000000000000,
+      timestamp: 1726714967,
+      block_number: 34961244,
+      block_timestamp: 1726714967,
+      transaction_hash:
+        "0xf89507b1685064a70d6e1cb6bd4890f737990c8105c22b2097b02826a856b5c7",
+      event_name: "season_pass_purchased",
+      address: "0x067b5ab68e8db251f3f497f2273cdd9ab05567b2",
+    };
     const handleOspReturnData = handleOspRequestPrepareOffChainV2(
       null,
       JSON.stringify(seasonPassJson)
     );
-    // console.log(handleOspReturnData);
+    console.log("SeasonPass Data:\n", handleOspReturnData);
   });
 
   it("Test Subscription", async () => {
@@ -128,7 +142,7 @@ describe("Test handleOspRequestPrepareOffChainV2", () => {
       null,
       JSON.stringify(subscriptionJson)
     );
-    // console.log(handleOspReturnData);
+    console.log("Subscription Data:\n", handleOspReturnData);
   });
 
   it("Test FixFeePaid", async () => {
@@ -149,6 +163,6 @@ describe("Test handleOspRequestPrepareOffChainV2", () => {
       null,
       JSON.stringify(fixFeePaidJson)
     );
-    // console.log(handleOspReturnData);
+    console.log("CreationFeePaid Data:\n", handleOspReturnData);
   });
 });
