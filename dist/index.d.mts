@@ -69,7 +69,7 @@ declare const JoinSchemaUID = "0x15ce785a4cd0951c813f27917308bb632162855f33d4a93
 declare const JoinedSchemaUID = "0xe1685d5f5e58134cbcd44a1f3250027c2192a2c9552cb1fbe048ad3e6e999ed6";
 declare const SeasonPassSchemaUID = "0xa34e00fdc96e3686fa961f6d4ae9f904e42fc2717a214226f9840b8a7b9eca7c";
 declare const SubscribeSchemaUID = "0x8e4bf4cb7a111ae35b49994893ff6f33803b52305c0ba980c4150dd4e7b344f9";
-declare const CreationFeePaidSchemaUID = "0x16da17e8b479593ccaf2fea0dbc801b0a69c7ddb443facb1f129fdfe8afbc85b";
+declare const CreationFeePaidSchemaUID = "0x723173b4de0f3ccdfeaf91359b57ccc59ccf19ac1d5eca3c346eeff4b62c164b";
 declare const OspDataTypeMap: Map<OspDataType, string>;
 declare const ProfileSchema = "bytes32 createProfileTx, address profileOwner, uint256 profileId, string handle";
 declare const FollowSchema = "bytes32 followTx, address follower, address followedAddress, uint256 followedProfileId";

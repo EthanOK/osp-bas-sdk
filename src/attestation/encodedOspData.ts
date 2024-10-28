@@ -32,7 +32,7 @@ export const SeasonPassSchemaUID =
 export const SubscribeSchemaUID =
   "0x8e4bf4cb7a111ae35b49994893ff6f33803b52305c0ba980c4150dd4e7b344f9";
 export const CreationFeePaidSchemaUID =
-  "0x16da17e8b479593ccaf2fea0dbc801b0a69c7ddb443facb1f129fdfe8afbc85b";
+  "0x723173b4de0f3ccdfeaf91359b57ccc59ccf19ac1d5eca3c346eeff4b62c164b";
 
 export const OspDataTypeMap = new Map([
   [OspDataType.Profile, ProfileSchemaUID],

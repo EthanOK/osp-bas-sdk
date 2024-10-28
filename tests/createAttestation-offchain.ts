@@ -9,6 +9,7 @@ import {
   multiAttestBasUploadGreenField,
   setOspBasSdkConfig,
   updateBucketQuota,
+  handleOspRequestPrepareOffChainV2,
   // } from "osp-bas-sdk";
 } from "../src";
 import { ethers, hexlify, keccak256, randomBytes } from "ethers";
@@ -40,42 +41,31 @@ async function main() {
 
   let timestamp = Math.floor(Date.now() / 1000);
 
-  let dataType = 1;
-
   for (let i = 0; i < 5; i++) {
     const recipient = ethers.Wallet.createRandom().address;
     const followedAddress = ethers.Wallet.createRandom().address;
-    const followHash = hexlify(randomBytes(32));
-    if (dataType === 1) {
-      Global_UnHandle_Data.push({
-        dataType: OspDataType.Follow,
-        requestData: getAttestParamsOffChain(
-          OspDataType.Follow,
-          recipient,
-          encodeFollowData({
-            followTx: followHash,
-            follower: recipient,
-            followedAddress: followedAddress,
-            followedProfileId: i.toString(),
-          }),
-          1729750000
-        ),
-      });
-    } else if (dataType == 2) {
-      Global_UnHandle_Data.push({
-        dataType: OspDataType.Profile,
-        requestData: getAttestParamsOffChain(
-          OspDataType.Profile,
-          recipient,
-          encodeProfileData({
-            createProfileTx: followHash,
-            profileOwner: recipient,
-            profileId: i.toString(),
-            handle: `demo${i}`,
-          })
-        ),
-      });
-    }
+    const transaction_hash = hexlify(randomBytes(32));
+
+    const seasonPassJson = {
+      vid: timestamp + i,
+      season_pass_id: 1,
+      user: recipient,
+      count: 1,
+      currency: "0x0000000000000000000000000000000000000000",
+      amount: 5000000000000000,
+      timestamp: 1726714967,
+      block_number: 34961244,
+      block_timestamp: 1726714967,
+      transaction_hash: transaction_hash,
+      event_name: "season_pass_purchased",
+      address: "0x067b5ab68e8db251f3f497f2273cdd9ab05567b2",
+    };
+    const handleOspReturnData = handleOspRequestPrepareOffChainV2(
+      null,
+      JSON.stringify(seasonPassJson)
+    );
+
+    Global_UnHandle_Data.push(handleOspReturnData[0]);
   }
   console.log("组装数据:", Math.floor(Date.now() / 1000) - timestamp, "S");
   try {
