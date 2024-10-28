@@ -137,7 +137,21 @@ describe("Test handleOspRequestPrepareOffChainV2", () => {
   });
 
   it("Test Subscription", async () => {
-    const subscriptionJson = {};
+    const subscriptionJson = {
+      vid: 1,
+      community_id: 2,
+      account: "0xb9dd6f077e2fa7d32596240f2409ea904922a27f",
+      currency: "0x0000000000000000000000000000000000000000",
+      price: 5000000000000000,
+      timestamp: 1726725562,
+      duration: 1000,
+      deadline: 1726735562,
+      block_timestamp: 1726725562,
+      transaction_hash:
+        "0x5466a8f379b3030d64276d41ea39e0976085a5f50cd84aacda3059341a1f18b4",
+      event_name: "subscription_purchased",
+      address: "0x0000004b90ba819700af15b052ee151ccc49fb34",
+    };
     const handleOspReturnData = handleOspRequestPrepareOffChainV2(
       null,
       JSON.stringify(subscriptionJson)

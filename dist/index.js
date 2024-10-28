@@ -12929,7 +12929,7 @@ var getAttestationOffChainV1 = (offchain, signer, params) => __async(void 0, nul
   const message = {
     recipient: params.recipient,
     // Unix timestamp of when attestation expires. (0 for no expiration)
-    expirationTime: BigInt(0),
+    expirationTime: BigInt(params.expirationTime ? params.expirationTime : 0),
     // Unix timestamp of current time
     time: BigInt(params.timestamp ? params.timestamp : timestamp),
     revocable: true,

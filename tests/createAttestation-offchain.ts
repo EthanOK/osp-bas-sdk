@@ -46,23 +46,24 @@ async function main() {
     const followedAddress = ethers.Wallet.createRandom().address;
     const transaction_hash = hexlify(randomBytes(32));
 
-    const seasonPassJson = {
-      vid: timestamp + i,
-      season_pass_id: 1,
-      user: recipient,
-      count: 1,
+    const subscriptionJson = {
+      vid: 1,
+      community_id: 2,
+      account: recipient,
       currency: "0x0000000000000000000000000000000000000000",
-      amount: 5000000000000000,
-      timestamp: 1726714967,
-      block_number: 34961244,
-      block_timestamp: 1726714967,
-      transaction_hash: transaction_hash,
-      event_name: "season_pass_purchased",
-      address: "0x067b5ab68e8db251f3f497f2273cdd9ab05567b2",
+      price: 5000000000000000,
+      timestamp: 1726725562 + i,
+      duration: 1000,
+      deadline: 1726735562,
+      block_timestamp: 1726725562,
+      transaction_hash:
+        "0x5466a8f379b3030d64276d41ea39e0976085a5f50cd84aacda3059341a1f18b4",
+      event_name: "subscription_purchased",
+      address: "0x0000004b90ba819700af15b052ee151ccc49fb34",
     };
     const handleOspReturnData = handleOspRequestPrepareOffChainV2(
       null,
-      JSON.stringify(seasonPassJson)
+      JSON.stringify(subscriptionJson)
     );
 
     Global_UnHandle_Data.push(handleOspReturnData[0]);
