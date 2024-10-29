@@ -14205,13 +14205,13 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
   const data = JSON.parse(jsonData);
   const handledDatas = [];
   try {
-    switch (data.event_name) {
-      case "followed":
+    switch (data.eventName) {
+      case "Followed":
         const followData = {
-          followTx: data.transaction_hash,
+          followTx: data.transactionHash,
           follower: data.follower,
           followedAddress: data.followed,
-          followedProfileId: BigInt(data.profile_id).toString()
+          followedProfileId: BigInt(data.profileId).toString()
         };
         const encode_FollowData = encodeFollowData(followData);
         const encode_FollowedData = encodeFollowedData(followData);
@@ -14221,7 +14221,7 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
             2 /* Follow */,
             data.follower,
             encode_FollowData,
-            data.block_timestamp
+            data.blockTimestamp
           )
         });
         handledDatas.push({
@@ -14230,16 +14230,16 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
             3 /* Followed */,
             data.followed,
             encode_FollowedData,
-            data.block_timestamp
+            data.blockTimestamp
           )
         });
         break;
-      case "joined":
+      case "Joined":
         const joinData = {
-          joinTx: data.transaction_hash,
+          joinTx: data.transactionHash,
           joiner: data.joiner,
-          communityId: BigInt(data.community_id).toString(),
-          communityOwner: data.community_owner
+          communityId: BigInt(data.communityId).toString(),
+          communityOwner: data.communityOwner
         };
         const encode_JoinData = encodeJoinData(joinData);
         const encode_JoinedData = encodeJoinedData(joinData);
@@ -14249,24 +14249,24 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
             5 /* Join */,
             data.joiner,
             encode_JoinData,
-            data.block_timestamp
+            data.blockTimestamp
           )
         });
         handledDatas.push({
           dataType: 6 /* Joined */,
           requestData: getAttestParamsOffChain(
             6 /* Joined */,
-            data.community_owner,
+            data.communityOwner,
             encode_JoinedData,
-            data.block_timestamp
+            data.blockTimestamp
           )
         });
         break;
-      case "profile_created":
+      case "ProfileCreated":
         const encode_ProfileData = encodeProfileData({
-          createProfileTx: data.transaction_hash,
+          createProfileTx: data.transactionHash,
           profileOwner: data.to,
-          profileId: BigInt(data.profile_id).toString(),
+          profileId: BigInt(data.profileId).toString(),
           handle: data.handle
         });
         handledDatas.push({
@@ -14275,17 +14275,17 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
             1 /* Profile */,
             data.to,
             encode_ProfileData,
-            data.block_timestamp
+            data.blockTimestamp
           )
         });
         break;
-      case "community_created":
+      case "CommunityCreated":
         const encode_CommunityData = encodeCommunityData({
-          createCommunityTx: data.transaction_hash,
+          createCommunityTx: data.transactionHash,
           communityOwner: data.to,
-          communityId: BigInt(data.community_id).toString(),
+          communityId: BigInt(data.communityId).toString(),
           handle: data.handle,
-          joinNFT: data.join_nft
+          joinNFT: data.joinNft
         });
         handledDatas.push({
           dataType: 4 /* Community */,
@@ -14293,15 +14293,15 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
             4 /* Community */,
             data.to,
             encode_CommunityData,
-            data.block_timestamp
+            data.blockTimestamp
           )
         });
         break;
-      case "season_pass_purchased":
+      case "SeasonPassPurchased":
         const encode_SeasonPassData = encodeSeasonPassData({
-          purchaseTx: data.transaction_hash,
+          purchaseTx: data.transactionHash,
           purchaser: data.user,
-          seasonId: BigInt(data.season_pass_id).toString(),
+          seasonId: BigInt(data.seasonPassId).toString(),
           count: BigInt(data.count).toString(),
           currency: data.currency,
           amount: BigInt(data.amount).toString()
@@ -14312,15 +14312,15 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
             7 /* SeasonPass */,
             data.user,
             encode_SeasonPassData,
-            data.block_timestamp
+            data.blockTimestamp
           )
         });
         break;
-      case "subscription_purchased":
+      case "SubscriptionPurchased":
         const encode_SubscribeData = encodeSubscribeData({
-          subscribeTx: data.transaction_hash,
+          subscribeTx: data.transactionHash,
           subscriber: data.account,
-          communityId: BigInt(data.community_id).toString(),
+          communityId: BigInt(data.communityId).toString(),
           currency: data.currency,
           price: BigInt(data.price).toString(),
           duration: BigInt(data.duration).toString()
@@ -14331,14 +14331,14 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
             8 /* Subscribe */,
             data.account,
             encode_SubscribeData,
-            data.block_timestamp,
+            data.blockTimestamp,
             data.deadline
           )
         });
         break;
-      case "fix_fee_paid":
+      case "FixFeePaid":
         const encode_FixFeeData = encodeCreationFeePaidData({
-          creationFeePaidTx: data.transaction_hash,
+          creationFeePaidTx: data.transactionHash,
           payer: data.to,
           handle: data.handle,
           price: BigInt(data.price).toString()
@@ -14349,7 +14349,7 @@ var handleOspRequestPrepareOffChainV2 = (chainId, jsonData) => {
             9 /* CreationFeePaid */,
             data.to,
             encode_FixFeeData,
-            data.block_timestamp
+            data.blockTimestamp
           )
         });
         break;
